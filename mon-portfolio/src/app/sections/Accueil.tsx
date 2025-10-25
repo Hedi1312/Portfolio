@@ -13,7 +13,7 @@ export default function Accueil() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
             >
-                Salut, moi c’est <span className="text-teal-400">Hedi OKBA</span>
+                Salut, moi c’est <span className="text-teal-400">Hëdi OKBA</span>
             </motion.h2>
 
             <p className="text-lg text-gray-300 max-w-xl mb-8">

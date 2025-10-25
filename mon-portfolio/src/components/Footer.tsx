@@ -6,7 +6,7 @@ export default function Footer() {
             <div className="max-w-4xl mx-auto px-6 flex items-center justify-center gap-2 flex-wrap text-sm">
                 <p>
                     © {new Date().getFullYear()}{" "}
-                    <span className="text-white font-semibold">Hedi OKBA</span>. Tous droits réservés.
+                    <span className="text-white font-semibold">Hëdi OKBA</span> - Tous droits réservés.
                 </p>
 
                 <div className="flex space-x-3">
