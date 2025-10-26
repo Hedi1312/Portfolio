@@ -47,7 +47,7 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: true,
             url: "/cv/CV_OKBA_Hedi.pdf",
-            name: file.name, // 👈 le vrai nom d’origine
+            name: file.name, // le vrai nom d’origine
             message: "CV mis à jour avec succès.",
         });
     } catch (err) {

@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { GrDocumentPdf } from "react-icons/gr";
-import { FiEye } from "react-icons/fi";
+import { FiEye, FiX } from "react-icons/fi";
+import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 
 export default function CV() {
     const [cvUrl, setCvUrl] = useState("/cv/CV_OKBA_Hedi.pdf");
@@ -18,6 +19,10 @@ export default function CV() {
             })
             .catch((err) => console.error("Erreur chargement CV :", err));
     }, []);
+
+    // On bloque le scroll quand la modale est ouverte
+    useLockBodyScroll(isOpen);
+
 
     return (
         <section id="cv" className="px-6 py-20 bg-gray-900 text-center text-white">
@@ -51,8 +56,9 @@ export default function CV() {
                         <button
                             onClick={() => setIsOpen(false)}
                             className="absolute top-2 right-3 text-gray-400 hover:text-white text-3xl cursor-pointer"
+                            aria-label="Fermer la modale"
                         >
-                            ✕
+                            <FiX />
                         </button>
 
                         <iframe
@@ -60,6 +66,18 @@ export default function CV() {
                             title="CV Hedi OKBA"
                             className="w-full h-[80vh] rounded-lg border border-gray-700"
                         ></iframe>
+                        <p className="text-center text-gray-400 text-sm mt-4">
+                            📱 Si l’affichage n’est pas optimal,{" "}
+                            <a
+                                href={cvUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-teal-400 hover:underline"
+                            >
+                                ouvre le CV en plein écran
+                            </a>.
+                        </p>
+
                     </div>
                 </div>
             )}

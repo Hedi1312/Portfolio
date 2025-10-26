@@ -4,6 +4,7 @@ import MesProjets from "./sections/MesProjets";
 import Contact from "./sections/Contact";
 import CV from "./sections/CV";
 
+
 export default function Home() {
     return (
         <>

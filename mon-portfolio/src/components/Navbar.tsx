@@ -68,7 +68,7 @@ export default function Navbar() {
                 </AnimatePresence>
             </button>
 
-            {/* Menu mobile en grille avec séparateur */}
+            {/* Menu mobile */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -76,27 +76,52 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 w-full bg-gray-900/95 backdrop-blur-md md:hidden flex flex-col items-center py-6"
+                        className="absolute top-full left-0 w-full bg-gray-900/95 backdrop-blur-md md:hidden flex flex-col items-center py-8 border-t border-gray-700 shadow-lg"
                     >
-                        {/* 🔹 Trait de séparation */}
-                        <div className="w-full border-t border-white mb-6"></div>
+                        <div className="grid grid-cols-4 gap-8 text-4xl justify-items-center">
+                            <Link
+                                href="/"
+                                onClick={handleLinkClick}
+                                className="hover:text-teal-400 transition flex flex-col items-center"
+                            >
+                                <FaHome size={38} />
+                                <span className="text-sm mt-2">Accueil</span>
+                            </Link>
 
-                        {/* Grille d’icônes */}
-                        <div className="grid grid-cols-4 gap-10 text-3xl justify-items-center">
-                            <Link href="/" onClick={handleLinkClick} className="hover:text-teal-400 transition" title="Accueil">
-                                <FaHome size={30} />
+                            <Link
+                                href="#a-propos"
+                                onClick={handleLinkClick}
+                                className="hover:text-teal-400 transition flex flex-col items-center"
+                            >
+                                <FaUser size={38} />
+                                <span className="text-sm mt-2">À propos</span>
                             </Link>
-                            <Link href="#a-propos" onClick={handleLinkClick} className="hover:text-teal-400 transition" title="À propos">
-                                <FaUser size={30} />
+
+                            <Link
+                                href="#mes-projets"
+                                onClick={handleLinkClick}
+                                className="hover:text-teal-400 transition flex flex-col items-center"
+                            >
+                                <FaFolderOpen size={38} />
+                                <span className="text-sm mt-2">Projets</span>
                             </Link>
-                            <Link href="#mes-projets" onClick={handleLinkClick} className="hover:text-teal-400 transition" title="Projets">
-                                <FaFolderOpen size={30} />
+
+                            <Link
+                                href="#cv"
+                                onClick={handleLinkClick}
+                                className="hover:text-teal-400 transition flex flex-col items-center"
+                            >
+                                <LuFileText size={38} />
+                                <span className="text-sm mt-2">CV</span>
                             </Link>
-                            <Link href="#cv" onClick={handleLinkClick} className="hover:text-teal-400 transition" title="Cv">
-                                <LuFileText size={30}/>
-                            </Link>
-                            <Link href="#contact" onClick={handleLinkClick} className="hover:text-teal-400 transition" title="Contact">
-                                <FaEnvelope size={30} />
+
+                            <Link
+                                href="#contact"
+                                onClick={handleLinkClick}
+                                className="hover:text-teal-400 transition flex flex-col items-center"
+                            >
+                                <FaEnvelope size={38} />
+                                <span className="text-sm mt-2">Contact</span>
                             </Link>
                         </div>
                     </motion.div>
