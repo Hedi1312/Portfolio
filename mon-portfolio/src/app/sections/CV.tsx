@@ -74,7 +74,7 @@ export default function CV() {
                                 rel="noopener noreferrer"
                                 className="text-teal-400 hover:underline"
                             >
-                                ouvre le CV en plein écran
+                                ouvrez le CV en plein écran
                             </a>.
                         </p>
 
