@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FiMail, FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
@@ -7,20 +7,21 @@ import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 export default function Contact() {
     const [isOpen, setIsOpen] = useState(false);
     const [form, setForm] = useState({ name: "", email: "", message: "" });
+    const [honeypot, setHoneypot] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [submitted, setSubmitted] = useState(false);
 
     useLockBodyScroll(isOpen);
 
-
-    useEffect(() => {
-        if (!isOpen) {
+    const handleClose = () => {
+        setIsOpen(false);
+        setTimeout(() => {
             setForm({ name: "", email: "", message: "" });
+            setHoneypot("");
             setFile(null);
             setSubmitted(false);
-        }
-    }, [isOpen]);
-
+        }, 300);
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -38,6 +39,8 @@ export default function Contact() {
         formData.append("name", form.name);
         formData.append("email", form.email);
         formData.append("message", form.message);
+        formData.append("company", honeypot);
+
         if (file) formData.append("file", file);
 
         const res = await fetch("/api/contact", {
@@ -48,6 +51,7 @@ export default function Contact() {
         if (res.ok) {
             setSubmitted(true);
             setForm({ name: "", email: "", message: "" });
+            setHoneypot("");
             setFile(null);
             setTimeout(() => setIsOpen(false), 2000);
         } else {
@@ -89,7 +93,7 @@ export default function Contact() {
                             className="bg-gray-900 rounded-2xl shadow-lg max-w-lg w-full p-8 relative border border-gray-700"
                         >
                             <button
-                                onClick={() => setIsOpen(false)}
+                                onClick={handleClose}
                                 className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl cursor-pointer"
                             >
                                 <FiX />
@@ -99,9 +103,18 @@ export default function Contact() {
                                 Contacte-moi
                             </h2>
 
-
                             {!submitted ? (
                                 <form onSubmit={handleSubmit} className="space-y-5 text-left">
+                                    <input
+                                        type="text"
+                                        name="company"
+                                        value={honeypot}
+                                        onChange={(e) => setHoneypot(e.target.value)}
+                                        style={{ display: "none" }}
+                                        tabIndex={-1}
+                                        autoComplete="off"
+                                    />
+
                                     <div>
                                         <label className="block text-gray-300 mb-2">NOM Prénom</label>
                                         <input
@@ -152,24 +165,19 @@ export default function Contact() {
                                     </div>
 
                                     <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                                        {/* Bouton Mailto */}
                                         <a
                                             href="mailto:hediokbapro@gmail.com?subject=Contact%20depuis%20le%20portfolio&body=Bonjour%20Hedi%2C%0A%0A"
                                             className="w-full sm:w-1/2 text-center bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-semibold transition-colors"
                                         >
                                             M’écrire directement
                                         </a>
-                                        {/* Bouton Envoyer */}
                                         <button
                                             type="submit"
                                             className="w-full sm:w-1/2 bg-teal-500 hover:bg-teal-400 py-3 rounded-lg font-semibold transition-colors cursor-pointer"
                                         >
                                             Envoyer
                                         </button>
-
                                     </div>
-
-
                                 </form>
                             ) : (
                                 <motion.p
