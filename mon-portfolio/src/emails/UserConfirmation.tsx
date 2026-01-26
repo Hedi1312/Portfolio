@@ -24,7 +24,7 @@ export const UserConfirmation = ({ name }: UserConfirmationProps) => (
                 <Text style={footer}>
                     En attendant, tu peux revoir mes projets sur <Link href="https://hedi-okba.fr" style={link}>hedi-okba.fr</Link>.
                 </Text>
-                <Text style={footer}>Cordialement,<br/>Hedi Okba</Text>
+                <Text style={footer}>Cordialement,<br/>Hëdi OKBA</Text>
             </Container>
         </Body>
     </Html>
