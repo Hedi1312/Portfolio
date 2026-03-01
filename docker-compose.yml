@@ -1,0 +1,48 @@
+services:
+  app:
+    build: .
+    container_name: app
+    ports:
+      - '3000:3000' # Tu accèdes via localhost:3000
+    volumes:
+      - .:/app # Synchronise ton code en temps réel (Hot Reload)
+      - /app/node_modules # Isole les modules du conteneur
+      - /app/.next # Isole le build du conteneur
+    environment:
+      # ICI C'EST TRES IMPORTANT : On utilise les noms de service 'db' et 'mailpit'
+      - DATABASE_URL=postgresql://hedi:password@db:5432/portfolio_db
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+      # Pour forcer le Hot Reload sur Windows/WSL si ça rame
+      - WATCHPACK_POLLING=true
+    depends_on:
+      - db
+      - mailpit
+
+  db:
+    image: postgres:15-alpine
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: hedi
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: portfolio_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: always
+    ports:
+      - '8025:8025' # Interface Web
+      - '1025:1025' # Port SMTP interne
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+volumes:
+  postgres_data:

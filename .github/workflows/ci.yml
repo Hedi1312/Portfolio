@@ -1,0 +1,48 @@
+name: CI Verification
+
+on:
+  pull_request:
+    branches: [main, development]
+  push:
+    branches: [main, development]
+
+jobs:
+  verify-project: # C'est ce nom qu'il faudra taper dans "Status Checks"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      # Sécurité : Bloquer les PR vers main si elles ne viennent pas de development
+      - name: Check Branch Flow
+        if: github.base_ref == 'main' && github.head_ref != 'development'
+        run: |
+          echo "ERREUR : Le workflow impose de passer par la branche 'development' avant 'main'."
+          exit 1
+
+      - name: Prettier check
+        run: npm run format:check
+
+      - name: Lint check
+        run: npm run lint
+
+      - name: Build check
+        run: npm run build
+        env:
+          # On met des variables fictives pour que Next.js accepte de compiler
+          DATABASE_URL: 'postgresql://user:pass@localhost:5432/db'
+          ADMIN_MAIL: 'test@example.com'
+          SMTP_HOST: 'smtp.example.com'
+          SMTP_PORT: '587'
+          SMTP_USER: 'user'
+          SMTP_PASS: 'pass'
+          SMTP_FROM: 'onboarding@resend.dev'
