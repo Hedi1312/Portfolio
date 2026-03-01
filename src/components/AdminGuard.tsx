@@ -13,7 +13,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
 
   useEffect(() => {
     const loggedIn = sessionStorage.getItem('admin_logged_in');
-    
+
     if (!loggedIn) {
       router.replace('/admin-login');
     } else {
