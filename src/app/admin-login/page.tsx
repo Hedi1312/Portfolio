@@ -45,7 +45,9 @@ export default function LoginPage() {
         </h1>
 
         {error && (
-          <p className="mb-4 mt-10 rounded-lg bg-danger-100 p-2 text-center text-danger-600">{error}</p>
+          <p className="mb-4 mt-10 rounded-lg bg-danger-100 p-2 text-center text-danger-600">
+            {error}
+          </p>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4 text-neutral-700 mt-12 max-w-sm mx-auto">
