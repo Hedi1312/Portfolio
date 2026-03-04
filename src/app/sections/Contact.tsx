@@ -61,16 +61,16 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="px-6 py-20 bg-gray-800 text-center text-white">
+    <section id="contact" className="px-6 py-20 bg-neutral-800 text-center text-white">
       <h3 className="text-3xl font-bold mb-6">Contact</h3>
-      <p className="text-gray-300 mb-6">Tu veux collaborer ou discuter d’un projet ?</p>
+      <p className="text-neutral-300 mb-6">Tu veux collaborer ou discuter d’un projet ?</p>
 
       <button
         onClick={() => {
           setSubmitted(false);
           setIsOpen(true);
         }}
-        className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-400 rounded-lg font-semibold transition-colors cursor-pointer mx-auto"
+        className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-400 rounded-lg font-semibold transition-colors cursor-pointer mx-auto"
       >
         <FiMail className="text-lg" />
         Me contacter
@@ -90,16 +90,16 @@ export default function Contact() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-gray-900 rounded-2xl shadow-lg max-w-lg w-full p-8 relative border border-gray-700"
+              className="bg-neutral-900 rounded-2xl shadow-lg max-w-lg w-full p-8 relative border border-neutral-700"
             >
               <button
                 onClick={handleClose}
-                className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl cursor-pointer"
+                className="absolute top-3 right-3 text-neutral-400 hover:text-white text-2xl cursor-pointer"
               >
                 <FiX />
               </button>
 
-              <h2 className="text-2xl font-bold text-teal-400 mb-6 text-center">Contacte-moi</h2>
+              <h2 className="text-2xl font-bold text-brand-400 mb-6 text-center">Contacte-moi</h2>
 
               {!submitted ? (
                 <form onSubmit={handleSubmit} className="space-y-5 text-left">
@@ -114,64 +114,64 @@ export default function Contact() {
                   />
 
                   <div>
-                    <label className="block text-gray-300 mb-2">NOM Prénom</label>
+                    <label className="block text-neutral-300 mb-2">NOM Prénom</label>
                     <input
                       type="text"
                       name="name"
                       value={form.name}
                       onChange={handleChange}
                       required
-                      className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-teal-400 focus:outline-none"
+                      className="w-full p-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:border-brand-400 focus:outline-none"
                       placeholder="NOM Prénom"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 mb-2">Email</label>
+                    <label className="block text-neutral-300 mb-2">Email</label>
                     <input
                       type="email"
                       name="email"
                       value={form.email}
                       onChange={handleChange}
                       required
-                      className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-teal-400 focus:outline-none"
+                      className="w-full p-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:border-brand-400 focus:outline-none"
                       placeholder="exemple@exemple.com"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 mb-2">Message</label>
+                    <label className="block text-neutral-300 mb-2">Message</label>
                     <textarea
                       name="message"
                       value={form.message}
                       onChange={handleChange}
                       required
                       rows={4}
-                      className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-teal-400 focus:outline-none resize-none"
+                      className="w-full p-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:border-brand-400 focus:outline-none resize-none"
                       placeholder="Mon message..."
                     ></textarea>
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 mb-2">Pièce jointe</label>
+                    <label className="block text-neutral-300 mb-2">Pièce jointe</label>
                     <input
                       type="file"
                       accept=".png,.jpg,.jpeg,.pdf"
                       onChange={handleFileChange}
-                      className="block w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-teal-500 file:text-white hover:file:bg-teal-400 cursor-pointer"
+                      className="block w-full text-neutral-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-brand-500 file:text-white hover:file:bg-brand-400 cursor-pointer"
                     />
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4 mt-6">
                     <a
                       href={`mailto:${process.env.NEXT_PUBLIC_EMAIL_TO}?subject=Contact%20depuis%20le%20portfolio&body=Bonjour%20Hedi%2C%0A%0A`}
-                      className="w-full sm:w-1/2 text-center bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-semibold transition-colors"
+                      className="w-full sm:w-1/2 text-center bg-neutral-700 hover:bg-neutral-600 py-3 rounded-lg font-semibold transition-colors"
                     >
                       M’écrire directement
                     </a>
                     <button
                       type="submit"
-                      className="w-full sm:w-1/2 bg-teal-500 hover:bg-teal-400 py-3 rounded-lg font-semibold transition-colors cursor-pointer"
+                      className="w-full sm:w-1/2 bg-brand-500 hover:bg-brand-400 py-3 rounded-lg font-semibold transition-colors cursor-pointer"
                     >
                       Envoyer
                     </button>
@@ -181,7 +181,7 @@ export default function Contact() {
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center text-green-400 font-medium text-lg"
+                  className="text-center text-success-400 font-medium text-lg"
                 >
                   ✅ Message envoyé avec succès !
                 </motion.p>

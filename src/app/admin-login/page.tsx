@@ -38,17 +38,17 @@ export default function LoginPage() {
   };
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-start pt-16 px-6 bg-gray-50">
+    <section className="min-h-screen flex flex-col items-center justify-start pt-16 px-6 bg-neutral-50">
       <div className="w-full max-w-xl mx-auto rounded-2xl bg-white p-8 shadow-md mb-12 mt-20">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 text-center ">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-neutral-800 text-center ">
           👨🏻‍💻 Connexion Admin
         </h1>
 
         {error && (
-          <p className="mb-4 mt-10 rounded-lg bg-red-100 p-2 text-center text-red-600">{error}</p>
+          <p className="mb-4 mt-10 rounded-lg bg-danger-100 p-2 text-center text-danger-600">{error}</p>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4 text-gray-700 mt-12 max-w-sm mx-auto">
+        <form onSubmit={handleLogin} className="space-y-4 text-neutral-700 mt-12 max-w-sm mx-auto">
           <div>
             <label className="block text-sm font-medium">Mot de passe</label>
             <input
@@ -56,7 +56,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
+              className="mt-1 w-full rounded-lg border px-3 py-2 text-neutral-700 focus:border-indigo-500 focus:ring-indigo-500"
               placeholder="********"
             />
           </div>
