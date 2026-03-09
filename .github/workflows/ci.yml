@@ -35,6 +35,9 @@ jobs:
       - name: Lint check
         run: npm run lint
 
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v3
+
       - name: Build check
         run: doppler run -- npm run build
         env:
