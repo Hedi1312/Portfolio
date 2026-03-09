@@ -5,7 +5,7 @@ export default function MesProjets() {
   const projets = ['Projet 1', 'Projet 2', 'Projet 3'];
 
   return (
-    <section id="mes-projets" className="px-6 py-20 bg-gray-500 text-center text-white">
+    <section id="mes-projets" className="px-6 py-20 bg-gray-800 text-center text-white">
       <h3 className="text-3xl font-bold mb-10">Mes Projets</h3>
       <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
         {projets.map((title, i) => (

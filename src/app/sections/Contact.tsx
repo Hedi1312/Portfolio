@@ -163,12 +163,12 @@ export default function Contact() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                    <a
+                    {/* <a
                       href={`mailto:${process.env.NEXT_PUBLIC_EMAIL_TO}?subject=Contact%20depuis%20le%20portfolio&body=Bonjour%20Hedi%2C%0A%0A`}
                       className="w-full sm:w-1/2 text-center bg-neutral-700 hover:bg-neutral-600 py-3 rounded-lg font-semibold transition-colors"
                     >
                       M’écrire directement
-                    </a>
+                    </a> */}
                     <button
                       type="submit"
                       className="w-full sm:w-1/2 bg-brand-500 hover:bg-brand-400 py-3 rounded-lg font-semibold transition-colors cursor-pointer"

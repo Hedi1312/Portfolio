@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
+import { render } from '@react-email/components';
 
 import { AdminNotification } from '@/emails/AdminNotification';
 import { UserConfirmation } from '@/emails/UserConfirmation';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: process.env.SMTP_SECURE === 'true',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 export async function POST(req: Request) {
   try {
@@ -27,26 +36,42 @@ export async function POST(req: Request) {
       const buffer = Buffer.from(bytes);
       attachments.push({
         filename: file.name,
-        content: buffer.toString('base64'),
+        content: buffer,
       });
     }
 
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM!,
-      to: process.env.EMAIL_TO!,
+    const destinataire = process.env.ADMIN_MAIL as string;
+    let prefixe = '';
+
+    if (process.env.VERCEL_ENV === 'preview') {
+      prefixe = '[PREVIEW] ';
+    } else if (!process.env.VERCEL_ENV) {
+      prefixe = '[LOCAL] ';
+    }
+
+    const subject = `${prefixe} - Nouveau message de ${name}`;
+
+    const adminHtml = await render(AdminNotification({ name, email, message }));
+    const userHtml = await render(UserConfirmation({ name }));
+
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM,
+      to: destinataire,
       replyTo: email,
-      subject: `Nouveau message de ${name}`,
-      react: AdminNotification({ name, email, message }),
+      subject: subject,
       attachments,
+      html: adminHtml,
     });
 
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM!,
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM,
       to: email,
-      subject: 'Merci pour ton message !',
-      react: UserConfirmation({ name }),
+      subject: `${prefixe} - Merci pour ton message !`,
+      html: userHtml,
     });
 
+    console.log(`📩 [ADMIN] Alerte reçue envoyée à : ${destinataire}`);
+    console.log(`✉️ [USER] Confirmation de réception envoyée à : ${email}`);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Erreur:', error);
