@@ -2,12 +2,12 @@ name: CI Verification
 
 on:
   pull_request:
-    branches: [main, development]
+    branches: [main, staging]
   push:
-    branches: [main, development]
+    branches: [main, staging]
 
 jobs:
-  verify-project: # C'est ce nom qu'il faudra taper dans "Status Checks"
+  verify-project:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -22,11 +22,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Sécurité : Bloquer les PR vers main si elles ne viennent pas de development
+      # Sécurité : Bloquer les PR vers main si elles ne viennent pas de staging
       - name: Check Branch Flow
-        if: github.base_ref == 'main' && github.head_ref != 'development'
+        if: github.base_ref == 'main' && github.head_ref != 'staging'
         run: |
-          echo "ERREUR : Le workflow impose de passer par la branche 'development' avant 'main'."
+          echo "ERREUR : Le workflow impose de passer par la branche 'staging' avant 'main'."
           exit 1
 
       - name: Prettier check
@@ -35,14 +35,10 @@ jobs:
       - name: Lint check
         run: npm run lint
 
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v3
+
       - name: Build check
-        run: npm run build
+        run: doppler run -- npm run build
         env:
-          # On met des variables fictives pour que Next.js accepte de compiler
-          DATABASE_URL: 'postgresql://user:pass@localhost:5432/db'
-          ADMIN_MAIL: 'test@example.com'
-          SMTP_HOST: 'smtp.example.com'
-          SMTP_PORT: '587'
-          SMTP_USER: 'user'
-          SMTP_PASS: 'pass'
-          SMTP_FROM: 'onboarding@resend.dev'
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN_STAGING }}

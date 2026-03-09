@@ -5,7 +5,7 @@ export default function Accueil() {
   return (
     <section
       id="home"
-      className="flex flex-col items-center justify-center text-center min-h-screen px-6 bg-gradient-to-b from-gray-900 to-gray-800 text-white"
+      className="flex flex-col items-center justify-center text-center min-h-screen px-6 bg-gradient-to-b from-neutral-900 to-neutral-800 text-white"
     >
       <motion.h2
         className="text-5xl font-extrabold mb-4"
@@ -13,16 +13,16 @@ export default function Accueil() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        Salut, moi c’est <span className="text-teal-400">Hëdi OKBA</span>
+        Salut, moi c’est <span className="text-brand-400">Hëdi OKBA</span>
       </motion.h2>
 
-      <p className="text-lg text-gray-300 max-w-xl mb-8">
+      <p className="text-lg text-neutral-300 max-w-xl mb-8">
         Développeur passionné par la création d’expériences web modernes, performantes et élégantes.
       </p>
 
       <a
         href="#mes-projets"
-        className="px-6 py-3 bg-teal-500 hover:bg-teal-400 rounded-lg font-semibold transition-colors"
+        className="px-6 py-3 bg-brand-500 hover:bg-brand-400 rounded-lg font-semibold transition-colors"
       >
         Voir mes projets
       </a>
