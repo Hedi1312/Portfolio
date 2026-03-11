@@ -1,16 +1,16 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
-import bcrypt from "bcrypt"
+import NextAuth from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+import bcrypt from 'bcrypt';
 // 🚀 1. On importe TON schéma
-import { loginSchema } from "@/lib/schemas/login" 
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "@/lib/prisma"
+import { loginSchema } from '@/lib/schemas/login';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import { prisma } from '@/lib/prisma';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
+  session: { strategy: 'jwt' },
   pages: {
-    signIn: "/login", 
+    signIn: '/login',
   },
   providers: [
     Credentials({
@@ -36,11 +36,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!isPasswordValid) return null;
 
           return { id: admin.id, email: admin.email };
-        } catch (error) {
+        } catch (_error) {
           // Si ton Zod échoue (ex: format email invalide), on refuse silencieusement
-          return null; 
+          return null;
         }
       },
     }),
   ],
-})
+});
