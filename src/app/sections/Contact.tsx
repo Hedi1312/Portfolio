@@ -1,8 +1,8 @@
 'use client';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { FiMail, FiX } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useLockBodyScroll } from '@/lib/useLockBodyScroll';
 
 export default function Contact() {
   const [isOpen, setIsOpen] = useState(false);

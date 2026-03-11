@@ -8,6 +8,7 @@
     "setup": "npm install && npm run pull:env && docker compose up -d && npm run db:init",
     "db:init": "npm run db:generate && npm run db:migrate && npm run db:seed",
     "refresh": "npm run pull:env && npx prisma generate && npm run db:migrate && npm run db:generate",
+    "reset": "docker compose down -v && npm install && docker compose up -d --build && npm run db:init",
     "db:generate": "docker compose exec app npx prisma generate",
     "db:migrate": "docker compose exec app npx prisma migrate dev",
     "db:push": "docker compose exec app npx prisma db push",
@@ -26,6 +27,7 @@
     "validate": "npm run format:write && npm run lint"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
     "@react-email/components": "^1.0.6",
@@ -38,12 +40,14 @@
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.547.0",
     "next": "^16.0.7",
-    "nodemailer": "^8.0.1",
+    "next-auth": "^5.0.0-beta.30",
+    "nodemailer": "^7.0.13",
     "pg": "^8.20.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-icons": "^5.5.0",
-    "resend": "^6.2.2"
+    "resend": "^6.2.2",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
