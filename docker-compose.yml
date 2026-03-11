@@ -4,6 +4,7 @@ services:
     container_name: app
     ports:
       - '3000:3000'
+      - '5555:5555'
     volumes:
       - .:/app # Synchronise ton code en temps réel (Hot Reload)
       - /app/node_modules # Isole les modules du conteneur
@@ -20,8 +21,10 @@ services:
     image: postgres:15-alpine
     container_name: db
     restart: always
-    env_file:
-      - .env
+    environment:
+      - POSTGRES_USER=hedi
+      - POSTGRES_PASSWORD=monmotdepasse
+      - POSTGRES_DB=portfolio_db
     ports:
       - '5432:5432'
     volumes:
