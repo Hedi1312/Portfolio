@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { GrDocumentPdf } from 'react-icons/gr';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import { useEffect, useState } from 'react';
 import { FiEye, FiX } from 'react-icons/fi';
-import { useLockBodyScroll } from '@/lib/useLockBodyScroll';
+import { GrDocumentPdf } from 'react-icons/gr';
 
 export default function CV() {
   const [cvUrl, setCvUrl] = useState('/cv/CV_OKBA_Hedi.pdf');
