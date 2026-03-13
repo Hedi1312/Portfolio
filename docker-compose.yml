@@ -3,17 +3,16 @@ services:
     build: .
     container_name: app
     ports:
-      - '3000:3000' # Tu accèdes via localhost:3000
+      - '3000:3000'
+      - '5555:5555'
     volumes:
       - .:/app # Synchronise ton code en temps réel (Hot Reload)
       - /app/node_modules # Isole les modules du conteneur
       - /app/.next # Isole le build du conteneur
+    command: sh -c "npx prisma generate && npm run dev"
+    env_file:
+      - .env
     environment:
-      # ICI C'EST TRES IMPORTANT : On utilise les noms de service 'db' et 'mailpit'
-      - DATABASE_URL=postgresql://hedi:password@db:5432/portfolio_db
-      - SMTP_HOST=mailpit
-      - SMTP_PORT=1025
-      # Pour forcer le Hot Reload sur Windows/WSL si ça rame
       - WATCHPACK_POLLING=true
     depends_on:
       - db
@@ -24,9 +23,9 @@ services:
     container_name: db
     restart: always
     environment:
-      POSTGRES_USER: hedi
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: portfolio_db
+      - POSTGRES_USER=hedi
+      - POSTGRES_PASSWORD=monmotdepasse
+      - POSTGRES_DB=portfolio_db
     ports:
       - '5432:5432'
     volumes:

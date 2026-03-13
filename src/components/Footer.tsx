@@ -1,33 +1,42 @@
+'use client';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-400 py-6 border-t border-gray-800">
-      <div className="max-w-4xl mx-auto px-6 flex items-center justify-center gap-2 flex-wrap text-sm">
-        <p>
-          © {new Date().getFullYear()} <span className="text-white font-semibold">Hëdi OKBA</span> -
-          Tous droits réservés.
-        </p>
+    <footer className="relative bg-white dark:bg-[#0f172a] text-neutral-500 dark:text-neutral-400 transition-colors duration-500">
+      {/* Gradient separator */}
+      <div className="h-px bg-gradient-to-r from-transparent via-brand-400/50 to-transparent" />
 
-        <div className="flex space-x-3">
-          <a
-            href="https://github.com/Hedi1312"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-teal-400 transition-colors"
-            aria-label="GitHub"
-          >
-            <FaGithub size={20} />
-          </a>
-          <a
-            href="https://linkedin.com/in/hedi-okba"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-teal-400 transition-colors"
-            aria-label="LinkedIn"
-          >
-            <FaLinkedin size={20} />
-          </a>
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm">
+            © {new Date().getFullYear()}{' '}
+            <span className="gradient-text font-semibold">Hëdi OKBA</span> — Tous droits réservés.
+          </p>
+
+          <div className="flex items-center gap-4">
+            {[
+              { href: 'https://github.com/Hedi1312', icon: FaGithub, label: 'GitHub' },
+              { href: 'https://linkedin.com/in/hedi-okba', icon: FaLinkedin, label: 'LinkedIn' },
+            ].map((social) => {
+              const Icon = social.icon;
+              return (
+                <motion.a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl hover:bg-brand-400/10 hover:text-brand-400 transition-all duration-200"
+                  aria-label={social.label}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Icon size={20} />
+                </motion.a>
+              );
+            })}
+          </div>
         </div>
       </div>
     </footer>

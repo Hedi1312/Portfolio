@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -11,7 +9,7 @@
 !.yarn/versions
 
 /.idea
-/.vscode
+
 
 # testing
 /coverage
@@ -35,6 +33,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.doppler-fallback
 
 # vercel
 .vercel
@@ -42,3 +41,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma

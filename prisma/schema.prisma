@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id                String          @id @default(cuid())
+  email             String          @unique
+  passwordHash      String
+  passwordUpdatedAt DateTime?
+  createdAt         DateTime        @default(now())
+
+  // Changement ici : Relation 1-à-1 (un seul reset possible)
+  passwordReset     PasswordReset?
+
+  @@map("admins")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+
+  // Relation avec l'Admin
+  adminId   String   @unique
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("password_resets")
+}
