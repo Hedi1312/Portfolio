@@ -9,6 +9,7 @@ services:
       - .:/app # Synchronise ton code en temps réel (Hot Reload)
       - /app/node_modules # Isole les modules du conteneur
       - /app/.next # Isole le build du conteneur
+    command: sh -c "npx prisma generate && npm run dev"
     env_file:
       - .env
     environment:

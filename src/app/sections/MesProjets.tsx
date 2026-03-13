@@ -17,6 +17,7 @@ export default function MesProjets() {
             className="bg-white dark:bg-neutral-900 p-6 rounded-xl shadow-lg hover:shadow-brand-400/30 transition-shadow duration-300"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.5, delay: i * 0.2 }}
           >
             <h4 className="text-xl font-semibold mb-2 text-neutral-900 dark:text-white">{title}</h4>

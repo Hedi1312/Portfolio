@@ -14,7 +14,7 @@ export default function ScrollToTop() {
   }, []);
 
   const scrollToTop = useCallback(() => {
-    const duration = 1400;
+    const duration = 800;
     const start = window.scrollY;
     const startTime = performance.now();
 

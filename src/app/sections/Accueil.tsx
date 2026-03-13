@@ -4,11 +4,11 @@ import { motion } from 'framer-motion';
 const name = 'Hëdi OKBA';
 
 const letterVariants = {
-  hidden: { opacity: 0, y: 20, rotateX: -90 },
+  hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    rotateX: 0,
+
     transition: {
       delay: 0.6 + i * 0.11,
       duration: 0.55,
@@ -27,7 +27,7 @@ export default function Accueil() {
         className="text-5xl font-extrabold mb-4"
         initial={{ opacity: 0, y: -50 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: false, amount: 0.5 }}
+        viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.8 }}
       >
         Salut, moi c&apos;est{' '}
@@ -39,7 +39,7 @@ export default function Accueil() {
               variants={letterVariants}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: false, amount: 1 }}
+              viewport={{ once: true, amount: 1 }}
               className={char === ' ' ? 'w-3' : 'inline-block'}
             >
               {char === ' ' ? '\u00A0' : char}

@@ -1,48 +1,36 @@
 'use client';
 
-import { useState, useSyncExternalStore, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FiSun, FiMoon } from 'react-icons/fi';
 
-function getThemeSnapshot(): 'light' | 'dark' {
-  const stored = localStorage.getItem('theme');
-  if (stored === 'light') return 'light';
-  return 'dark';
-}
-
-function getServerSnapshot(): 'light' | 'dark' {
-  return 'dark';
-}
-
-function subscribeToTheme(callback: () => void) {
-  window.addEventListener('storage', callback);
-  return () => window.removeEventListener('storage', callback);
-}
-
 export default function ThemeToggle() {
-  const theme = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, getServerSnapshot);
-  const [hydrated, setHydrated] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
 
-  // Un seul setState via un callback dans un gestionnaire passif
-  if (!hydrated && typeof window !== 'undefined') {
-    setHydrated(true);
-  }
+  // Lire le thème depuis localStorage après hydration
+  useEffect(() => {
+    const stored = localStorage.getItem('theme');
+    const initial = stored === 'light' ? 'light' : 'dark';
+    setTheme(initial);
+  }, []);
 
   const toggleTheme = useCallback(() => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('theme', newTheme);
+    setTheme((prev) => {
+      const newTheme = prev === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', newTheme);
 
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
 
-    // Force un re-render en dispatchant un storage event
-    window.dispatchEvent(new Event('storage'));
-  }, [theme]);
+      return newTheme;
+    });
+  }, []);
 
-  if (!hydrated) return null;
+  // Ne rien afficher tant que le thème n'est pas connu (évite le mismatch d'hydration)
+  if (theme === null) return null;
 
   return (
     <button
