@@ -1,5 +1,6 @@
 'use client';
 
+import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
   CalendarDays,
@@ -14,10 +15,8 @@ import {
 export default function DashboardPage() {
   const router = useRouter();
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('admin_logged_in');
-    window.dispatchEvent(new Event('admin-logout'));
-    router.push('/admin-login');
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/admin-login' });
   };
 
   const actions = [
@@ -61,16 +60,16 @@ export default function DashboardPage() {
   ];
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-start pt-16 px-6 bg-neutral-50">
+    <section className="min-h-screen flex flex-col items-center justify-start pt-16 px-6 bg-background transition-colors duration-300">
       <div className="mx-auto max-w-5xl w-full mb-12 mt-20">
         {/* Titre + bouton logout */}
         <div className="flex flex-col items-center lg:flex-row lg:justify-center lg:gap-4 mb-10 w-full relative">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-neutral-800 text-center">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-neutral-900 dark:text-white text-center">
             👨🏻‍💻 Espace Admin
           </h1>
           <button
             onClick={handleLogout}
-            className="mt-4 lg:absolute lg:right-0 flex items-center gap-2 rounded-lg bg-danger-600 px-4 py-2 font-medium text-white hover:bg-danger-700 cursor-pointer"
+            className="mt-4 lg:absolute lg:right-0 flex items-center gap-2 rounded-lg border border-danger-500 bg-white dark:bg-neutral-800 px-4 py-2 font-medium text-danger-500 transition-colors hover:bg-danger-600 hover:text-white cursor-pointer shadow-sm"
           >
             <LogOut className="h-5 w-5" /> Déconnexion
           </button>
@@ -82,13 +81,17 @@ export default function DashboardPage() {
             <div
               key={index}
               onClick={action.onClick}
-              className="cursor-pointer rounded-2xl bg-white p-6 shadow-md transition hover:scale-105 hover:shadow-xl"
+              className="cursor-pointer rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-6 shadow-md dark:shadow-xl transition-all hover:-translate-y-1 hover:border-brand-500 hover:shadow-[0_0_15px_rgba(0,187,167,0.15)] group"
             >
-              <div className="flex items-center justify-center rounded-xl bg-neutral-100 p-4">
+              <div className="flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-700/50 p-4 transition-colors group-hover:bg-neutral-200 dark:group-hover:bg-neutral-700">
                 {action.icon}
               </div>
-              <h2 className="mt-4 text-xl font-semibold text-neutral-800">{action.title}</h2>
-              <p className="mt-2 text-sm text-neutral-600">{action.description}</p>
+              <h2 className="mt-4 text-xl font-semibold text-neutral-900 dark:text-white group-hover:text-brand-500 dark:group-hover:text-brand-400 transition-colors">
+                {action.title}
+              </h2>
+              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                {action.description}
+              </p>
             </div>
           ))}
         </div>

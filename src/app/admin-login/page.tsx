@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { loginSchema } from '@/lib/schemas/auth';
+import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,22 +17,26 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      setError(validation.error.issues[0].message);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch('/api/admin/admin-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+      const res = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       });
 
-      const result = await res.json();
-
-      if (result.success) {
-        sessionStorage.setItem('admin_logged_in', 'true');
-        window.dispatchEvent(new Event('admin-login'));
-        router.push('/admin/dashboard');
-      } else {
-        setError(result.message);
+      if (res?.error) {
+        setError('Email ou mot de passe incorrect');
         setLoading(false);
+      } else if (res?.ok) {
+        router.push('/admin/dashboard');
+        router.refresh();
       }
     } catch {
       setError('Erreur de connexion');
@@ -38,27 +45,46 @@ export default function LoginPage() {
   };
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-start pt-16 px-6 bg-neutral-50">
-      <div className="w-full max-w-xl mx-auto rounded-2xl bg-white p-8 shadow-md mb-12 mt-20">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-neutral-800 text-center ">
+    <section className="min-h-screen flex flex-col items-center justify-start pt-16 px-6 bg-background transition-colors duration-300">
+      <div className="w-full max-w-xl mx-auto rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-8 shadow-xl dark:shadow-2xl mb-12 mt-20 transition-colors duration-300">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-neutral-900 dark:text-white text-center">
           👨🏻‍💻 Connexion Admin
         </h1>
 
         {error && (
-          <p className="mb-4 mt-10 rounded-lg bg-danger-100 p-2 text-center text-danger-600">
+          <p className="mb-4 mt-6 rounded-lg bg-danger-50 dark:bg-danger-100/10 border border-danger-200 dark:border-danger-500/50 p-3 text-center text-danger-600 dark:text-danger-400 font-medium">
             {error}
           </p>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4 text-neutral-700 mt-12 max-w-sm mx-auto">
+        <form
+          onSubmit={handleLogin}
+          className="space-y-5 text-neutral-700 dark:text-neutral-200 mt-10 max-w-sm mx-auto"
+        >
           <div>
-            <label className="block text-sm font-medium">Mot de passe</label>
+            <label className="block text-sm font-medium mb-1 text-neutral-700 dark:text-neutral-300">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 px-4 py-2.5 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
+              placeholder="admin@example.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-neutral-700 dark:text-neutral-300">
+              Mot de passe
+            </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-neutral-700 focus:border-indigo-500 focus:ring-indigo-500"
+              className="w-full rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 px-4 py-2.5 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
               placeholder="********"
             />
           </div>
@@ -66,9 +92,9 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 mt-4 mb-2 font-medium text-white transition hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+            className="w-full rounded-lg bg-brand-500 px-4 py-3 mt-6 font-bold text-white transition-all hover:bg-brand-400 hover:shadow-[0_0_15px_rgba(0,187,167,0.4)] disabled:opacity-50 disabled:hover:shadow-none cursor-pointer"
           >
-            {loading ? 'Connexion...' : 'Se connecter'}
+            {loading ? 'Connexion en cours...' : 'Se connecter'}
           </button>
         </form>
       </div>

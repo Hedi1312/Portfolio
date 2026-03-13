@@ -2,11 +2,12 @@ import { FaGithub, FaLinkedin } from 'react-icons/fa';
 
 export default function Footer() {
   return (
-    <footer className="bg-neutral-900 text-neutral-400 py-6 border-t border-neutral-800">
+    <footer className="bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 py-6 border-t border-neutral-300 dark:border-neutral-800 transition-colors duration-300">
       <div className="max-w-4xl mx-auto px-6 flex items-center justify-center gap-2 flex-wrap text-sm">
         <p>
-          © {new Date().getFullYear()} <span className="text-white font-semibold">Hëdi OKBA</span> -
-          Tous droits réservés.
+          © {new Date().getFullYear()}{' '}
+          <span className="text-neutral-900 dark:text-white font-semibold">Hëdi OKBA</span> - Tous
+          droits réservés.
         </p>
 
         <div className="flex space-x-3">

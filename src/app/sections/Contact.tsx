@@ -61,16 +61,21 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="px-6 py-20 bg-neutral-800 text-center text-white">
+    <section
+      id="contact"
+      className="px-6 py-20 bg-neutral-50 dark:bg-neutral-800 text-center text-neutral-900 dark:text-white transition-colors duration-300"
+    >
       <h3 className="text-3xl font-bold mb-6">Contact</h3>
-      <p className="text-neutral-300 mb-6">Tu veux collaborer ou discuter d’un projet ?</p>
+      <p className="text-neutral-600 dark:text-neutral-300 mb-6">
+        Tu veux collaborer ou discuter d’un projet ?
+      </p>
 
       <button
         onClick={() => {
           setSubmitted(false);
           setIsOpen(true);
         }}
-        className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-400 rounded-lg font-semibold transition-colors cursor-pointer mx-auto"
+        className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-400 text-white rounded-lg font-semibold transition-colors cursor-pointer mx-auto"
       >
         <FiMail className="text-lg" />
         Me contacter
@@ -90,11 +95,11 @@ export default function Contact() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-neutral-900 rounded-2xl shadow-lg max-w-lg w-full p-8 relative border border-neutral-700"
+              className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl max-w-lg w-full p-8 relative border border-neutral-200 dark:border-neutral-700 transition-colors duration-300"
             >
               <button
                 onClick={handleClose}
-                className="absolute top-3 right-3 text-neutral-400 hover:text-white text-2xl cursor-pointer"
+                className="absolute top-3 right-3 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white text-2xl cursor-pointer"
               >
                 <FiX />
               </button>
@@ -114,51 +119,59 @@ export default function Contact() {
                   />
 
                   <div>
-                    <label className="block text-neutral-300 mb-2">NOM Prénom</label>
+                    <label className="block text-neutral-700 dark:text-neutral-300 mb-2">
+                      NOM Prénom
+                    </label>
                     <input
                       type="text"
                       name="name"
                       value={form.name}
                       onChange={handleChange}
                       required
-                      className="w-full p-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:border-brand-400 focus:outline-none"
+                      className="w-full p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white focus:border-brand-500 focus:outline-none transition-colors"
                       placeholder="NOM Prénom"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-neutral-300 mb-2">Email</label>
+                    <label className="block text-neutral-700 dark:text-neutral-300 mb-2">
+                      Email
+                    </label>
                     <input
                       type="email"
                       name="email"
                       value={form.email}
                       onChange={handleChange}
                       required
-                      className="w-full p-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:border-brand-400 focus:outline-none"
+                      className="w-full p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white focus:border-brand-500 focus:outline-none transition-colors"
                       placeholder="exemple@exemple.com"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-neutral-300 mb-2">Message</label>
+                    <label className="block text-neutral-700 dark:text-neutral-300 mb-2">
+                      Message
+                    </label>
                     <textarea
                       name="message"
                       value={form.message}
                       onChange={handleChange}
                       required
                       rows={4}
-                      className="w-full p-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:border-brand-400 focus:outline-none resize-none"
+                      className="w-full p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white focus:border-brand-500 focus:outline-none resize-none transition-colors"
                       placeholder="Mon message..."
                     ></textarea>
                   </div>
 
                   <div>
-                    <label className="block text-neutral-300 mb-2">Pièce jointe</label>
+                    <label className="block text-neutral-700 dark:text-neutral-300 mb-2">
+                      Pièce jointe
+                    </label>
                     <input
                       type="file"
                       accept=".png,.jpg,.jpeg,.pdf"
                       onChange={handleFileChange}
-                      className="block w-full text-neutral-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-brand-500 file:text-white hover:file:bg-brand-400 cursor-pointer"
+                      className="block w-full text-neutral-600 dark:text-neutral-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-brand-500 file:text-white dark:file:text-neutral-900 hover:file:bg-brand-400 cursor-pointer transition-colors"
                     />
                   </div>
 
@@ -171,7 +184,7 @@ export default function Contact() {
                     </a> */}
                     <button
                       type="submit"
-                      className="w-full sm:w-1/2 bg-brand-500 hover:bg-brand-400 py-3 rounded-lg font-semibold transition-colors cursor-pointer"
+                      className="w-full sm:w-1/2 bg-brand-500 hover:bg-brand-400 text-white py-3 rounded-lg font-semibold transition-colors cursor-pointer"
                     >
                       Envoyer
                     </button>
