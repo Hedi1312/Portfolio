@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSun, FiMoon } from 'react-icons/fi';
 
-export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
+function getTheme(): 'light' | 'dark' {
+  if (typeof window === 'undefined') return 'dark';
+  return localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+}
 
-  useEffect(() => {
-    const stored = localStorage.getItem('theme');
-    const initial = stored === 'light' ? 'light' : 'dark';
-    setTheme(initial);
-  }, []);
+export default function ThemeToggle() {
+  const [theme, setTheme] = useState<'light' | 'dark'>(getTheme);
 
   const toggleTheme = useCallback(() => {
     setTheme((prev) => {
@@ -27,8 +26,6 @@ export default function ThemeToggle() {
       return newTheme;
     });
   }, []);
-
-  if (theme === null) return null;
 
   return (
     <motion.button
