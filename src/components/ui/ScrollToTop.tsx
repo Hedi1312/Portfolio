@@ -14,17 +14,16 @@ export default function ScrollToTop() {
   }, []);
 
   const scrollToTop = useCallback(() => {
-    const duration = 800;
+    const duration = 2500;
     const start = window.scrollY;
     const startTime = performance.now();
 
-    const easeInOutQuart = (t: number) =>
-      t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+    const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
     const step = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      window.scrollTo(0, start * (1 - easeInOutQuart(progress)));
+      window.scrollTo(0, start * (1 - easeOutExpo(progress)));
       if (progress < 1) requestAnimationFrame(step);
     };
 
@@ -35,15 +34,18 @@ export default function ScrollToTop() {
     <AnimatePresence>
       {visible && (
         <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: 'easeInOut' }}
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-brand-500 hover:bg-brand-400 text-white shadow-lg hover:shadow-[0_0_20px_rgba(0,187,167,0.4)] transition-shadow cursor-pointer"
+          className="fixed bottom-6 right-6 z-50 p-3.5 rounded-xl glass text-brand-400 hover:text-white hover:bg-brand-500 cursor-pointer transition-all duration-300"
+          style={{ animation: 'pulse-glow 3s ease-in-out infinite' }}
           aria-label="Remonter en haut"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
         >
-          <FiArrowUp size={26} strokeWidth={3} />
+          <FiArrowUp size={22} strokeWidth={2.5} />
         </motion.button>
       )}
     </AnimatePresence>

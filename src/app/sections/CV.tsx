@@ -1,8 +1,8 @@
 'use client';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { useEffect, useState } from 'react';
-import { FiEye, FiX } from 'react-icons/fi';
-import { GrDocumentPdf } from 'react-icons/gr';
+import { AnimatePresence, motion } from 'framer-motion';
+import { FiEye, FiDownload, FiX } from 'react-icons/fi';
 
 export default function CV() {
   const [cvUrl, setCvUrl] = useState('/cv/CV_OKBA_Hedi.pdf');
@@ -24,63 +24,114 @@ export default function CV() {
   return (
     <section
       id="cv"
-      className="px-6 py-20 bg-white dark:bg-neutral-900 text-center text-neutral-900 dark:text-white transition-colors duration-300"
+      className="relative px-6 py-24 md:py-32 bg-white dark:bg-[#0f172a] text-center text-neutral-900 dark:text-white transition-colors duration-500"
     >
-      <h3 className="text-3xl font-bold mb-6">Mon CV</h3>
-      <p className="text-neutral-600 dark:text-neutral-300 mb-8">
-        Consulte mon CV ou télécharge-le directement.
-      </p>
-
-      <div className="flex justify-center gap-4">
-        <button
-          onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-400 text-white rounded-lg font-semibold transition-colors cursor-pointer"
+      <div className="max-w-2xl mx-auto">
+        {/* Section heading */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.5 }}
         >
-          <FiEye className="text-white text-lg" />
-          Voir mon CV
-        </button>
+          <h3 className="text-3xl md:text-4xl section-heading">Mon CV</h3>
+        </motion.div>
 
-        <a
-          href={cvUrl}
-          download
-          className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 border border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white rounded-lg font-semibold transition-colors"
+        {/* Glass card */}
+        <motion.div
+          className="glass-card p-10 mx-auto"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <GrDocumentPdf className="w-5 h-5 text-danger-500 dark:text-danger-400" />
-          Télécharger
-        </a>
+          {/* Decorative icon */}
+          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-brand-400/10 flex items-center justify-center">
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <FiEye size={32} className="text-brand-400" />
+            </motion.div>
+          </div>
+
+          <p className="text-neutral-500 dark:text-neutral-400 mb-8">
+            Consulte mon CV ou télécharge-le directement.
+          </p>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <motion.button
+              onClick={() => setIsOpen(true)}
+              className="btn-glow flex items-center justify-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-400 text-white rounded-xl font-semibold transition-colors cursor-pointer"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <FiEye size={18} />
+              Voir mon CV
+            </motion.button>
+
+            <motion.a
+              href={cvUrl}
+              download
+              className="flex items-center justify-center gap-2 px-6 py-3 glass-card font-semibold transition-all hover:border-brand-400/30 cursor-pointer"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <FiDownload size={18} className="text-brand-400" />
+              Télécharger
+            </motion.a>
+          </div>
+        </motion.div>
       </div>
 
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4">
-          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-lg max-w-5xl w-full p-4 relative transition-colors duration-300">
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute top-2 right-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white text-3xl cursor-pointer"
-              aria-label="Fermer la modale"
+      {/* Modal */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4"
+            onClick={() => setIsOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="glass-card max-w-5xl w-full p-6 relative"
+              onClick={(e) => e.stopPropagation()}
             >
-              <FiX />
-            </button>
-
-            <iframe
-              src={cvUrl}
-              title="CV Hedi OKBA"
-              className="w-full h-[80vh] rounded-lg border border-neutral-300 dark:border-neutral-700"
-            ></iframe>
-            <p className="text-center text-neutral-600 dark:text-neutral-400 text-sm mt-4">
-              📱 Si l’affichage n’est pas optimal,{' '}
-              <a
-                href={cvUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-brand-400 hover:underline"
+              <button
+                onClick={() => setIsOpen(false)}
+                className="absolute top-4 right-4 p-2 rounded-xl hover:bg-brand-400/10 text-neutral-500 hover:text-foreground transition-all cursor-pointer"
+                aria-label="Fermer la modale"
               >
-                ouvrez le CV en plein écran
-              </a>
-              .
-            </p>
-          </div>
-        </div>
-      )}
+                <FiX size={22} />
+              </button>
+
+              <iframe
+                src={cvUrl}
+                title="CV Hedi OKBA"
+                className="w-full h-[80vh] rounded-xl border border-neutral-200/20 dark:border-neutral-700/30"
+              />
+              <p className="text-center text-neutral-500 dark:text-neutral-400 text-sm mt-4">
+                📱 Si l&apos;affichage n&apos;est pas optimal,{' '}
+                <a
+                  href={cvUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-400 hover:underline"
+                >
+                  ouvrez le CV en plein écran
+                </a>
+                .
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

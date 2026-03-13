@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiSun, FiMoon } from 'react-icons/fi';
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
 
-  // Lire le thème depuis localStorage après hydration
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     const initial = stored === 'light' ? 'light' : 'dark';
@@ -29,31 +28,39 @@ export default function ThemeToggle() {
     });
   }, []);
 
-  // Ne rien afficher tant que le thème n'est pas connu (évite le mismatch d'hydration)
   if (theme === null) return null;
 
   return (
-    <button
+    <motion.button
       onClick={toggleTheme}
-      className="p-2 w-10 h-10 flex items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors shadow-sm cursor-pointer"
+      className="relative p-2.5 w-10 h-10 flex items-center justify-center rounded-xl glass hover:border-brand-400/30 text-neutral-600 dark:text-neutral-300 hover:text-brand-400 cursor-pointer transition-all duration-300"
       aria-label="Toggle theme"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
-      <motion.div
-        initial={false}
-        animate={{ rotate: theme === 'dark' ? 180 : 0, scale: theme === 'dark' ? 0.8 : 1 }}
-        transition={{ duration: 0.3 }}
-        className="absolute"
-      >
-        <FiSun size={20} className={theme === 'dark' ? 'opacity-0' : 'opacity-100'} />
-      </motion.div>
-      <motion.div
-        initial={false}
-        animate={{ rotate: theme === 'dark' ? 0 : -180, scale: theme === 'dark' ? 1 : 0.8 }}
-        transition={{ duration: 0.3 }}
-        className="absolute"
-      >
-        <FiMoon size={20} className={theme === 'dark' ? 'opacity-100' : 'opacity-0'} />
-      </motion.div>
-    </button>
+      <AnimatePresence mode="wait" initial={false}>
+        {theme === 'light' ? (
+          <motion.div
+            key="sun"
+            initial={{ rotate: -90, scale: 0 }}
+            animate={{ rotate: 0, scale: 1 }}
+            exit={{ rotate: 90, scale: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FiSun size={18} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="moon"
+            initial={{ rotate: 90, scale: 0 }}
+            animate={{ rotate: 0, scale: 1 }}
+            exit={{ rotate: -90, scale: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FiMoon size={18} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.button>
   );
 }
