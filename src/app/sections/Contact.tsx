@@ -8,7 +8,7 @@ export default function Contact() {
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [honeypot, setHoneypot] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
   useLockBodyScroll(isOpen);
@@ -18,7 +18,7 @@ export default function Contact() {
     setTimeout(() => {
       setForm({ name: '', email: '', message: '' });
       setHoneypot('');
-      setFile(null);
+      setFiles([]);
       setSubmitted(false);
     }, 300);
   };
@@ -28,8 +28,10 @@ export default function Contact() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0] || null;
-    setFile(selectedFile);
+    const selectedFiles = e.target.files;
+    if (selectedFiles) {
+      setFiles(Array.from(selectedFiles));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +43,7 @@ export default function Contact() {
     formData.append('message', form.message);
     formData.append('company', honeypot);
 
-    if (file) formData.append('file', file);
+    files.forEach((f) => formData.append('files', f));
 
     const res = await fetch('/api/contact', {
       method: 'POST',
@@ -52,7 +54,7 @@ export default function Contact() {
       setSubmitted(true);
       setForm({ name: '', email: '', message: '' });
       setHoneypot('');
-      setFile(null);
+      setFiles([]);
       setTimeout(() => setIsOpen(false), 2500);
     } else {
       const data = await res.json();
@@ -203,11 +205,12 @@ export default function Contact() {
 
                   <div>
                     <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      Pièce jointe
+                      Pièces jointes
                     </label>
                     <input
                       type="file"
                       accept=".png,.jpg,.jpeg,.pdf"
+                      multiple
                       onChange={handleFileChange}
                       className="block w-full text-sm text-neutral-500 dark:text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-400/10 file:text-brand-400 hover:file:bg-brand-400/20 cursor-pointer transition-colors"
                     />
