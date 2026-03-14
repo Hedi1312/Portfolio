@@ -89,7 +89,7 @@ export default function MessagesPage() {
         alert('Réponse envoyée !');
       } else {
         const data = await res.json();
-        alert(data.error || 'Erreur lors de l\'envoi.');
+        alert(data.error || "Erreur lors de l'envoi.");
       }
     } finally {
       setSending(false);

@@ -1,14 +1,5 @@
 import * as React from 'react';
-import {
-  Html,
-  Body,
-  Head,
-  Heading,
-  Hr,
-  Container,
-  Preview,
-  Text,
-} from '@react-email/components';
+import { Html, Body, Head, Heading, Hr, Container, Preview, Text } from '@react-email/components';
 
 interface AdminReplyProps {
   recipientName: string;
@@ -22,9 +13,7 @@ export const AdminReply = ({ recipientName, replyMessage }: AdminReplyProps) => 
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>📬 Réponse à votre message</Heading>
-        <Text style={text}>
-          Bonjour {recipientName},
-        </Text>
+        <Text style={text}>Bonjour {recipientName},</Text>
 
         <Hr style={hr} />
 
@@ -32,9 +21,7 @@ export const AdminReply = ({ recipientName, replyMessage }: AdminReplyProps) => 
 
         <Hr style={hr} />
 
-        <Text style={footer}>
-          — Hëdi OKBA
-        </Text>
+        <Text style={footer}>— Hëdi OKBA</Text>
       </Container>
     </Body>
   </Html>

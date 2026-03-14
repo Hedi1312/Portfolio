@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // PATCH → Marquer un message comme lu
-export async function PATCH(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const message = await prisma.contactMessage.update({
@@ -20,10 +17,7 @@ export async function PATCH(
 }
 
 // DELETE → Supprimer un message
-export async function DELETE(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     await prisma.contactMessage.delete({ where: { id } });

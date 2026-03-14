@@ -15,10 +15,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // POST → Envoyer une réponse personnalisée au contact
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
