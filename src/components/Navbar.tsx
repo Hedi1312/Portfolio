@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FiMenu, FiX } from 'react-icons/fi';
-import { FaHome, FaUser, FaFolderOpen, FaEnvelope, FaUnlockAlt } from 'react-icons/fa';
+import { FaHome, FaUser, FaFolderOpen, FaEnvelope, FaUnlockAlt, FaBell } from 'react-icons/fa';
 import { LuFileText } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
@@ -22,6 +22,21 @@ export default function Navbar() {
   const [activeSection, setActiveSection] = useState('home');
   const [scrolled, setScrolled] = useState(false);
   const { status } = useSession();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnread = useCallback(() => {
+    if (status !== 'authenticated') return;
+    fetch('/api/admin/messages/unread-count')
+      .then((res) => res.json())
+      .then((data) => setUnreadCount(data.count || 0))
+      .catch(() => {});
+  }, [status]);
+
+  useEffect(() => {
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, [fetchUnread]);
 
   // Detect active section via IntersectionObserver
   useEffect(() => {
@@ -119,6 +134,25 @@ export default function Navbar() {
             </Link>
           )}
 
+          {status === 'authenticated' && (
+            <Link
+              href="/admin/messages"
+              className="relative p-3 rounded-xl text-brand-500 hover:text-brand-400 transition-all duration-300 group"
+              title="Messages"
+            >
+              <FaBell
+                size={20}
+                className="transition-transform duration-200 group-hover:scale-110"
+              />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 bg-danger-500 text-white text-[10px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center shadow-md">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+              <span className="absolute inset-0 rounded-xl bg-brand-400/0 group-hover:bg-brand-400/10 transition-colors duration-300" />
+            </Link>
+          )}
+
           <div className="ml-2 pl-3 border-l border-neutral-300/30 dark:border-neutral-600/30">
             <ThemeToggle />
           </div>
@@ -212,20 +246,44 @@ export default function Navbar() {
                 })}
 
                 {status === 'authenticated' && (
-                  <motion.div
-                    initial={{ x: 40, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: navLinks.length * 0.05 }}
-                  >
-                    <Link
-                      href="/admin/dashboard"
-                      onClick={handleLinkClick}
-                      className="flex items-center gap-4 px-4 py-3 rounded-xl text-danger-500 hover:bg-danger-500/10 transition-all duration-200"
+                  <>
+                    <motion.div
+                      initial={{ x: 40, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: navLinks.length * 0.05 }}
                     >
-                      <FaUnlockAlt size={22} />
-                      <span className="font-medium">Admin</span>
-                    </Link>
-                  </motion.div>
+                      <Link
+                        href="/admin/dashboard"
+                        onClick={handleLinkClick}
+                        className="flex items-center gap-4 px-4 py-3 rounded-xl text-danger-500 hover:bg-danger-500/10 transition-all duration-200"
+                      >
+                        <FaUnlockAlt size={22} />
+                        <span className="font-medium">Admin</span>
+                      </Link>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ x: 40, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: (navLinks.length + 1) * 0.05 }}
+                    >
+                      <Link
+                        href="/admin/messages"
+                        onClick={handleLinkClick}
+                        className="flex items-center gap-4 px-4 py-3 rounded-xl text-brand-500 hover:bg-brand-400/10 transition-all duration-200"
+                      >
+                        <div className="relative">
+                          <FaBell size={22} />
+                          {unreadCount > 0 && (
+                            <span className="absolute -top-1 -right-2 bg-danger-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                              {unreadCount > 9 ? '9+' : unreadCount}
+                            </span>
+                          )}
+                        </div>
+                        <span className="font-medium">Messages</span>
+                      </Link>
+                    </motion.div>
+                  </>
                 )}
               </nav>
 

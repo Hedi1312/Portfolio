@@ -30,3 +30,15 @@ model PasswordReset {
 
   @@map("password_resets")
 }
+
+model ContactMessage {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  message     String
+  attachments Json     @default("[]")
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("contact_messages")
+}

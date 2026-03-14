@@ -2,18 +2,20 @@
 
 import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import {
-  CalendarDays,
-  Trophy,
-  Ticket,
-  LogOut,
-  CirclePlus,
-  BellRing,
-  LoaderPinwheel,
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { LogOut, Ticket, Mail } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/admin/messages/unread-count')
+      .then((res) => res.json())
+      .then((data) => setUnreadCount(data.count || 0))
+      .catch(() => {});
+  }, []);
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/admin-login' });
@@ -22,40 +24,16 @@ export default function DashboardPage() {
   const actions = [
     {
       title: 'Modifier mon CV',
-      description: 'Consultez la liste des tickets déjà achetés',
-      icon: <Ticket className="h-8 w-8 text-danger-500" />,
+      description: 'Mets à jour ton CV en uploadant un nouveau fichier PDF.',
+      icon: <Ticket className="h-8 w-8 text-brand-500" />,
       onClick: () => router.push('/admin/cv'),
     },
     {
-      title: 'Créer des tickets',
-      description: "Créer des tickets à partir des infos de l'acheteur",
-      icon: <CirclePlus className="h-8 w-8 text-success-600" />,
-      onClick: () => router.push('/admin/creer-ticket'),
-    },
-    {
-      title: 'Déterminer les gagnants',
-      description:
-        'Choisir le nombre de gagnants, les ajouter aléatoirement et leur envoyer un email',
-      icon: <Trophy className="h-8 w-8 text-yellow-500" />,
-      onClick: () => router.push('/admin/choix-gagnant'),
-    },
-    {
-      title: 'Roue de la chance',
-      description: 'Modifier le taux de victoire de la roue et afficher la liste des participants',
-      icon: <LoaderPinwheel className="h-8 w-8 text-success-600" />,
-      onClick: () => router.push('/admin/roue-probabilite'),
-    },
-    {
-      title: 'Choisir la date du tirage',
-      description: 'Modifiez la date prévue pour le prochain tirage',
-      icon: <CalendarDays className="h-8 w-8 text-indigo-600" />,
-      onClick: () => router.push('/admin/choix-date'),
-    },
-    {
-      title: 'Prévenir les participants',
-      description: 'Envoyer un email aux participants inscrits que le tirage a eu lieu',
-      icon: <BellRing className="h-8 w-8 text-yellow-500" />,
-      onClick: () => router.push('/admin/envoyer-notifications'),
+      title: 'Messages reçus',
+      description: 'Consulte et réponds aux messages reçus depuis le formulaire de contact.',
+      icon: <Mail className="h-8 w-8 text-brand-500" />,
+      onClick: () => router.push('/admin/messages'),
+      badge: unreadCount,
     },
   ];
 
@@ -76,15 +54,23 @@ export default function DashboardPage() {
         </div>
 
         {/* Actions grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto">
           {actions.map((action, index) => (
-            <div
+            <motion.div
               key={index}
               onClick={action.onClick}
               className="cursor-pointer rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-6 shadow-md dark:shadow-xl transition-all hover:-translate-y-1 hover:border-brand-500 hover:shadow-[0_0_15px_rgba(0,187,167,0.15)] group"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.4 }}
             >
-              <div className="flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-700/50 p-4 transition-colors group-hover:bg-neutral-200 dark:group-hover:bg-neutral-700">
+              <div className="flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-700/50 p-4 transition-colors group-hover:bg-neutral-200 dark:group-hover:bg-neutral-700 relative">
                 {action.icon}
+                {'badge' in action && action.badge !== undefined && action.badge > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-danger-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-md">
+                    {action.badge > 99 ? '99+' : action.badge}
+                  </span>
+                )}
               </div>
               <h2 className="mt-4 text-xl font-semibold text-neutral-900 dark:text-white group-hover:text-brand-500 dark:group-hover:text-brand-400 transition-colors">
                 {action.title}
@@ -92,7 +78,7 @@ export default function DashboardPage() {
               <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
                 {action.description}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
