@@ -80,6 +80,7 @@ export default function Contact() {
         setForm({ name: '', email: '', message: '' });
         setHoneypot('');
         setFiles([]);
+        if (typeof window !== 'undefined' && window.umami) window.umami.track('contact-form-submit');
         setTimeout(() => setIsOpen(false), 2500);
       } else {
         const data = await res.json();
@@ -129,6 +130,7 @@ export default function Contact() {
             setIsOpen(true);
           }}
           className="btn-glow inline-flex items-center gap-2 px-8 py-4 bg-brand-500 hover:bg-brand-400 text-white rounded-xl font-semibold text-lg transition-colors cursor-pointer"
+          data-umami-event="click-contact-open"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

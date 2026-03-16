@@ -83,7 +83,7 @@ export default function CV() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button onClick={() => setIsOpen(true)} variant="primary">
+            <Button onClick={() => setIsOpen(true)} variant="primary" data-umami-event="click-cv-view">
               <FiEye size={18} />
               Voir mon CV
             </Button>
@@ -93,6 +93,7 @@ export default function CV() {
               variant="glass"
               isLoading={isDownloading}
               loadingText="Téléchargement en cours..."
+              data-umami-event="click-cv-download"
             >
               <FiDownload size={18} className="text-brand-400" />
               Télécharger

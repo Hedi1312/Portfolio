@@ -17,8 +17,8 @@ export default function Footer() {
 
           <div className="flex items-center gap-4">
             {[
-              { href: 'https://github.com/Hedi1312', icon: FaGithub, label: 'GitHub' },
-              { href: 'https://linkedin.com/in/hedi-okba', icon: FaLinkedin, label: 'LinkedIn' },
+              { href: 'https://github.com/Hedi1312', icon: FaGithub, label: 'GitHub', umamiEvent: 'click-github-profile' },
+              { href: 'https://linkedin.com/in/hedi-okba', icon: FaLinkedin, label: 'LinkedIn', umamiEvent: 'click-linkedin-profile' },
             ].map((social) => {
               const Icon = social.icon;
               return (
@@ -29,6 +29,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="p-2 rounded-xl hover:bg-brand-400/10 hover:text-brand-400 transition-all duration-200"
                   aria-label={social.label}
+                  data-umami-event={social.umamiEvent}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                 >
