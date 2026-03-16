@@ -50,7 +50,7 @@ export async function POST(req: Request) {
           const buffer = Buffer.from(bytes);
 
           // Upload vers Cloudinary
-          const uploaded = await uploadToCloudinary(buffer, file.name);
+          const uploaded = await uploadToCloudinary(buffer, file.name, 'emails');
 
           emailAttachments.push({
             filename: file.name,

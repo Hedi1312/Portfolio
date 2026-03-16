@@ -10,15 +10,16 @@ import {
   SiGit,
   SiNodedotjs,
 } from 'react-icons/si';
+import { useIsDark } from '@/hooks/useIsDark';
 
 const techStack = [
   { icon: SiReact, name: 'React', color: '#61DAFB' },
-  { icon: SiNextdotjs, name: 'Next.js', color: '#ffffff' },
+  { icon: SiNextdotjs, name: 'Next.js', color: '#ffffff', colorLight: '#000000' },
   { icon: SiTypescript, name: 'TypeScript', color: '#3178C6' },
   { icon: SiTailwindcss, name: 'Tailwind', color: '#06B6D4' },
   { icon: SiNodedotjs, name: 'Node.js', color: '#339933' },
   { icon: SiDocker, name: 'Docker', color: '#2496ED' },
-  { icon: SiPrisma, name: 'Prisma', color: '#2D3748' },
+  { icon: SiPrisma, name: 'Prisma', color: '#5A67D8', colorLight: '#2D3748' },
   { icon: SiGit, name: 'Git', color: '#F05032' },
 ];
 
@@ -39,6 +40,8 @@ const itemVariants = {
 };
 
 export default function APropos() {
+  const isDark = useIsDark();
+
   return (
     <section
       id="a-propos"
@@ -134,7 +137,10 @@ export default function APropos() {
                   variants={itemVariants}
                   whileHover={{ scale: 1.05, y: -2 }}
                 >
-                  <Icon size={18} style={{ color: tech.color }} />
+                  <Icon
+                    size={18}
+                    style={{ color: isDark ? tech.color : tech.colorLight || tech.color }}
+                  />
                   <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
                     {tech.name}
                   </span>
