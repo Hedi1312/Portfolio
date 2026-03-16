@@ -51,10 +51,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
           <script
             defer
-            src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL}
+            src="/stats/script.js"
             data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+            data-host-url="/stats"
           />
         )}
+        
       </head>
       <body className="bg-background text-foreground transition-colors duration-300">
         <AppSessionProvider>

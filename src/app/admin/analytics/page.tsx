@@ -1,32 +1,58 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
 import {
+  FiActivity,
   FiArrowLeft,
-  FiUsers,
+  FiArrowUpRight,
+  FiClock,
   FiEye,
   FiGlobe,
   FiMonitor,
-  FiSmartphone,
-  FiActivity,
   FiMousePointer,
+  FiSmartphone,
+  FiUsers,
 } from 'react-icons/fi';
 import {
-  AreaChart,
+  FaChrome,
+  FaFirefox,
+  FaSafari,
+  FaEdge,
+  FaOpera,
+  FaApple,
+  FaAndroid,
+  FaWindows,
+  FaLinux,
+} from 'react-icons/fa';
+import {
+  SiVercel,
+} from 'react-icons/si';
+import {
   Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
+import {
+  AlertCircle,
+  Clock,
+  ExternalLink,
+  ChevronRight,
+  Monitor,
+  Laptop,
+  Smartphone,
+  Tablet,
+} from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────
 interface AnalyticsData {
@@ -101,28 +127,169 @@ function formatDuration(ms: number) {
   return `${minutes}m ${secs}s`;
 }
 
+// ─── Helpers ──────────────────────────────────────────
+function getCountryFlag(countryCode: string) {
+  if (!countryCode) return '🌍';
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map((char) => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+}
+
+function getCountryName(code: string) {
+  try {
+    const displayNames = new Intl.DisplayNames(['fr'], { type: 'region' });
+    return displayNames.of(code.toUpperCase()) || code;
+  } catch (e) {
+    return code;
+  }
+}
+
+const BROWSER_MAP: Record<string, { label: string; icon: any; color: string; logoUrl?: string }> = {
+  chrome: { 
+    label: 'Chrome', 
+    icon: FaChrome, 
+    color: '#4285F4',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome.svg'
+  },
+  firefox: { 
+    label: 'Firefox', 
+    icon: FaFirefox, 
+    color: '#FF7139',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox.svg'
+  },
+  safari: { 
+    label: 'Safari', 
+    icon: FaSafari, 
+    color: '#00AEFF',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari.svg'
+  },
+  edge: { 
+    label: 'Edge', 
+    icon: FaEdge, 
+    color: '#0078D7',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge.svg'
+  },
+  opera: { 
+    label: 'Opera', 
+    icon: FaOpera, 
+    color: '#FF1B2D',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera.svg'
+  },
+  ie: { 
+    label: 'Internet Explorer', 
+    icon: FaEdge, 
+    color: '#0078D7',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/archive/internet-explorer_9-11/internet-explorer_9-11.svg'
+  },
+};
+
+const DEVICE_MAP: Record<string, { label: string; icon: any; color: string }> = {
+  desktop: { label: 'Ordinateur', icon: Monitor, color: '#6366F1' },
+  laptop: { label: 'PC Portable', icon: Laptop, color: '#8B5CF6' },
+  mobile: { label: 'Mobile', icon: Smartphone, color: '#10B981' },
+  tablet: { label: 'Tablette', icon: Tablet, color: '#F59E0B' },
+};
+
+const OS_MAP: Record<string, { label: string; icon: any; color: string; logoUrl?: string }> = {
+  ios: { 
+    label: 'iOS', 
+    icon: FaApple, 
+    color: '#555555',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/apple/apple.svg'
+  },
+  android: { 
+    label: 'Android', 
+    icon: FaAndroid, 
+    color: '#3DDC84',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/android/android.svg'
+  },
+  windows: { 
+    label: 'Windows', 
+    icon: FaWindows, 
+    color: '#0078D7',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/refs/heads/master/src/windows/windows.svg'
+  },
+  macos: { 
+    label: 'macOS', 
+    icon: FaApple, 
+    color: '#555555',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/apple/apple.svg'
+  },
+  linux: { 
+    label: 'Linux', 
+    icon: FaLinux, 
+    color: '#FCC624',
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/archive/tux/tux.svg'
+  },
+};
+
+function formatLabel(label: string, map: Record<string, { label: string; icon: any; color: string; logoUrl?: string }>) {
+  if (!label) return { label: 'Inconnu', icon: AlertCircle, color: '#9CA3AF' };
+  const lower = label.toLowerCase().trim();
+  
+  if (lower.includes('windows')) return map['windows'];
+  if (lower.includes('mac') || lower.includes('ios') || lower.includes('apple')) return map['macos'];
+  if (lower.includes('android')) return map['android'];
+  if (lower.includes('linux')) return map['linux'];
+  
+  return map[lower] || { label: label.charAt(0).toUpperCase() + label.slice(1), icon: Monitor, color: '#6B7280' };
+}
+
+// ─── Logo Component with Fallback ────────────────────────
+function BrandLogo({ logoUrl, label, icon: Icon, color }: { logoUrl?: string; label: string; icon: any; color: string }) {
+  const [error, setError] = useState(false);
+
+  if (logoUrl && !error) {
+    return (
+      <img
+        src={logoUrl}
+        alt=""
+        className="w-4 h-4 object-contain"
+        onError={() => setError(true)}
+      />
+    );
+  }
+
+  return <Icon className="w-4 h-4" style={{ color }} />;
+}
+
 // ─── Custom Tooltip ─────────────────────────────────────
-function CustomTooltip({
+function ChartTooltip({
   active,
   payload,
   label,
   period,
+  isDate = false,
 }: {
   active?: boolean;
-  payload?: { value: number; name: string; color: string }[];
+  payload?: any[];
   label?: string;
-  period: string;
+  period?: string;
+  isDate?: boolean;
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-3 shadow-lg text-sm">
-      <p className="font-medium text-neutral-900 dark:text-white mb-1">
-        {label ? formatDate(label, period) : ''}
+    <div className="bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md border border-neutral-200 dark:border-neutral-700 rounded-xl p-3 shadow-2xl text-sm min-w-[140px]">
+      <p className="font-bold text-neutral-900 dark:text-white mb-1.5 border-b border-neutral-100 dark:border-neutral-700 pb-1.5">
+        {isDate && period ? formatDate(label || '', period) : label}
       </p>
       {payload.map((entry, i) => (
-        <p key={i} style={{ color: entry.color }} className="text-xs">
-          {entry.name}: <span className="font-semibold">{entry.value.toLocaleString('fr-FR')}</span>
-        </p>
+        <div key={i} className="flex items-center justify-between gap-4 mt-1">
+          <div className="flex items-center gap-2">
+            <div 
+              className="w-2 h-2 rounded-full" 
+              style={{ backgroundColor: entry.color || entry.fill }} 
+            />
+            <span className="text-neutral-500 dark:text-neutral-400 text-xs italic">
+              {entry.name}
+            </span>
+          </div>
+          <span className="font-bold text-neutral-900 dark:text-white">
+            {entry.value.toLocaleString('fr-FR')}
+          </span>
+        </div>
       ))}
     </div>
   );
@@ -331,7 +498,12 @@ export default function AnalyticsPage() {
                         <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} />
+                    <CartesianGrid 
+                      strokeDasharray="3 3" 
+                      stroke="currentColor" 
+                      className="text-neutral-400 dark:text-neutral-500" 
+                      opacity={0.6} 
+                    />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(d) => formatDate(d, period)}
@@ -344,7 +516,7 @@ export default function AnalyticsPage() {
                       axisLine={false}
                       tickLine={false}
                     />
-                    <Tooltip content={<CustomTooltip period={period} />} />
+                    <Tooltip content={<ChartTooltip period={period} isDate={true} />} cursor={{ stroke: '#00d5be', strokeWidth: 1, strokeDasharray: '4 4' }} />
                     <Area
                       type="monotone"
                       dataKey="pageviews"
@@ -381,7 +553,12 @@ export default function AnalyticsPage() {
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={(data?.pages || []).slice(0, 8)} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} />
+                      <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        stroke="currentColor" 
+                        className="text-neutral-400 dark:text-neutral-500" 
+                        opacity={0.6} 
+                      />
                       <XAxis
                         type="number"
                         tick={{ fontSize: 11, fill: '#9ca3af' }}
@@ -396,7 +573,7 @@ export default function AnalyticsPage() {
                         axisLine={false}
                         tickLine={false}
                       />
-                      <Tooltip />
+                      <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(0, 213, 190, 0.05)' }} />
                       <Bar dataKey="y" name="Vues" fill="#00bba7" radius={[0, 6, 6, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -408,13 +585,13 @@ export default function AnalyticsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35 }}
-                className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 shadow-sm"
+                className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-0 overflow-hidden shadow-sm flex flex-col"
               >
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white px-6 pt-6 mb-4 flex items-center gap-2">
                   <FiMousePointer size={18} /> Événements trackés
                 </h2>
                 {data?.events && data.events.length > 0 ? (
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                  <div className="space-y-3 max-h-64 overflow-y-auto px-6 pb-6">
                     {data.events.map((evt, i) => {
                       const maxVal = data.events![0].y;
                       const pct = maxVal > 0 ? (evt.y / maxVal) * 100 : 0;
@@ -446,38 +623,44 @@ export default function AnalyticsPage() {
 
             {/* Three-column grid: Countries / Browsers+OS / Devices+Referrers */}
             <div className="grid md:grid-cols-3 gap-8 mb-8">
-              {/* Countries Pie */}
+              {/* Countries List */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 shadow-sm"
+                className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-0 overflow-hidden shadow-sm flex flex-col"
               >
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white px-6 pt-6 mb-4 flex items-center gap-2">
                   <FiGlobe size={18} /> Pays
                 </h2>
                 {data?.countries && data.countries.length > 0 ? (
-                  <div className="h-56">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={data.countries}
-                          dataKey="y"
-                          nameKey="x"
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={80}
-                          innerRadius={40}
-                          paddingAngle={2}
-                          label={({ x: name }) => name}
-                        >
-                          {data.countries.map((_, i) => (
-                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
+                  <div className="space-y-3 max-h-72 overflow-y-auto px-6 pb-6">
+                    {data.countries
+                      .sort((a, b) => b.y - a.y)
+                      .map((c, i) => {
+                        const total = data.countries!.reduce((acc, curr) => acc + curr.y, 0);
+                        const pct = total > 0 ? ((c.y / total) * 100).toFixed(1) : 0;
+                        return (
+                          <div key={i} className="flex items-center justify-between group">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xl leading-none" role="img" aria-label={c.x}>
+                                {getCountryFlag(c.x)}
+                              </span>
+                              <span className="text-sm text-neutral-700 dark:text-neutral-300 font-medium">
+                                {getCountryName(c.x)}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-sm font-bold text-neutral-900 dark:text-white block">
+                                {c.y.toLocaleString('fr-FR')}
+                              </span>
+                              <span className="text-xs text-neutral-400 font-medium">
+                                {pct}%
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
                 ) : (
                   <p className="text-neutral-400 text-sm text-center py-8">Aucune donnée</p>
@@ -489,77 +672,83 @@ export default function AnalyticsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45 }}
-                className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 shadow-sm"
+                className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-0 overflow-hidden shadow-sm flex flex-col"
               >
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white px-6 pt-6 mb-4 flex items-center gap-2">
                   <FiMonitor size={18} /> Navigateurs & OS
                 </h2>
-                <div className="space-y-4">
+                <div className="space-y-4 px-6 pb-6 overflow-y-auto max-h-[22rem]">
                   <div>
                     <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
                       Navigateurs
                     </h3>
-                    {(data?.browsers || []).map((b, i) => (
-                      <div key={i} className="flex justify-between text-sm py-1">
-                        <span className="text-neutral-700 dark:text-neutral-300">{b.x}</span>
-                        <span className="font-medium text-neutral-900 dark:text-white">{b.y}</span>
-                      </div>
-                    ))}
+                    <div className="space-y-1">
+                      {(data?.browsers || []).map((b, i) => {
+                        const { label, icon: Icon, color, logoUrl } = formatLabel(b.x, BROWSER_MAP);
+                        return (
+                          <div key={i} className="flex justify-between text-sm py-1">
+                            <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
+                              <BrandLogo logoUrl={logoUrl} label={label} icon={Icon} color={color} />
+                              <span>{label}</span>
+                            </span>
+                            <span className="font-medium text-neutral-900 dark:text-white">{b.y}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                   <hr className="border-neutral-200 dark:border-neutral-700" />
                   <div>
                     <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
                       Systèmes
                     </h3>
-                    {(data?.os || []).map((o, i) => (
-                      <div key={i} className="flex justify-between text-sm py-1">
-                        <span className="text-neutral-700 dark:text-neutral-300">{o.x}</span>
-                        <span className="font-medium text-neutral-900 dark:text-white">{o.y}</span>
-                      </div>
-                    ))}
+                    <div className="space-y-1">
+                      {(data?.os || []).map((o, i) => {
+                        const { label, icon: Icon, color, logoUrl } = formatLabel(o.x, OS_MAP);
+                        return (
+                          <div key={i} className="flex justify-between text-sm py-1">
+                            <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
+                              <BrandLogo logoUrl={logoUrl} label={label} icon={Icon} color={color} />
+                              <span>{label}</span>
+                            </span>
+                            <span className="font-medium text-neutral-900 dark:text-white">{o.y}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </motion.div>
 
-              {/* Devices & Referrers */}
+              {/* Devices Only */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 shadow-sm"
+                className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-0 overflow-hidden shadow-sm flex flex-col"
               >
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
-                  <FiSmartphone size={18} /> Appareils & Referrers
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white px-6 pt-6 mb-4 flex items-center gap-2">
+                  <FiSmartphone size={18} /> Appareils
                 </h2>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
-                      Appareils
-                    </h3>
-                    {(data?.devices || []).map((d, i) => (
-                      <div key={i} className="flex justify-between text-sm py-1">
-                        <span className="text-neutral-700 dark:text-neutral-300">
-                          {d.x || 'Inconnu'}
-                        </span>
-                        <span className="font-medium text-neutral-900 dark:text-white">{d.y}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <hr className="border-neutral-200 dark:border-neutral-700" />
-                  <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
-                      Referrers
-                    </h3>
-                    {(data?.referrers || []).slice(0, 5).map((r, i) => (
-                      <div key={i} className="flex justify-between text-sm py-1">
-                        <span className="text-neutral-700 dark:text-neutral-300 truncate mr-2">
-                          {r.x || 'Direct'}
-                        </span>
-                        <span className="font-medium text-neutral-900 dark:text-white shrink-0">
-                          {r.y}
-                        </span>
-                      </div>
-                    ))}
+                <div className="space-y-4 px-6 pb-6 overflow-y-auto max-h-80">
+                  <div className="space-y-2">
+                    {(data?.devices || []).map((d, i) => {
+                      const { label, icon: Icon, color } = formatLabel(d.x, DEVICE_MAP);
+                      return (
+                        <div key={i} className="flex justify-between items-center text-sm p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg">
+                          <span className="text-neutral-700 dark:text-neutral-300 font-medium flex items-center gap-2">
+                            <Icon className="w-4 h-4" style={{ color }} />
+                            <span>{label}</span>
+                          </span>
+                          <span className="font-bold text-neutral-900 dark:text-white">
+                            {d.y.toLocaleString('fr-FR')}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {!data?.devices?.length && (
+                      <p className="text-neutral-400 text-sm text-center py-8">Aucune donnée</p>
+                    )}
                   </div>
                 </div>
               </motion.div>
