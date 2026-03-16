@@ -1,3 +1,5 @@
+import type { IconType } from 'react-icons';
+import { FaAws } from 'react-icons/fa6';
 import {
   SiReact,
   SiNextdotjs,
@@ -41,10 +43,9 @@ import {
   SiSupabase,
   SiCloudinary,
   SiNestjs,
-  SiAmazon,
   SiResend,
 } from 'react-icons/si';
-import type { IconType } from 'react-icons';
+
 
 export interface SkillIconEntry {
   icon: IconType;
@@ -104,7 +105,7 @@ export const SKILL_ICONS: Record<string, SkillIconEntry> = {
   vite: { icon: SiVite, color: '#646CFF', label: 'Vite' },
   supabase: { icon: SiSupabase, color: '#3ECF8E', label: 'Supabase' },
   cloudinary: { icon: SiCloudinary, color: '#3448C5', colorLight: '#1E33C6', label: 'Cloudinary' },
-  aws: { icon: SiAmazon, color: '#FF9900', label: 'AWS' },
+  aws: { icon: FaAws, color: '#FF9900', label: 'AWS' },
   nestjs: { icon: SiNestjs, color: '#EA2845', label: 'NestJS' },
   resend: { icon: SiResend, color: '#ffffff', colorLight: '#000000', label: 'Resend' },
 };
