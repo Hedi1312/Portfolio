@@ -83,7 +83,11 @@ export default function CV() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button onClick={() => setIsOpen(true)} variant="primary" data-umami-event="click-cv-view">
+            <Button
+              onClick={() => setIsOpen(true)}
+              variant="primary"
+              data-umami-event="click-cv-view"
+            >
               <FiEye size={18} />
               Voir mon CV
             </Button>

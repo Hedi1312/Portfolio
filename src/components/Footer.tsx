@@ -17,8 +17,18 @@ export default function Footer() {
 
           <div className="flex items-center gap-4">
             {[
-              { href: 'https://github.com/Hedi1312', icon: FaGithub, label: 'GitHub', umamiEvent: 'click-github-profile' },
-              { href: 'https://linkedin.com/in/hedi-okba', icon: FaLinkedin, label: 'LinkedIn', umamiEvent: 'click-linkedin-profile' },
+              {
+                href: 'https://github.com/Hedi1312',
+                icon: FaGithub,
+                label: 'GitHub',
+                umamiEvent: 'click-github-profile',
+              },
+              {
+                href: 'https://linkedin.com/in/hedi-okba',
+                icon: FaLinkedin,
+                label: 'LinkedIn',
+                umamiEvent: 'click-linkedin-profile',
+              },
             ].map((social) => {
               const Icon = social.icon;
               return (

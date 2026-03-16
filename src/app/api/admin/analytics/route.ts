@@ -53,10 +53,7 @@ export async function GET(req: Request) {
   }
 
   if (!UMAMI_API_URL || !UMAMI_API_KEY || !WEBSITE_ID) {
-    return NextResponse.json(
-      { error: 'Variables Umami non configurées' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Variables Umami non configurées' }, { status: 500 });
   }
 
   const { searchParams } = new URL(req.url);

@@ -60,8 +60,16 @@ const PERIODS = [
 ];
 
 const COLORS = [
-  '#00bba7', '#6366f1', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#10b981', '#ec4899', '#14b8a6', '#f97316', '#0ea5e9',
+  '#00bba7',
+  '#6366f1',
+  '#f59e0b',
+  '#ef4444',
+  '#8b5cf6',
+  '#10b981',
+  '#ec4899',
+  '#14b8a6',
+  '#f97316',
+  '#0ea5e9',
 ];
 
 const EVENT_LABELS: Record<string, string> = {
@@ -94,7 +102,17 @@ function formatDuration(ms: number) {
 }
 
 // ─── Custom Tooltip ─────────────────────────────────────
-function CustomTooltip({ active, payload, label, period }: { active?: boolean; payload?: { value: number; name: string; color: string }[]; label?: string; period: string }) {
+function CustomTooltip({
+  active,
+  payload,
+  label,
+  period,
+}: {
+  active?: boolean;
+  payload?: { value: number; name: string; color: string }[];
+  label?: string;
+  period: string;
+}) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-3 shadow-lg text-sm">
@@ -151,11 +169,12 @@ export default function AnalyticsPage() {
     : '0s';
 
   // Chart data
-  const chartData = data?.pageviews?.pageviews?.map((pv, i) => ({
-    date: pv.x,
-    pageviews: pv.y,
-    sessions: data.pageviews?.sessions?.[i]?.y || 0,
-  })) || [];
+  const chartData =
+    data?.pageviews?.pageviews?.map((pv, i) => ({
+      date: pv.x,
+      pageviews: pv.y,
+      sessions: data.pageviews?.sessions?.[i]?.y || 0,
+    })) || [];
 
   const kpis = [
     {
@@ -363,7 +382,12 @@ export default function AnalyticsPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={(data?.pages || []).slice(0, 8)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.15} />
-                      <XAxis type="number" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                      <XAxis
+                        type="number"
+                        tick={{ fontSize: 11, fill: '#9ca3af' }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
                       <YAxis
                         type="category"
                         dataKey="x"
@@ -472,7 +496,9 @@ export default function AnalyticsPage() {
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">Navigateurs</h3>
+                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
+                      Navigateurs
+                    </h3>
                     {(data?.browsers || []).map((b, i) => (
                       <div key={i} className="flex justify-between text-sm py-1">
                         <span className="text-neutral-700 dark:text-neutral-300">{b.x}</span>
@@ -482,7 +508,9 @@ export default function AnalyticsPage() {
                   </div>
                   <hr className="border-neutral-200 dark:border-neutral-700" />
                   <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">Systèmes</h3>
+                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
+                      Systèmes
+                    </h3>
                     {(data?.os || []).map((o, i) => (
                       <div key={i} className="flex justify-between text-sm py-1">
                         <span className="text-neutral-700 dark:text-neutral-300">{o.x}</span>
@@ -505,21 +533,31 @@ export default function AnalyticsPage() {
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">Appareils</h3>
+                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
+                      Appareils
+                    </h3>
                     {(data?.devices || []).map((d, i) => (
                       <div key={i} className="flex justify-between text-sm py-1">
-                        <span className="text-neutral-700 dark:text-neutral-300">{d.x || 'Inconnu'}</span>
+                        <span className="text-neutral-700 dark:text-neutral-300">
+                          {d.x || 'Inconnu'}
+                        </span>
                         <span className="font-medium text-neutral-900 dark:text-white">{d.y}</span>
                       </div>
                     ))}
                   </div>
                   <hr className="border-neutral-200 dark:border-neutral-700" />
                   <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">Referrers</h3>
+                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
+                      Referrers
+                    </h3>
                     {(data?.referrers || []).slice(0, 5).map((r, i) => (
                       <div key={i} className="flex justify-between text-sm py-1">
-                        <span className="text-neutral-700 dark:text-neutral-300 truncate mr-2">{r.x || 'Direct'}</span>
-                        <span className="font-medium text-neutral-900 dark:text-white shrink-0">{r.y}</span>
+                        <span className="text-neutral-700 dark:text-neutral-300 truncate mr-2">
+                          {r.x || 'Direct'}
+                        </span>
+                        <span className="font-medium text-neutral-900 dark:text-white shrink-0">
+                          {r.y}
+                        </span>
                       </div>
                     ))}
                   </div>
