@@ -35,6 +35,7 @@ try {
 
   let addedCount = 0;
   let modifiedCount = 0;
+  let deletedCount = 0;
 
   for (const [key, value] of Object.entries(newParsed)) {
     if (!(key in oldParsed)) {
@@ -44,7 +45,13 @@ try {
     }
   }
 
-  console.log(`✅ Succès ! ${addedCount} ajoutée(s), ${modifiedCount} modifiée(s).`);
+  for (const key in oldParsed) {
+    if (!(key in newParsed)) {
+      deletedCount++;
+    }
+  }
+
+  console.log(`✅ Succès ! ${addedCount} ajoutée(s), ${modifiedCount} modifiée(s), ${deletedCount} supprimée(s).`);
 } catch (error) {
   console.error('❌ Erreur lors du téléchargement des secrets:', error.message);
   process.exit(1);
