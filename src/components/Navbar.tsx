@@ -35,7 +35,12 @@ export default function Navbar() {
   useEffect(() => {
     fetchUnread();
     const interval = setInterval(fetchUnread, 30000);
-    return () => clearInterval(interval);
+    const handleUnreadUpdate = () => fetchUnread();
+    window.addEventListener('unread-updated', handleUnreadUpdate);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('unread-updated', handleUnreadUpdate);
+    };
   }, [fetchUnread]);
 
   // Detect active section via IntersectionObserver
@@ -137,7 +142,7 @@ export default function Navbar() {
           {status === 'authenticated' && (
             <Link
               href="/admin/messages"
-              className="relative p-3 rounded-xl text-brand-500 hover:text-brand-400 transition-all duration-300 group"
+              className="relative p-3 rounded-xl text-neutral-500 dark:text-neutral-400 hover:text-foreground transition-all duration-300 group"
               title="Messages"
             >
               <FaBell

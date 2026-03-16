@@ -3,12 +3,12 @@ import {
   Html,
   Body,
   Head,
-  Heading,
-  Hr,
   Container,
   Preview,
   Section,
   Text,
+  Hr,
+  Img,
 } from '@react-email/components';
 
 interface AdminNotificationProps {
@@ -19,52 +19,164 @@ interface AdminNotificationProps {
 
 export const AdminNotification = ({ name, email, message }: AdminNotificationProps) => (
   <Html>
-    <Head />
-    <Preview>Nouveau message de {name} sur ton portfolio</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>📩 Nouveau Contact</Heading>
-        <Text style={text}>Tu as reçu un nouveau message depuis ton portfolio.</Text>
+    <Head>
+      <style>{`
+        @media only screen and (max-width: 600px) {
+          .container { width: 100% !important; padding: 16px !important; }
+        }
+      `}</style>
+    </Head>
+    <Preview>💬 {name} t&apos;a écrit sur ton portfolio</Preview>
+    <Body style={body}>
+      <Container style={card} className="container">
+        {/* Gradient header */}
+        <Section style={header}>
+          <Img
+            src="https://img.icons8.com/fluency/96/new-message.png"
+            width="48"
+            height="48"
+            alt=""
+            style={{ margin: '0 auto 12px' }}
+          />
+          <Text style={headerTitle}>Nouveau message</Text>
+          <Text style={headerSub}>Quelqu&apos;un t&apos;a contacté via ton portfolio</Text>
+        </Section>
 
-        <Section style={section}>
-          <Text style={field}>
-            <strong>Nom :</strong> {name}
-          </Text>
-          <Text style={field}>
-            <strong>Email :</strong> {email}
+        {/* Content */}
+        <Section style={content}>
+          {/* Sender info */}
+          <table style={senderTable}>
+            <tbody>
+              <tr>
+                <td style={avatar}>{name.charAt(0).toUpperCase()}</td>
+                <td style={{ paddingLeft: '14px' }}>
+                  <Text style={senderName}>{name}</Text>
+                  <Text style={senderEmail}>{email}</Text>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <Hr style={divider} />
+
+          {/* Message */}
+          <Section style={messageCard}>
+            <Text style={messageText}>{message}</Text>
+          </Section>
+
+          {/* Action hint */}
+          <Text style={hint}>
+            Réponds directement depuis ton dashboard admin ou en répondant à cet email.
           </Text>
         </Section>
 
-        <Hr style={hr} />
-
-        <Heading as="h3" style={h3}>
-          Message :
-        </Heading>
-        <Text style={paragraph}>{message}</Text>
+        {/* Footer */}
+        <Section style={footer}>
+          <Text style={footerText}>Portfolio — Notification automatique</Text>
+        </Section>
       </Container>
     </Body>
   </Html>
 );
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'sans-serif' };
-const container = { margin: '0 auto', padding: '20px 0 48px', width: '580px' };
-const h1 = { color: '#333', fontSize: '24px', fontWeight: 'bold', paddingTop: '32px' };
-const h3 = { color: '#333', fontSize: '18px', fontWeight: 'bold' };
-const text = { color: '#333', fontSize: '16px', lineHeight: '26px' };
-const paragraph = {
-  fontSize: '16px',
-  lineHeight: '26px',
-  backgroundColor: '#f4f4f4',
-  padding: '15px',
-  borderRadius: '5px',
+const body = {
+  backgroundColor: '#edf2f7',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  padding: '40px 16px',
+  margin: '0',
 };
-const section = {
-  padding: '24px',
-  border: 'solid 1px #dedede',
-  borderRadius: '5px',
-  textAlign: 'left' as const,
+const card = {
+  maxWidth: '520px',
+  margin: '0 auto',
+  backgroundColor: '#ffffff',
+  borderRadius: '16px',
+  overflow: 'hidden' as const,
+  boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
 };
-const field = { margin: '5px 0' };
-const hr = { borderColor: '#dddddd', margin: '20px 0' };
+const header = {
+  background: 'linear-gradient(135deg, #0d9488 0%, #00bba7 50%, #06b6d4 100%)',
+  padding: '36px 32px 28px',
+  textAlign: 'center' as const,
+};
+const headerTitle = {
+  color: '#ffffff',
+  fontSize: '20px',
+  fontWeight: '700' as const,
+  margin: '0 0 4px',
+  letterSpacing: '-0.3px',
+};
+const headerSub = {
+  color: 'rgba(255,255,255,0.8)',
+  fontSize: '13px',
+  margin: '0',
+};
+const content = {
+  padding: '28px 32px 20px',
+};
+const senderTable = {
+  width: '100%' as const,
+  borderCollapse: 'collapse' as const,
+};
+const avatar = {
+  width: '44px',
+  height: '44px',
+  borderRadius: '50%',
+  backgroundColor: '#00bba7',
+  color: '#ffffff',
+  fontSize: '18px',
+  fontWeight: '700' as const,
+  textAlign: 'center' as const,
+  verticalAlign: 'middle' as const,
+  lineHeight: '44px',
+};
+const senderName = {
+  color: '#1a202c',
+  fontSize: '15px',
+  fontWeight: '600' as const,
+  margin: '0',
+  lineHeight: '20px',
+};
+const senderEmail = {
+  color: '#718096',
+  fontSize: '13px',
+  margin: '2px 0 0',
+  lineHeight: '18px',
+};
+const divider = {
+  borderColor: '#e2e8f0',
+  margin: '20px 0',
+};
+const messageCard = {
+  backgroundColor: '#f7fafc',
+  border: '1px solid #e2e8f0',
+  borderRadius: '12px',
+  padding: '20px',
+  marginBottom: '20px',
+};
+const messageText = {
+  color: '#2d3748',
+  fontSize: '14px',
+  lineHeight: '22px',
+  margin: '0',
+  whiteSpace: 'pre-wrap' as const,
+  wordBreak: 'break-word' as const,
+};
+const hint = {
+  color: '#a0aec0',
+  fontSize: '12px',
+  textAlign: 'center' as const,
+  margin: '0',
+};
+const footer = {
+  backgroundColor: '#f7fafc',
+  padding: '16px 32px',
+  borderTop: '1px solid #e2e8f0',
+};
+const footerText = {
+  color: '#a0aec0',
+  fontSize: '11px',
+  textAlign: 'center' as const,
+  margin: '0',
+};
 
 export default AdminNotification;

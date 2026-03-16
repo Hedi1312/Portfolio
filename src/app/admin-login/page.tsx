@@ -4,6 +4,7 @@ import { loginSchema } from '@/lib/schemas/auth';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Button } from '@/components/ui/Button';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -89,13 +90,15 @@ export default function LoginPage() {
             />
           </div>
 
-          <button
+          <Button
             type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-brand-500 px-4 py-3 mt-6 font-bold text-white transition-all hover:bg-brand-400 hover:shadow-[0_0_15px_rgba(0,187,167,0.4)] disabled:opacity-50 disabled:hover:shadow-none cursor-pointer"
+            isLoading={loading}
+            loadingText="Connexion en cours..."
+            fullWidth
+            className="mt-6 shadow-[0_0_15px_rgba(0,187,167,0.4)] disabled:hover:shadow-none"
           >
-            {loading ? 'Connexion en cours...' : 'Se connecter'}
-          </button>
+            Se connecter
+          </Button>
         </form>
       </div>
     </section>

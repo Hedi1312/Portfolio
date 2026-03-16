@@ -3,10 +3,12 @@ import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FiEye, FiDownload, FiX } from 'react-icons/fi';
+import { Button } from '@/components/ui/Button';
 
 export default function CV() {
   const [cvUrl, setCvUrl] = useState('/cv/CV_OKBA_Hedi.pdf');
   const [isOpen, setIsOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/cv')
@@ -20,6 +22,26 @@ export default function CV() {
   }, []);
 
   useLockBodyScroll(isOpen);
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch(cvUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'CV_OKBA_Hedi.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <section
@@ -61,26 +83,20 @@ export default function CV() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <motion.button
-              onClick={() => setIsOpen(true)}
-              className="btn-glow flex items-center justify-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-400 text-white rounded-xl font-semibold transition-colors cursor-pointer"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
+            <Button onClick={() => setIsOpen(true)} variant="primary">
               <FiEye size={18} />
               Voir mon CV
-            </motion.button>
+            </Button>
 
-            <motion.a
-              href={cvUrl}
-              download
-              className="flex items-center justify-center gap-2 px-6 py-3 glass-card font-semibold transition-all hover:border-brand-400/30 cursor-pointer"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <Button
+              onClick={handleDownload}
+              variant="glass"
+              isLoading={isDownloading}
+              loadingText="Téléchargement en cours..."
             >
               <FiDownload size={18} className="text-brand-400" />
               Télécharger
-            </motion.a>
+            </Button>
           </div>
         </motion.div>
       </div>
