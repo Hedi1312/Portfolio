@@ -62,59 +62,29 @@ export async function GET(req: Request) {
   const unit = getUnit(period);
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  const [active, stats, pageviews, countries, pages, events, browsers, os, devices, referrers] =
-    await Promise.all([
-      umamiGet(`/api/websites/${WEBSITE_ID}/active`),
-      umamiGet(`/api/websites/${WEBSITE_ID}/stats`, { startAt, endAt }),
-      umamiGet(`/api/websites/${WEBSITE_ID}/pageviews`, {
-        startAt,
-        endAt,
-        unit,
-        timezone: tz,
-      }),
-      umamiGet(`/api/websites/${WEBSITE_ID}/metrics`, {
-        startAt,
-        endAt,
-        type: 'country',
-        limit: '10',
-      }),
-      umamiGet(`/api/websites/${WEBSITE_ID}/metrics`, {
-        startAt,
-        endAt,
-        type: 'path',
-        limit: '10',
-      }),
-      umamiGet(`/api/websites/${WEBSITE_ID}/metrics`, {
-        startAt,
-        endAt,
-        type: 'event',
-        limit: '20',
-      }),
-      umamiGet(`/api/websites/${WEBSITE_ID}/metrics`, {
-        startAt,
-        endAt,
-        type: 'browser',
-        limit: '5',
-      }),
-      umamiGet(`/api/websites/${WEBSITE_ID}/metrics`, {
-        startAt,
-        endAt,
-        type: 'os',
-        limit: '5',
-      }),
-      umamiGet(`/api/websites/${WEBSITE_ID}/metrics`, {
-        startAt,
-        endAt,
-        type: 'device',
-        limit: '5',
-      }),
-      umamiGet(`/api/websites/${WEBSITE_ID}/metrics`, {
-        startAt,
-        endAt,
-        type: 'referrer',
-        limit: '10',
-      }),
-    ]);
+  const metricsConfig = [
+    { type: 'country', limit: '10' },
+    { type: 'path', limit: '10' },
+    { type: 'event', limit: '20' },
+    { type: 'browser', limit: '5' },
+    { type: 'os', limit: '5' },
+    { type: 'device', limit: '5' },
+    { type: 'referrer', limit: '10' },
+  ];
+
+  const basePath = `/websites/${WEBSITE_ID}`;
+
+  const [active, stats, pageviews, ...metricsData] = await Promise.all([
+    umamiGet(`${basePath}/active`),
+    umamiGet(`${basePath}/stats`, { startAt, endAt }),
+    umamiGet(`${basePath}/pageviews`, { startAt, endAt, unit, timezone: tz }),
+
+    ...metricsConfig.map(({ type, limit }) =>
+      umamiGet(`${basePath}/metrics`, { startAt, endAt, type, limit }),
+    ),
+  ]);
+
+  const [countries, pages, events, browsers, os, devices, referrers] = metricsData;
 
   return NextResponse.json({
     active,
