@@ -13,7 +13,6 @@ model Admin {
   passwordUpdatedAt DateTime?
   createdAt         DateTime        @default(now())
 
-  // Changement ici : Relation 1-à-1 (un seul reset possible)
   passwordReset     PasswordReset?
 
   @@map("admins")
@@ -24,21 +23,47 @@ model PasswordReset {
   token     String   @unique
   expiresAt DateTime
 
-  // Relation avec l'Admin
   adminId   String   @unique
   admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@map("password_resets")
 }
 
+// Contact unique par email — regroupe toutes les conversations
+model Contact {
+  id        String           @id @default(cuid())
+  email     String           @unique
+  name      String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  messages  ContactMessage[]
+
+  @@map("contacts")
+}
+
 model ContactMessage {
-  id          String   @id @default(cuid())
-  name        String
-  email       String
+  id          String         @id @default(cuid())
+  email       String         @default("")
   message     String
-  attachments Json     @default("[]")
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  attachments Json           @default("[]")
+  isRead      Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  replies     MessageReply[]
+
+  contactId   String
+  contact     Contact        @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
   @@map("contact_messages")
+}
+
+model MessageReply {
+  id          String         @id @default(cuid())
+  message     String
+  attachments Json           @default("[]")
+  createdAt   DateTime       @default(now())
+
+  contactMessageId String
+  contactMessage   ContactMessage @relation(fields: [contactMessageId], references: [id], onDelete: Cascade)
+
+  @@map("message_replies")
 }

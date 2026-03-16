@@ -2,7 +2,7 @@
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
-import { FiMail, FiX, FiSend, FiCheckCircle } from 'react-icons/fi';
+import { FiMail, FiX, FiSend, FiCheckCircle, FiPaperclip } from 'react-icons/fi';
 
 export default function Contact() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +10,7 @@ export default function Contact() {
   const [honeypot, setHoneypot] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [fileError, setFileError] = useState('');
 
   useLockBodyScroll(isOpen);
 
@@ -27,10 +28,30 @@ export default function Contact() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 Mo
+  const MAX_FILES = 3;
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
     if (selectedFiles) {
-      setFiles(Array.from(selectedFiles));
+      const filesArray = Array.from(selectedFiles);
+      if (filesArray.length > MAX_FILES) {
+        setFileError(`Maximum ${MAX_FILES} fichiers autorisés.`);
+        setFiles([]);
+        e.target.value = '';
+        return;
+      }
+      const tooBig = filesArray.filter((f) => f.size > MAX_FILE_SIZE);
+      if (tooBig.length > 0) {
+        setFileError(
+          `Fichier(s) trop volumineux (max 5 Mo) : ${tooBig.map((f) => f.name).join(', ')}`,
+        );
+        setFiles([]);
+        e.target.value = '';
+        return;
+      }
+      setFileError('');
+      setFiles(filesArray);
     }
   };
 
@@ -160,7 +181,7 @@ export default function Contact() {
 
                   <div>
                     <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      NOM Prénom
+                      Prénom NOM
                     </label>
                     <input
                       type="text"
@@ -169,7 +190,7 @@ export default function Contact() {
                       onChange={handleChange}
                       required
                       className={inputClasses}
-                      placeholder="NOM Prénom"
+                      placeholder="Prénom NOM"
                     />
                   </div>
 
@@ -204,21 +225,56 @@ export default function Contact() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2">
                       Pièces jointes
                     </label>
-                    <input
-                      type="file"
-                      accept=".png,.jpg,.jpeg,.pdf"
-                      multiple
-                      onChange={handleFileChange}
-                      className="block w-full text-sm text-neutral-500 dark:text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-400/10 file:text-brand-400 hover:file:bg-brand-400/20 cursor-pointer transition-colors"
-                    />
+                    <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-50/50 dark:bg-neutral-800/50 border border-neutral-200/80 dark:border-neutral-700/50 text-neutral-500 dark:text-neutral-400 hover:border-brand-400 hover:text-brand-400 cursor-pointer transition-all text-sm">
+                      <FiPaperclip size={16} />
+                      Parcourir les fichiers
+                      <input
+                        type="file"
+                        accept=".png,.jpg,.jpeg,.pdf"
+                        multiple
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                    </label>
+                    {fileError && <p className="text-xs text-danger-500 mt-1.5">{fileError}</p>}
+                    <p className="text-xs text-neutral-400 mt-4">Max 3 fichiers, 5 Mo chacun</p>
+                    {files.length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                        {files.map((f, i) => (
+                          <span
+                            key={i}
+                            className="inline-flex items-center gap-1 text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 px-2 py-1 rounded-md"
+                          >
+                            <FiPaperclip size={10} />
+                            {f.name}
+                            <button
+                              type="button"
+                              onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
+                              className="text-neutral-400 hover:text-danger-500 cursor-pointer"
+                            >
+                              <FiX size={12} />
+                            </button>
+                          </span>
+                        ))}
+                        {files.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => setFiles([])}
+                            className="text-xs text-neutral-400 hover:text-danger-500 cursor-pointer ml-1"
+                          >
+                            Tout retirer
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <motion.button
                     type="submit"
-                    className="btn-glow w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-white py-3.5 rounded-xl font-semibold transition-colors cursor-pointer mt-2"
+                    className="btn-glow w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-white py-3.5 rounded-xl font-semibold transition-colors cursor-pointer mt-6"
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
                   >

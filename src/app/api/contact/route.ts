@@ -39,11 +39,17 @@ export async function POST(req: Request) {
     const dbAttachments: { filename: string; path: string }[] = [];
 
     if (files.length > 0) {
-      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+      const uploadsDir = path.join(process.cwd(), 'storage', 'messages');
       await mkdir(uploadsDir, { recursive: true });
 
       for (const file of files) {
         if (file && file.size > 0) {
+          if (file.size > 5 * 1024 * 1024) {
+            return NextResponse.json(
+              { error: `Le fichier "${file.name}" dépasse la limite de 5 Mo.` },
+              { status: 400 },
+            );
+          }
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
           const ext = path.extname(file.name);
@@ -59,19 +65,26 @@ export async function POST(req: Request) {
 
           dbAttachments.push({
             filename: file.name,
-            path: `/uploads/${uniqueName}`,
+            path: `/api/messages/${uniqueName}`,
           });
         }
       }
     }
 
-    // Sauvegarder en base de données
+    // Upsert du contact (crée ou met à jour le nom)
+    const contact = await prisma.contact.upsert({
+      where: { email },
+      update: { name, updatedAt: new Date() },
+      create: { email, name },
+    });
+
+    // Sauvegarder le message
     await prisma.contactMessage.create({
       data: {
-        name,
         email,
         message,
         attachments: dbAttachments,
+        contactId: contact.id,
       },
     });
 
@@ -85,7 +98,7 @@ export async function POST(req: Request) {
       prefixe = '[LOCAL] ';
     }
 
-    const subject = `${prefixe} - Nouveau message de ${name}`;
+    const subject = `${prefixe}Nouveau message de ${name}`;
 
     const adminHtml = await render(AdminNotification({ name, email, message }));
     const userHtml = await render(UserConfirmation({ name }));
@@ -94,7 +107,7 @@ export async function POST(req: Request) {
       from: process.env.SMTP_FROM,
       to: destinataire,
       replyTo: email,
-      subject: subject,
+      subject,
       attachments: emailAttachments,
       html: adminHtml,
     });
@@ -102,7 +115,7 @@ export async function POST(req: Request) {
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: email,
-      subject: `${prefixe} - Merci pour ton message !`,
+      subject: `${prefixe}Merci pour ton message !`,
       html: userHtml,
     });
 

@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
 import { render } from '@react-email/components';
+import { mkdir, writeFile } from 'fs/promises';
+import path from 'path';
+import { randomUUID } from 'crypto';
 import { AdminReply } from '@/emails/AdminReply';
 
 const transporter = nodemailer.createTransport({
@@ -15,15 +18,23 @@ const transporter = nodemailer.createTransport({
 });
 
 // POST → Envoyer une réponse personnalisée au contact
+// id = contactId (on répond à un contact, la réponse est liée au dernier message)
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
-    // Récupérer le message original
-    const original = await prisma.contactMessage.findUnique({ where: { id } });
-    if (!original) {
-      return NextResponse.json({ error: 'Message introuvable.' }, { status: 404 });
+    // Récupérer le contact et son dernier message
+    const contact = await prisma.contact.findUnique({
+      where: { id },
+      include: {
+        messages: { orderBy: { createdAt: 'desc' }, take: 1 },
+      },
+    });
+    if (!contact || contact.messages.length === 0) {
+      return NextResponse.json({ error: 'Contact introuvable.' }, { status: 404 });
     }
+
+    const lastMessage = contact.messages[0];
 
     // Extraire les données du formulaire (message + pièces jointes)
     const formData = await req.formData();
@@ -33,16 +44,41 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'Le message est requis.' }, { status: 400 });
     }
 
-    // Préparer les pièces jointes
-    const attachments = [];
+    // Sauvegarder les pièces jointes sur le disque
+    const emailAttachments = [];
+    const dbAttachments: { filename: string; path: string }[] = [];
     const files = formData.getAll('files') as File[];
-    for (const file of files) {
-      if (file && file.size > 0) {
-        const bytes = await file.arrayBuffer();
-        attachments.push({
-          filename: file.name,
-          content: Buffer.from(bytes),
-        });
+
+    if (files.length > 0) {
+      const uploadsDir = path.join(process.cwd(), 'storage', 'messages');
+      await mkdir(uploadsDir, { recursive: true });
+
+      for (const file of files) {
+        if (file && file.size > 0) {
+          if (file.size > 5 * 1024 * 1024) {
+            return NextResponse.json(
+              { error: `Le fichier "${file.name}" dépasse la limite de 5 Mo.` },
+              { status: 400 },
+            );
+          }
+          const bytes = await file.arrayBuffer();
+          const buffer = Buffer.from(bytes);
+          const ext = path.extname(file.name);
+          const uniqueName = `${randomUUID()}${ext}`;
+          const filePath = path.join(uploadsDir, uniqueName);
+
+          await writeFile(filePath, buffer);
+
+          emailAttachments.push({
+            filename: file.name,
+            content: buffer,
+          });
+
+          dbAttachments.push({
+            filename: file.name,
+            path: `/api/messages/${uniqueName}`,
+          });
+        }
       }
     }
 
@@ -57,28 +93,43 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // Rendre le template email
     const html = await render(
       AdminReply({
-        recipientName: original.name,
+        recipientName: contact.name,
         replyMessage,
       }),
     );
 
+    // Sauvegarder la réponse en BDD avec pièces jointes
+    const savedReply = await prisma.messageReply.create({
+      data: {
+        message: replyMessage,
+        attachments: dbAttachments,
+        contactMessageId: lastMessage.id,
+      },
+    });
+
     // Envoyer l'email
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
-      to: original.email,
+      to: contact.email,
       subject: `${prefixe}Réponse à votre message — Hëdi OKBA`,
       html,
-      attachments,
+      attachments: emailAttachments,
     });
 
-    // Marquer le message comme lu
-    await prisma.contactMessage.update({
-      where: { id },
+    // Marquer tous les messages comme lus
+    await prisma.contactMessage.updateMany({
+      where: { contactId: id, isRead: false },
       data: { isRead: true },
     });
 
-    console.log(`📤 [REPLY] Réponse envoyée à : ${original.email}`);
-    return NextResponse.json({ success: true });
+    // Mettre à jour le timestamp du contact
+    await prisma.contact.update({
+      where: { id },
+      data: { updatedAt: new Date() },
+    });
+
+    console.log(`📤 [REPLY] Réponse envoyée à : ${contact.email}`);
+    return NextResponse.json({ success: true, reply: savedReply });
   } catch (error) {
     console.error('Erreur envoi réponse:', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
