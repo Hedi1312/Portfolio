@@ -11,9 +11,11 @@ export { cloudinary };
 export async function uploadToCloudinary(
   buffer: Buffer,
   filename: string,
+  subfolder?: string,
 ): Promise<{ url: string; public_id: string }> {
   return new Promise((resolve, reject) => {
-    const folder = process.env.CLOUDINARY_FOLDER || 'development';
+    const baseFolder = process.env.CLOUDINARY_FOLDER || 'development';
+    const folder = subfolder ? `${baseFolder}/${subfolder}` : baseFolder;
 
     // Pour que Cloudinary gère bien le format (pdf, images, etc)
     const resource_type = filename.toLowerCase().endsWith('.pdf') ? 'image' : 'auto';

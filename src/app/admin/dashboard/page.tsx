@@ -4,7 +4,7 @@ import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Ticket, Mail } from 'lucide-react';
+import { LogOut, Ticket, Mail, FolderKanban } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -34,6 +34,12 @@ export default function DashboardPage() {
       icon: <Mail className="h-8 w-8 text-brand-500" />,
       onClick: () => router.push('/admin/messages'),
       badge: unreadCount,
+    },
+    {
+      title: 'Gérer mes projets',
+      description: 'Ajoute, modifie ou supprime les projets affichés sur mon portfolio.',
+      icon: <FolderKanban className="h-8 w-8 text-brand-500" />,
+      onClick: () => router.push('/admin/projects'),
     },
   ];
 

@@ -1,36 +1,34 @@
 'use client';
-import { motion } from 'framer-motion';
-import { FiExternalLink, FiGithub } from 'react-icons/fi';
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiExternalLink, FiGithub, FiInfo } from 'react-icons/fi';
+import { SKILL_ICONS } from '@/lib/skill-icons';
+import { useIsDark } from '@/hooks/useIsDark';
+import { ProjectModal } from '@/components/ProjectModal';
 
-const projets = [
-  {
-    title: 'Portfolio Personnel',
-    description:
-      'Site web personnel moderne et responsive construit avec Next.js, Tailwind CSS et Framer Motion. Design premium avec glassmorphism et animations fluides.',
-    tags: ['Next.js', 'Tailwind', 'Framer Motion'],
-    gradient: 'from-brand-400/20 to-brand-600/20',
-    link: '#',
-    github: '#',
-  },
-  {
-    title: 'Projet 2',
-    description:
-      'Description rapide du projet, technologies utilisées ou lien vers le code source.',
-    tags: ['React', 'Node.js', 'PostgreSQL'],
-    gradient: 'from-purple-400/20 to-pink-600/20',
-    link: '#',
-    github: '#',
-  },
-  {
-    title: 'Projet 3',
-    description:
-      'Description rapide du projet, technologies utilisées ou lien vers le code source.',
-    tags: ['TypeScript', 'Docker', 'Prisma'],
-    gradient: 'from-blue-400/20 to-cyan-600/20',
-    link: '#',
-    github: '#',
-  },
-];
+export interface ProjectImage {
+  id: string;
+  url: string;
+  order: number;
+}
+
+export interface Skill {
+  id: string;
+  name: string;
+  icon?: string | null;
+  color: string;
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  gradient: string;
+  link?: string | null;
+  github?: string | null;
+  skills: Skill[];
+  images?: ProjectImage[];
+}
 
 const containerVariants = {
   hidden: {},
@@ -49,11 +47,43 @@ const cardVariants = {
 };
 
 export default function MesProjets() {
+  const [projets, setProjets] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const isDark = useIsDark();
+
+  useEffect(() => {
+    fetch('/api/admin/projects')
+      .then((res) => res.json())
+      .then((data: Project[] | { error: string }) => {
+        if (Array.isArray(data)) {
+          // Ne garder que les projets visibles (le backend les envoie tous)
+          setProjets(data.filter((p: Project & { visible?: boolean }) => p.visible !== false));
+        } else {
+          console.error('Erreur API:', data.error);
+        }
+      })
+      .catch((err) => console.error('Erreur chargement projets:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return null;
+  if (projets.length === 0) return null;
+
   return (
     <section
       id="mes-projets"
       className="relative px-6 py-24 md:py-32 bg-neutral-50 dark:bg-[#0a0f1a] text-neutral-900 dark:text-white transition-colors duration-500"
     >
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectModal 
+            project={selectedProject} 
+            onClose={() => setSelectedProject(null)} 
+          />
+        )}
+      </AnimatePresence>
+
       {/* Subtle background gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,213,190,0.05)_0%,transparent_50%)]" />
 
@@ -77,57 +107,92 @@ export default function MesProjets() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
         >
-          {projets.map((projet, i) => (
+          {projets.map((projet) => (
             <motion.div
-              key={i}
-              className="glass-card overflow-hidden group"
+              key={projet.id}
+              className="glass-card flex flex-col h-full overflow-hidden group cursor-pointer hover:shadow-brand-500/10 transition-shadow"
               variants={cardVariants}
+              onClick={() => setSelectedProject(projet)}
             >
-              {/* Gradient preview area */}
-              <div className={`h-40 bg-gradient-to-br ${projet.gradient} relative overflow-hidden`}>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1)_0%,transparent_60%)]" />
+              {/* Preview area */}
+              <div className={`h-40 relative overflow-hidden ${(!projet.images || projet.images.length === 0) ? `bg-gradient-to-br ${projet.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}>
+                {projet.images && projet.images.length > 0 && (
+                  <>
+                    <img src={projet.images[0].url} alt={projet.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
+                  </>
+                )}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.4)_0%,transparent_60%)] dark:bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1)_0%,transparent_60%)] z-10" />
                 {/* Decorative elements */}
-                <div className="absolute top-4 right-4 w-12 h-12 rounded-full border border-white/20 group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute bottom-4 left-4 w-8 h-8 rounded-lg border border-white/15 rotate-45 group-hover:rotate-90 transition-transform duration-700" />
+                <div className="absolute top-4 right-4 w-12 h-12 rounded-full border border-black/10 dark:border-white/20 group-hover:scale-110 transition-transform duration-500" />
+                <div className="absolute bottom-4 left-4 w-8 h-8 rounded-lg border border-black/10 dark:border-white/15 rotate-45 group-hover:rotate-90 transition-transform duration-700" />
               </div>
 
               {/* Card content */}
-              <div className="p-6">
-                <h4 className="text-xl font-bold mb-3 font-[family-name:var(--font-space-grotesk)] group-hover:text-brand-400 transition-colors duration-300">
+              <div className="p-6 flex flex-col grow">
+                <h4 className="text-xl font-bold mb-3 font-(family-name:--font-space-grotesk) group-hover:text-brand-400 transition-colors duration-300 break-words line-clamp-2">
                   {projet.title}
                 </h4>
-                <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed mb-4">
+                <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed mb-6 break-words line-clamp-3">
                   {projet.description}
                 </p>
 
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-5">
-                  {projet.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2.5 py-1 text-xs font-medium rounded-full bg-brand-400/10 text-brand-400 border border-brand-400/20"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                {/* Skills with icons */}
+                {projet.skills.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {projet.skills.map((skill) => {
+                      const match = SKILL_ICONS[skill.name.toLowerCase()];
+                      const Icon = match?.icon;
+                      return (
+                        <span
+                          key={skill.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[0.8125rem] font-medium rounded-full bg-brand-400/10 text-brand-600 dark:text-brand-400 border border-brand-400/20 shadow-sm"
+                        >
+                          {Icon && (
+                            <Icon
+                              size={12}
+                              style={{ color: isDark ? match.color : (match.colorLight || match.color) }}
+                            />
+                          )}
+                          {skill.name}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Links */}
-                <div className="flex items-center gap-3">
-                  <a
-                    href={projet.github}
-                    className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 hover:text-foreground transition-colors"
+                <div className="flex items-center gap-3 mt-auto pt-4">
+                  {projet.github && (
+                    <a
+                      href={projet.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 hover:text-foreground transition-colors"
+                    >
+                      <FiGithub size={16} />
+                      Code
+                    </a>
+                  )}
+                  {projet.link && (
+                    <a
+                      href={projet.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-100 transition-colors"
+                    >
+                      <FiExternalLink size={16} />
+                      Voir en ligne
+                    </a>
+                  )}
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setSelectedProject(projet) }}
+                    className="ml-auto flex items-center gap-1.5 text-sm font-medium transition-opacity text-brand-500 hover:text-brand-100 cursor-pointer"
                   >
-                    <FiGithub size={16} />
-                    Code
-                  </a>
-                  <a
-                    href={projet.link}
-                    className="flex items-center gap-1.5 text-sm text-brand-400 hover:text-brand-300 transition-colors"
-                  >
-                    <FiExternalLink size={16} />
-                    Voir le projet
-                  </a>
+                     <FiInfo size={16} />
+                     Détails
+                  </button>
                 </div>
               </div>
             </motion.div>

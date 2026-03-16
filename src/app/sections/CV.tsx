@@ -121,10 +121,10 @@ export default function CV() {
             >
               <button
                 onClick={() => setIsOpen(false)}
-                className="absolute top-4 right-4 p-2 rounded-xl hover:bg-brand-400/10 text-neutral-500 hover:text-foreground transition-all cursor-pointer"
+                className="absolute top-4 right-4 z-10 p-1.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 rounded-full transition-colors cursor-pointer shadow-sm"
                 aria-label="Fermer la modale"
               >
-                <FiX size={22} />
+                <FiX size={18} />
               </button>
 
               <iframe

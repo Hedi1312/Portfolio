@@ -388,9 +388,9 @@ export default function MessagesPage() {
                       </div>
                       <button
                         onClick={() => setSelected(null)}
-                        className="p-2 text-neutral-400 hover:text-neutral-700 dark:hover:text-white transition-colors rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 cursor-pointer lg:hidden"
+                        className="p-1.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 rounded-full transition-colors cursor-pointer lg:hidden"
                       >
-                        <FiX size={20} />
+                        <FiX size={18} />
                       </button>
                     </div>
 
