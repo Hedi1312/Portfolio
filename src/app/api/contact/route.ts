@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { render } from '@react-email/components';
-import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
-import { randomUUID } from 'crypto';
 
 import { AdminNotification } from '@/emails/AdminNotification';
 import { UserConfirmation } from '@/emails/UserConfirmation';
@@ -36,36 +33,34 @@ export async function POST(req: Request) {
     // Gérer les pièces jointes (multiple)
     const files = formData.getAll('files') as File[];
     const emailAttachments = [];
-    const dbAttachments: { filename: string; path: string }[] = [];
+    const dbAttachments: { filename: string; path: string; public_id?: string }[] = [];
 
     if (files.length > 0) {
-      const uploadsDir = path.join(process.cwd(), 'storage', 'messages');
-      await mkdir(uploadsDir, { recursive: true });
+      const { uploadToCloudinary } = await import('@/lib/cloudinary');
 
       for (const file of files) {
         if (file && file.size > 0) {
-          if (file.size > 5 * 1024 * 1024) {
+          if (file.size > 10 * 1024 * 1024) {
             return NextResponse.json(
-              { error: `Le fichier "${file.name}" dépasse la limite de 5 Mo.` },
+              { error: `Le fichier "${file.name}" dépasse la limite de 10 Mo.` },
               { status: 400 },
             );
           }
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
-          const ext = path.extname(file.name);
-          const uniqueName = `${randomUUID()}${ext}`;
-          const filePath = path.join(uploadsDir, uniqueName);
 
-          await writeFile(filePath, buffer);
+          // Upload vers Cloudinary
+          const uploaded = await uploadToCloudinary(buffer, file.name);
 
           emailAttachments.push({
             filename: file.name,
-            content: buffer,
+            content: buffer, // Garder le buffer pour l'email nodemailer
           });
 
           dbAttachments.push({
             filename: file.name,
-            path: `/api/messages/${uniqueName}`,
+            path: uploaded.url,
+            public_id: uploaded.public_id,
           });
         }
       }

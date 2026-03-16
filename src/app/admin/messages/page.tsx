@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Button } from '@/components/ui/Button';
 import {
   FiArrowLeft,
   FiMail,
@@ -61,7 +62,7 @@ export default function MessagesPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const { toast, showToast, hideToast } = useToast();
 
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 Mo
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 Mo
   const MAX_FILES = 3;
 
   const fetchContacts = useCallback(async () => {
@@ -104,11 +105,20 @@ export default function MessagesPage() {
   };
 
   const deleteContact = async (id: string) => {
-    await fetch(`/api/admin/messages/${id}`, { method: 'DELETE' });
-    setContacts((prev) => prev.filter((c) => c.id !== id));
-    if (selected?.id === id) setSelected(null);
-    setDeleteTarget(null);
-    window.dispatchEvent(new Event('unread-updated'));
+    try {
+      const res = await fetch(`/api/admin/messages/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setContacts((prev) => prev.filter((c) => c.id !== id));
+        if (selected?.id === id) setSelected(null);
+        setDeleteTarget(null);
+        window.dispatchEvent(new Event('unread-updated'));
+        showToast('success', 'Conversation supprimée avec succès.');
+      } else {
+        showToast('error', 'Erreur lors de la suppression.');
+      }
+    } catch {
+      showToast('error', 'Erreur réseau lors de la suppression.');
+    }
   };
 
   const sendReply = async () => {
@@ -482,7 +492,7 @@ export default function MessagesPage() {
                                   const tooBig = filesArray.filter((f) => f.size > MAX_FILE_SIZE);
                                   if (tooBig.length > 0) {
                                     setReplyFileError(
-                                      `Max 5 Mo : ${tooBig.map((f) => f.name).join(', ')}`,
+                                      `Max 10 Mo : ${tooBig.map((f) => f.name).join(', ')}`,
                                     );
                                     setReplyFiles([]);
                                     e.target.value = '';
@@ -526,14 +536,15 @@ export default function MessagesPage() {
                           )}
                         </div>
 
-                        <button
+                        <Button
                           onClick={sendReply}
                           disabled={!replyText.trim() || sending}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-400 text-white rounded-xl font-semibold text-sm transition-colors disabled:opacity-50 cursor-pointer"
+                          isLoading={sending}
+                          loadingText="Envoi..."
                         >
                           <FiSend size={16} />
-                          {sending ? 'Envoi...' : 'Envoyer'}
-                        </button>
+                          Envoyer
+                        </Button>
                       </div>
                     </div>
                   </motion.div>

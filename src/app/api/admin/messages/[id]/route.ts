@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { unlink } from 'fs/promises';
-import path from 'path';
+import { deleteFromCloudinary } from '@/lib/cloudinary';
 
 // PATCH → Marquer tous les messages d'un contact comme lus
 export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -34,41 +33,42 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     });
 
     if (contact) {
-      // Collecter tous les chemins de fichiers à supprimer
-      const filesToDelete: string[] = [];
+      // Collecter tous les public_id Cloudinary à supprimer
+      const publicIdsToDelete: string[] = [];
 
-      contact.messages.forEach((msg) => {
-        // Obtenir pièces jointes du message de base
-        if (msg.attachments && typeof msg.attachments === 'object') {
-          const baseAttachments = msg.attachments as { path?: string }[];
-          if (Array.isArray(baseAttachments)) {
-            baseAttachments.forEach((a) => {
-              if (a.path && typeof a.path === 'string' && a.path.startsWith('/api/messages/')) {
-                filesToDelete.push(a.path.replace('/api/messages/', ''));
-              }
-            });
-          }
-        }
-
-        // Obtenir pièces jointes des réponses admin
-        msg.replies.forEach((rep) => {
-          if (rep.attachments && typeof rep.attachments === 'object') {
-            const replyAttachments = rep.attachments as { path?: string }[];
-            if (Array.isArray(replyAttachments)) {
-              replyAttachments.forEach((a) => {
-                if (a.path && typeof a.path === 'string' && a.path.startsWith('/api/messages/')) {
-                  filesToDelete.push(a.path.replace('/api/messages/', ''));
+      contact.messages.forEach(
+        (msg: { attachments: unknown; replies: { attachments: unknown }[] }) => {
+          // Obtenir pièces jointes du message de base
+          if (msg.attachments && typeof msg.attachments === 'object') {
+            const baseAttachments = msg.attachments as { public_id?: string }[];
+            if (Array.isArray(baseAttachments)) {
+              baseAttachments.forEach((a) => {
+                if (a.public_id && typeof a.public_id === 'string') {
+                  publicIdsToDelete.push(a.public_id);
                 }
               });
             }
           }
-        });
-      });
 
-      // Supprimer physiquement les fichiers du disque
-      const uploadsDir = path.join(process.cwd(), 'storage', 'messages');
+          // Obtenir pièces jointes des réponses admin
+          msg.replies.forEach((rep: { attachments: unknown }) => {
+            if (rep.attachments && typeof rep.attachments === 'object') {
+              const replyAttachments = rep.attachments as { public_id?: string }[];
+              if (Array.isArray(replyAttachments)) {
+                replyAttachments.forEach((a) => {
+                  if (a.public_id && typeof a.public_id === 'string') {
+                    publicIdsToDelete.push(a.public_id);
+                  }
+                });
+              }
+            }
+          });
+        },
+      );
+
+      // Supprimer les fichiers de Cloudinary en parallèle
       await Promise.allSettled(
-        filesToDelete.map((filename) => unlink(path.join(uploadsDir, filename))),
+        publicIdsToDelete.map((public_id) => deleteFromCloudinary(public_id)),
       );
     }
 

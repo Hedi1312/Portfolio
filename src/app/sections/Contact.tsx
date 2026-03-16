@@ -3,6 +3,7 @@ import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { FiMail, FiX, FiSend, FiCheckCircle, FiPaperclip } from 'react-icons/fi';
+import { Button } from '@/components/ui/Button';
 
 export default function Contact() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +11,7 @@ export default function Contact() {
   const [honeypot, setHoneypot] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileError, setFileError] = useState('');
 
   useLockBodyScroll(isOpen);
@@ -28,7 +30,7 @@ export default function Contact() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 Mo
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 Mo
   const MAX_FILES = 3;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,7 +46,7 @@ export default function Contact() {
       const tooBig = filesArray.filter((f) => f.size > MAX_FILE_SIZE);
       if (tooBig.length > 0) {
         setFileError(
-          `Fichier(s) trop volumineux (max 5 Mo) : ${tooBig.map((f) => f.name).join(', ')}`,
+          `Fichier(s) trop volumineux (max 10 Mo) : ${tooBig.map((f) => f.name).join(', ')}`,
         );
         setFiles([]);
         e.target.value = '';
@@ -57,6 +59,7 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     const formData = new FormData();
     formData.append('name', form.name);
@@ -66,20 +69,24 @@ export default function Contact() {
 
     files.forEach((f) => formData.append('files', f));
 
-    const res = await fetch('/api/contact', {
-      method: 'POST',
-      body: formData,
-    });
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        body: formData,
+      });
 
-    if (res.ok) {
-      setSubmitted(true);
-      setForm({ name: '', email: '', message: '' });
-      setHoneypot('');
-      setFiles([]);
-      setTimeout(() => setIsOpen(false), 2500);
-    } else {
-      const data = await res.json();
-      alert(data.error || "Erreur lors de l'envoi du message.");
+      if (res.ok) {
+        setSubmitted(true);
+        setForm({ name: '', email: '', message: '' });
+        setHoneypot('');
+        setFiles([]);
+        setTimeout(() => setIsOpen(false), 2500);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Erreur lors de l'envoi du message.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -240,7 +247,7 @@ export default function Contact() {
                       />
                     </label>
                     {fileError && <p className="text-xs text-danger-500 mt-1.5">{fileError}</p>}
-                    <p className="text-xs text-neutral-400 mt-4">Max 3 fichiers, 5 Mo chacun</p>
+                    <p className="text-xs text-neutral-400 mt-4">Max 3 fichiers, 10 Mo chacun</p>
                     {files.length > 0 && (
                       <div className="flex items-center gap-1.5 flex-wrap mt-2">
                         {files.map((f, i) => (
@@ -272,15 +279,16 @@ export default function Contact() {
                     )}
                   </div>
 
-                  <motion.button
+                  <Button
                     type="submit"
-                    className="btn-glow w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-white py-3.5 rounded-xl font-semibold transition-colors cursor-pointer mt-6"
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
+                    isLoading={isSubmitting}
+                    loadingText="Envoi en cours..."
+                    fullWidth
+                    className="mt-6"
                   >
                     <FiSend size={16} />
                     Envoyer
-                  </motion.button>
+                  </Button>
                 </form>
               ) : (
                 <motion.div
