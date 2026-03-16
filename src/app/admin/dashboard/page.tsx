@@ -4,7 +4,7 @@ import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Ticket, Mail, FolderKanban } from 'lucide-react';
+import { LogOut, Ticket, Mail, FolderKanban, BarChart3 } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -40,6 +40,12 @@ export default function DashboardPage() {
       description: 'Ajoute, modifie ou supprime les projets affichés sur mon portfolio.',
       icon: <FolderKanban className="h-8 w-8 text-brand-500" />,
       onClick: () => router.push('/admin/projects'),
+    },
+    {
+      title: 'Statistiques',
+      description: 'Consulte les statistiques de visite et les événements trackés.',
+      icon: <BarChart3 className="h-8 w-8 text-brand-500" />,
+      onClick: () => router.push('/admin/analytics'),
     },
   ];
 

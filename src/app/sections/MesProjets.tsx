@@ -174,6 +174,8 @@ export default function MesProjets() {
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
                       className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 hover:text-foreground transition-colors"
+                      data-umami-event="click-project-github"
+                      data-umami-event-project={projet.title}
                     >
                       <FiGithub size={16} />
                       Code
@@ -186,6 +188,8 @@ export default function MesProjets() {
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
                       className="flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-100 transition-colors"
+                      data-umami-event="click-project-live"
+                      data-umami-event-project={projet.title}
                     >
                       <FiExternalLink size={16} />
                       Voir en ligne
@@ -197,6 +201,8 @@ export default function MesProjets() {
                       setSelectedProject(projet);
                     }}
                     className="ml-auto flex items-center gap-1.5 text-sm font-medium transition-opacity text-brand-500 hover:text-brand-100 cursor-pointer"
+                    data-umami-event="click-project-details"
+                    data-umami-event-project={projet.title}
                   >
                     <FiInfo size={16} />
                     Détails
