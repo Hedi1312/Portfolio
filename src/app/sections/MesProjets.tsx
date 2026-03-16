@@ -77,10 +77,7 @@ export default function MesProjets() {
     >
       <AnimatePresence>
         {selectedProject && (
-          <ProjectModal 
-            project={selectedProject} 
-            onClose={() => setSelectedProject(null)} 
-          />
+          <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
         )}
       </AnimatePresence>
 
@@ -115,10 +112,16 @@ export default function MesProjets() {
               onClick={() => setSelectedProject(projet)}
             >
               {/* Preview area */}
-              <div className={`h-40 relative overflow-hidden ${(!projet.images || projet.images.length === 0) ? `bg-gradient-to-br ${projet.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}>
+              <div
+                className={`h-40 relative overflow-hidden ${!projet.images || projet.images.length === 0 ? `bg-gradient-to-br ${projet.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
+              >
                 {projet.images && projet.images.length > 0 && (
                   <>
-                    <img src={projet.images[0].url} alt={projet.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
+                    <img
+                      src={projet.images[0].url}
+                      alt={projet.title}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
+                    />
                   </>
                 )}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.4)_0%,transparent_60%)] dark:bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1)_0%,transparent_60%)] z-10" />
@@ -150,7 +153,9 @@ export default function MesProjets() {
                           {Icon && (
                             <Icon
                               size={12}
-                              style={{ color: isDark ? match.color : (match.colorLight || match.color) }}
+                              style={{
+                                color: isDark ? match.color : match.colorLight || match.color,
+                              }}
                             />
                           )}
                           {skill.name}
@@ -186,12 +191,15 @@ export default function MesProjets() {
                       Voir en ligne
                     </a>
                   )}
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setSelectedProject(projet) }}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedProject(projet);
+                    }}
                     className="ml-auto flex items-center gap-1.5 text-sm font-medium transition-opacity text-brand-500 hover:text-brand-100 cursor-pointer"
                   >
-                     <FiInfo size={16} />
-                     Détails
+                    <FiInfo size={16} />
+                    Détails
                   </button>
                 </div>
               </div>

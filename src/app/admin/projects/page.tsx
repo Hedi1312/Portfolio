@@ -183,7 +183,10 @@ function SortableProjectItem({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 shrink-0" onPointerDown={(e) => e.stopPropagation()}>
+        <div
+          className="flex items-center gap-1 shrink-0"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           <button
             onClick={() => moveProject(project.id, 'up')}
             disabled={idx === 0}
@@ -257,13 +260,17 @@ function SortableImageItem({
         isDragging ? 'shadow-lg ring-2 ring-brand-500/50' : ''
       }`}
     >
-      <div 
+      <div
         className="absolute inset-0 cursor-grab active:cursor-grabbing z-0"
         {...attributes}
         {...listeners}
       />
-      <img src={img.url} alt="Project image" className="w-full h-full object-cover pointer-events-none" />
-      
+      <img
+        src={img.url}
+        alt="Project image"
+        className="w-full h-full object-cover pointer-events-none"
+      />
+
       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 pointer-events-none">
         <div className="flex gap-2 relative z-10 pointer-events-auto">
           <button
@@ -328,7 +335,7 @@ export default function AdminProjectsPage() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [existingImages, setExistingImages] = useState<ProjectImage[]>([]);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  
+
   const { toast, showToast, hideToast } = useToast();
   const isDark = useIsDark();
 
@@ -356,7 +363,7 @@ export default function AdminProjectsPage() {
     if (search.length > 0) {
       // Filtrer les clés qui matchent
       const matchingKeys = Object.keys(SKILL_ICONS).filter((k) => k.includes(search));
-      
+
       // Dédoublonner par `label` pour ne pas avoir "next.js" et "nextjs"
       const uniqueLabels = new Set<string>();
       const deduplicatedKeys = matchingKeys.filter((k) => {
@@ -438,7 +445,7 @@ export default function AdminProjectsPage() {
       showToast('error', 'Veuillez corriger les erreurs du formulaire.');
       return;
     }
-    
+
     setFormErrors({});
     setSaving(true);
     try {
@@ -452,7 +459,10 @@ export default function AdminProjectsPage() {
       });
 
       if (res.ok) {
-        showToast('success', editingId ? `Projet "${form.title}" modifié !` : `Projet "${form.title}" créé !`);
+        showToast(
+          'success',
+          editingId ? `Projet "${form.title}" modifié !` : `Projet "${form.title}" créé !`,
+        );
         setFormOpen(false);
         setForm(defaultForm);
         setEditingId(null);
@@ -515,7 +525,7 @@ export default function AdminProjectsPage() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -543,7 +553,7 @@ export default function AdminProjectsPage() {
       try {
         await Promise.all(updates);
       } catch {
-        showToast('error', 'Erreur lors de la sauvegarde de l\'ordre.');
+        showToast('error', "Erreur lors de la sauvegarde de l'ordre.");
         fetchProjects(); // revert on error
       }
     }
@@ -577,7 +587,7 @@ export default function AdminProjectsPage() {
         await Promise.all(updates);
         fetchProjects(); // update global state
       } catch {
-        showToast('error', 'Erreur lors de la sauvegarde de l\'ordre des images.');
+        showToast('error', "Erreur lors de la sauvegarde de l'ordre des images.");
       }
     }
   };
@@ -642,7 +652,11 @@ export default function AdminProjectsPage() {
   const moveImage = async (id: string, direction: 'up' | 'down') => {
     if (!editingId) return;
     const idx = existingImages.findIndex((img) => img.id === id);
-    if ((direction === 'up' && idx === 0) || (direction === 'down' && idx === existingImages.length - 1)) return;
+    if (
+      (direction === 'up' && idx === 0) ||
+      (direction === 'down' && idx === existingImages.length - 1)
+    )
+      return;
 
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
     const newImages = [...existingImages];
@@ -667,12 +681,12 @@ export default function AdminProjectsPage() {
         body: JSON.stringify({ order: a.order }),
       }),
     ]);
-    
+
     // We update local orders specifically to match DB expectations in future moves
-    setExistingImages(prev => {
+    setExistingImages((prev) => {
       const updated = [...prev];
-      const newA = updated.find(img => img.id === a.id);
-      const newB = updated.find(img => img.id === b.id);
+      const newA = updated.find((img) => img.id === a.id);
+      const newB = updated.find((img) => img.id === b.id);
       if (newA && newB) {
         newA.order = b.order;
         newB.order = a.order;
@@ -725,7 +739,11 @@ export default function AdminProjectsPage() {
             </Button>
           </div>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
             <div className="space-y-4">
               <SortableContext items={projects} strategy={verticalListSortingStrategy}>
                 {projects.map((project, idx) => (
@@ -786,7 +804,9 @@ export default function AdminProjectsPage() {
                     className={`${inputClasses} ${formErrors.title ? 'border-danger-500 focus:border-danger-500 focus:ring-danger-500' : ''}`}
                     placeholder="Mon super projet"
                   />
-                  {formErrors.title && <p className="text-danger-500 text-xs mt-1">{formErrors.title}</p>}
+                  {formErrors.title && (
+                    <p className="text-danger-500 text-xs mt-1">{formErrors.title}</p>
+                  )}
                 </div>
 
                 {/* Description */}
@@ -799,7 +819,9 @@ export default function AdminProjectsPage() {
                     rows={3}
                     placeholder="Description du projet..."
                   />
-                  {formErrors.description && <p className="text-danger-500 text-xs mt-1">{formErrors.description}</p>}
+                  {formErrors.description && (
+                    <p className="text-danger-500 text-xs mt-1">{formErrors.description}</p>
+                  )}
                 </div>
 
                 {/* Gradient */}
@@ -833,7 +855,9 @@ export default function AdminProjectsPage() {
                       className={`${inputClasses} ${formErrors.link ? 'border-danger-500 focus:border-danger-500 focus:ring-danger-500' : ''}`}
                       placeholder="https://..."
                     />
-                    {formErrors.link && <p className="text-danger-500 text-xs mt-1">{formErrors.link}</p>}
+                    {formErrors.link && (
+                      <p className="text-danger-500 text-xs mt-1">{formErrors.link}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Lien GitHub</label>
@@ -844,13 +868,17 @@ export default function AdminProjectsPage() {
                       className={`${inputClasses} ${formErrors.github ? 'border-danger-500 focus:border-danger-500 focus:ring-danger-500' : ''}`}
                       placeholder="https://github.com/..."
                     />
-                    {formErrors.github && <p className="text-danger-500 text-xs mt-1">{formErrors.github}</p>}
+                    {formErrors.github && (
+                      <p className="text-danger-500 text-xs mt-1">{formErrors.github}</p>
+                    )}
                   </div>
                 </div>
 
                 {/* Compétences */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">Compétences / Technologies</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Compétences / Technologies
+                  </label>
                   <div className="relative">
                     <input
                       type="text"
@@ -898,7 +926,9 @@ export default function AdminProjectsPage() {
                               {Icon && (
                                 <Icon
                                   size={18}
-                                  style={{ color: isDark ? entry.color : (entry.colorLight || entry.color) }}
+                                  style={{
+                                    color: isDark ? entry.color : entry.colorLight || entry.color,
+                                  }}
                                 />
                               )}
                               <span className="text-sm font-medium">{entry?.label || s}</span>
@@ -926,7 +956,9 @@ export default function AdminProjectsPage() {
                             {Icon && (
                               <Icon
                                 size={14}
-                                style={{ color: isDark ? match.color : (match.colorLight || match.color) }}
+                                style={{
+                                  color: isDark ? match.color : match.colorLight || match.color,
+                                }}
                               />
                             )}
                             {skill.name}
@@ -964,12 +996,18 @@ export default function AdminProjectsPage() {
                 <div className="pt-4 mt-2 border-t border-neutral-200 dark:border-neutral-700">
                   <h3 className="text-sm font-bold mb-3">Galerie d&apos;images</h3>
                   {!editingId ? (
-                    <p className="text-sm text-neutral-500 italic">Veuillez d&apos;abord créer et sauvegarder le projet pour ajouter des images.</p>
+                    <p className="text-sm text-neutral-500 italic">
+                      Veuillez d&apos;abord créer et sauvegarder le projet pour ajouter des images.
+                    </p>
                   ) : (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
                         <label className="relative cursor-pointer bg-brand-500 hover:bg-brand-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                          {isUploadingImage ? <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div> : <FiPlus size={18} />}
+                          {isUploadingImage ? (
+                            <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                          ) : (
+                            <FiPlus size={18} />
+                          )}
                           <span>Ajouter des images (max 10MB)</span>
                           <input
                             type="file"
@@ -983,7 +1021,11 @@ export default function AdminProjectsPage() {
                       </div>
 
                       {existingImages.length > 0 && (
-                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleImageDragEnd}>
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleImageDragEnd}
+                        >
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             <SortableContext items={existingImages} strategy={rectSortingStrategy}>
                               {existingImages.map((img, idx) => (
@@ -992,9 +1034,18 @@ export default function AdminProjectsPage() {
                                   img={img}
                                   idx={idx}
                                   total={existingImages.length}
-                                  onMoveUp={(e) => { e.stopPropagation(); moveImage(img.id, 'up'); }}
-                                  onMoveDown={(e) => { e.stopPropagation(); moveImage(img.id, 'down'); }}
-                                  onDelete={(e) => { e.stopPropagation(); handleDeleteImage(img.id); }}
+                                  onMoveUp={(e) => {
+                                    e.stopPropagation();
+                                    moveImage(img.id, 'up');
+                                  }}
+                                  onMoveDown={(e) => {
+                                    e.stopPropagation();
+                                    moveImage(img.id, 'down');
+                                  }}
+                                  onDelete={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteImage(img.id);
+                                  }}
                                 />
                               ))}
                             </SortableContext>

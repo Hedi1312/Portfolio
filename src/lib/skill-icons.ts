@@ -46,7 +46,6 @@ import {
   SiResend,
 } from 'react-icons/si';
 
-
 export interface SkillIconEntry {
   icon: IconType;
   color: string; // Couleur en mode sombre

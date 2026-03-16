@@ -137,7 +137,10 @@ export default function APropos() {
                   variants={itemVariants}
                   whileHover={{ scale: 1.05, y: -2 }}
                 >
-                  <Icon size={18} style={{ color: isDark ? tech.color : (tech.colorLight || tech.color) }} />
+                  <Icon
+                    size={18}
+                    style={{ color: isDark ? tech.color : tech.colorLight || tech.color }}
+                  />
                   <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
                     {tech.name}
                   </span>

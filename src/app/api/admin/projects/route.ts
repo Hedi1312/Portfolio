@@ -5,9 +5,9 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     const projects = await prisma.project.findMany({
-      include: { 
+      include: {
         skills: true,
-        images: { orderBy: { order: 'asc' } }
+        images: { orderBy: { order: 'asc' } },
       },
       orderBy: { order: 'asc' },
     });

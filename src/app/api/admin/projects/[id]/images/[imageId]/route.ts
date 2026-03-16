@@ -4,7 +4,7 @@ import { deleteFromCloudinary } from '@/lib/cloudinary';
 
 export async function DELETE(
   _req: Request,
-  { params }: { params: Promise<{ id: string; imageId: string }> }
+  { params }: { params: Promise<{ id: string; imageId: string }> },
 ) {
   try {
     const { id, imageId } = await params;
@@ -34,7 +34,7 @@ export async function DELETE(
 
 export async function PUT(
   req: Request,
-  { params }: { params: Promise<{ id: string; imageId: string }> }
+  { params }: { params: Promise<{ id: string; imageId: string }> },
 ) {
   try {
     const { id, imageId } = await params;

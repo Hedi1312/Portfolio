@@ -143,7 +143,7 @@ export default function Navbar() {
               <span className="absolute inset-0 rounded-xl bg-brand-400/0 group-hover:bg-brand-400/10 transition-colors duration-300" />
             </Link>
           )}
-          
+
           {status === 'authenticated' && (
             <Link
               href="/admin/dashboard"
@@ -157,7 +157,6 @@ export default function Navbar() {
               <span className="absolute inset-0 rounded-xl bg-danger-500/0 group-hover:bg-danger-500/10 transition-colors duration-300" />
             </Link>
           )}
-
 
           <div className="ml-2 pl-3 border-l border-neutral-300/30 dark:border-neutral-600/30">
             <ThemeToggle />

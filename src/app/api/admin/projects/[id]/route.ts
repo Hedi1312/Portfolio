@@ -45,7 +45,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    
+
     // Récupérer le projet avec ses images pour nettoyer Cloudinary
     const project = await prisma.project.findUnique({
       where: { id },
@@ -54,7 +54,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
     if (project && project.images.length > 0) {
       await Promise.all(
-        project.images.map((img: { public_id: string }) => deleteFromCloudinary(img.public_id))
+        project.images.map((img: { public_id: string }) => deleteFromCloudinary(img.public_id)),
       );
     }
 

@@ -5,7 +5,7 @@ import { uploadToCloudinary } from '@/lib/cloudinary';
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    
+
     // Vérifier l'existence du projet
     const project = await prisma.project.findUnique({ where: { id } });
     if (!project) return NextResponse.json({ error: 'Projet introuvable' }, { status: 404 });
@@ -22,13 +22,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // Déterminer l'ordre (le max actuel + 1)
     const maxOrderRes = await prisma.projectImage.aggregate({
       where: { projectId: id },
-      _max: { order: true }
+      _max: { order: true },
     });
     let nextOrder = (maxOrderRes._max.order ?? -1) + 1;
 
     for (const file of files) {
       if (file.size > 10 * 1024 * 1024) {
-        return NextResponse.json({ error: `Fichier ${file.name} trop volumineux (max 10Mo).` }, { status: 400 });
+        return NextResponse.json(
+          { error: `Fichier ${file.name} trop volumineux (max 10Mo).` },
+          { status: 400 },
+        );
       }
 
       const bytes = await file.arrayBuffer();
@@ -42,9 +45,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           public_id: uploaded.public_id,
           order: nextOrder++,
           projectId: id,
-        }
+        },
       });
-      
+
       uploadedImages.push(projectImage);
     }
 
