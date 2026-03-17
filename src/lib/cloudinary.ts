@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import path from 'path';
 
 // Configuration automatique depuis process.env.CLOUDINARY_URL
 // Assure-toi que la variable CLOUDINARY_URL est bien présente dans le .env
@@ -18,15 +19,16 @@ export async function uploadToCloudinary(
     const folder = subfolder ? `${baseFolder}/${subfolder}` : baseFolder;
 
     // Pour que Cloudinary gère bien le format (pdf, images, etc)
-    const resource_type = filename.toLowerCase().endsWith('.pdf') ? 'image' : 'auto';
+    const isPdf = filename.toLowerCase().endsWith('.pdf');
+    const resource_type = isPdf ? 'image' : 'auto';
 
     cloudinary.uploader
       .upload_stream(
         {
           folder,
           resource_type: resource_type,
-          // On peut forcer un nom de fichier si besoin, mais cloudinary gère bien le random par défaut
-          // Si tu veux garder le format "randomUUID.pdf", tu peux passer le nom ici.
+          // Si c'est un PDF, on force l'extension pour éviter les soucis avec certains viewers
+          public_id: isPdf ? path.parse(filename).name : undefined,
         },
         (error, result) => {
           if (error) {
