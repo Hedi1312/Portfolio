@@ -18,7 +18,7 @@
     "pull:env": "node scripts/pull-env.mjs",
     "up": "docker compose up -d",
     "up:build": "docker compose up --build -d",
-    "clean": "docker compose down -v && docker compose up --build -d",
+    "clean": "docker compose down -v && docker compose up --build -d && npm run db:init",
     "down": "docker compose down",
     "logs": "docker compose logs -f app",
     "start": "next start",
