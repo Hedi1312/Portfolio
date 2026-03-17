@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { FiExternalLink, FiGithub, FiInfo } from 'react-icons/fi';
 import { SKILL_ICONS } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
@@ -104,25 +105,31 @@ export default function MesProjets() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
         >
-          {projets.map((projet) => (
+          {projets.map((projet, index) => (
             <motion.div
               key={projet.id}
               className="glass-card flex flex-col h-full overflow-hidden group cursor-pointer hover:shadow-brand-500/10 transition-shadow"
               variants={cardVariants}
-              onClick={() => setSelectedProject(projet)}
+              onClick={() => {
+                setSelectedProject(projet);
+                if (typeof window !== 'undefined' && window.umami) {
+                  window.umami.track(`Projet Détails: ${projet.title}`);
+                }
+              }}
             >
               {/* Preview area */}
               <div
                 className={`h-40 relative overflow-hidden ${!projet.images || projet.images.length === 0 ? `bg-gradient-to-br ${projet.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
               >
                 {projet.images && projet.images.length > 0 && (
-                  <>
-                    <img
-                      src={projet.images[0].url}
-                      alt={projet.title}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
-                    />
-                  </>
+                  <Image
+                    src={projet.images[0].url}
+                    alt={projet.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-all duration-700"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={index < 3}
+                  />
                 )}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.4)_0%,transparent_60%)] dark:bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1)_0%,transparent_60%)] z-10" />
                 {/* Decorative elements */}
@@ -174,8 +181,7 @@ export default function MesProjets() {
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
                       className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 hover:text-foreground transition-colors"
-                      data-umami-event="click-project-github"
-                      data-umami-event-project={projet.title}
+                      data-umami-event={`Projet Code: ${projet.title}`}
                     >
                       <FiGithub size={16} />
                       Code
@@ -188,8 +194,7 @@ export default function MesProjets() {
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
                       className="flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-100 transition-colors"
-                      data-umami-event="click-project-live"
-                      data-umami-event-project={projet.title}
+                      data-umami-event={`Projet Live: ${projet.title}`}
                     >
                       <FiExternalLink size={16} />
                       Voir en ligne
@@ -201,8 +206,7 @@ export default function MesProjets() {
                       setSelectedProject(projet);
                     }}
                     className="ml-auto flex items-center gap-1.5 text-sm font-medium transition-opacity text-brand-500 hover:text-brand-100 cursor-pointer"
-                    data-umami-event="click-project-details"
-                    data-umami-event-project={projet.title}
+                    data-umami-event={`Projet Détails: ${projet.title}`}
                   >
                     <FiInfo size={16} />
                     Détails

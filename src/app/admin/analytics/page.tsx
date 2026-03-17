@@ -105,9 +105,6 @@ const EVENT_LABELS: Record<string, string> = {
   'click-cv-download': 'Télécharger CV',
   'click-contact-open': 'Ouvrir contact',
   'contact-form-submit': 'Envoi formulaire',
-  'click-project-github': 'GitHub projet',
-  'click-project-live': 'Lien projet',
-  'click-project-details': 'Détails projet',
 };
 
 // ─── Formatters ─────────────────────────────────────────
