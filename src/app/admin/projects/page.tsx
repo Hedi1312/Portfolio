@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   FiArrowLeft,
   FiPlus,
@@ -266,9 +267,11 @@ function SortableImageItem({
         {...attributes}
         {...listeners}
       />
-      <img
+      <Image
         src={img.url}
         alt="Project image"
+        width={400}
+        height={225}
         className="w-full h-full object-cover pointer-events-none"
       />
 
