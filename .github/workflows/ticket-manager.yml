@@ -1,0 +1,38 @@
+name: Deplacer Ticket vers Staging
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - staging
+
+jobs:
+  vers-validation:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔍 Récupérer le numéro du ticket lié
+        id: find_issue
+        run: |
+          ISSUE_NUM=$(echo "${{ github.event.pull_request.body }}" | grep -ioE '(fixes|closes|resolves) #[0-9]+' | grep -oE '[0-9]+' | head -1)
+          echo "issue_number=$ISSUE_NUM" >> $GITHUB_OUTPUT
+
+      - name: 🆔 Récupérer le Node ID du ticket
+        id: get_node_id
+        if: steps.find_issue.outputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NODE_ID=$(gh issue view ${{ steps.find_issue.outputs.issue_number }} --repo ${{ github.repository }} --json id --jq '.id')
+          echo "node_id=$NODE_ID" >> $GITHUB_OUTPUT
+
+      - name: 🟡 Déplacer vers "En cours de validation"
+        if: steps.get_node_id.outputs.node_id != ''
+        uses: leonsteinhaeuser/project-beta-automations@v2.2.1
+        with:
+          gh_token: ${{ secrets.PROJECT_PAT }}
+          user: 'Hedi1312'
+          project_id: 4
+          resource_node_id: ${{ steps.get_node_id.outputs.node_id }}
+          status_value: 'En cours de validation'
