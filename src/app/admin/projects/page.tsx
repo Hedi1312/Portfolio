@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -40,6 +40,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { useToast, ToastContainer } from '@/components/ui/Toast';
 import { SKILL_ICONS } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { z } from 'zod';
 
 // ─── Zod Schema ──────────────────────────────────────
@@ -322,6 +323,7 @@ const defaultForm = {
 };
 
 export default function AdminProjectsPage() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
@@ -329,6 +331,7 @@ export default function AdminProjectsPage() {
   const [form, setForm] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
+  const [imageDeleteTarget, setImageDeleteTarget] = useState<ProjectImage | null>(null);
   const [skillInput, setSkillInput] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -338,6 +341,9 @@ export default function AdminProjectsPage() {
 
   const { toast, showToast, hideToast } = useToast();
   const isDark = useIsDark();
+  
+  // Prevent background scrolling when form is open
+  useLockBodyScroll(formOpen);
 
   // ─── Fetch projects ──────────────────────────────
   const fetchProjects = useCallback(async () => {
@@ -631,7 +637,7 @@ export default function AdminProjectsPage() {
     }
   };
 
-  const handleDeleteImage = async (imageId: string) => {
+  const confirmDeleteImage = async (imageId: string) => {
     if (!editingId) return;
     try {
       const res = await fetch(`/api/admin/projects/${editingId}/images/${imageId}`, {
@@ -646,7 +652,13 @@ export default function AdminProjectsPage() {
       }
     } catch {
       showToast('error', 'Erreur réseau.');
+    } finally {
+      setImageDeleteTarget(null);
     }
+  };
+
+  const handleDeleteImage = (img: ProjectImage) => {
+    setImageDeleteTarget(img);
   };
 
   const moveImage = async (id: string, direction: 'up' | 'down') => {
@@ -793,7 +805,13 @@ export default function AdminProjectsPage() {
                 </button>
               </div>
 
-              <div className="space-y-5">
+              <div 
+                className={`space-y-5 transition-all duration-300 ${
+                  (saving || isUploadingImage) 
+                    ? 'opacity-60 saturate-[0.5] pointer-events-none' 
+                    : 'opacity-100 saturate-100'
+                }`}
+              >
                 {/* Titre */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Titre *</label>
@@ -803,6 +821,7 @@ export default function AdminProjectsPage() {
                     onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                     className={`${inputClasses} ${formErrors.title ? 'border-danger-500 focus:border-danger-500 focus:ring-danger-500' : ''}`}
                     placeholder="Mon super projet"
+                    disabled={saving || isUploadingImage}
                   />
                   {formErrors.title && (
                     <p className="text-danger-500 text-xs mt-1">{formErrors.title}</p>
@@ -818,6 +837,7 @@ export default function AdminProjectsPage() {
                     className={`${inputClasses} resize-none ${formErrors.description ? 'border-danger-500 focus:border-danger-500 focus:ring-danger-500' : ''}`}
                     rows={3}
                     placeholder="Description du projet..."
+                    disabled={saving || isUploadingImage}
                   />
                   {formErrors.description && (
                     <p className="text-danger-500 text-xs mt-1">{formErrors.description}</p>
@@ -837,8 +857,9 @@ export default function AdminProjectsPage() {
                           form.gradient === g.value
                             ? 'border-brand-500 ring-2 ring-brand-500/30'
                             : 'border-transparent hover:border-neutral-400'
-                        }`}
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
                         title={g.label}
+                        disabled={saving || isUploadingImage}
                       />
                     ))}
                   </div>
@@ -854,6 +875,7 @@ export default function AdminProjectsPage() {
                       onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))}
                       className={`${inputClasses} ${formErrors.link ? 'border-danger-500 focus:border-danger-500 focus:ring-danger-500' : ''}`}
                       placeholder="https://..."
+                      disabled={saving || isUploadingImage}
                     />
                     {formErrors.link && (
                       <p className="text-danger-500 text-xs mt-1">{formErrors.link}</p>
@@ -867,6 +889,7 @@ export default function AdminProjectsPage() {
                       onChange={(e) => setForm((f) => ({ ...f, github: e.target.value }))}
                       className={`${inputClasses} ${formErrors.github ? 'border-danger-500 focus:border-danger-500 focus:ring-danger-500' : ''}`}
                       placeholder="https://github.com/..."
+                      disabled={saving || isUploadingImage}
                     />
                     {formErrors.github && (
                       <p className="text-danger-500 text-xs mt-1">{formErrors.github}</p>
@@ -905,6 +928,7 @@ export default function AdminProjectsPage() {
                       }}
                       className={inputClasses}
                       placeholder="Tape un nom de techno (React, Docker...)..."
+                      disabled={saving || isUploadingImage}
                     />
                     {/* Autocomplete dropdown */}
                     {suggestions.length > 0 && (
@@ -984,6 +1008,7 @@ export default function AdminProjectsPage() {
                       checked={form.visible}
                       onChange={(e) => setForm((f) => ({ ...f, visible: e.target.checked }))}
                       className="sr-only peer"
+                      disabled={saving || isUploadingImage}
                     />
                     <div className="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-neutral-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
                   </label>
@@ -1002,22 +1027,25 @@ export default function AdminProjectsPage() {
                   ) : (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
-                        <label className="relative cursor-pointer bg-brand-500 hover:bg-brand-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                          {isUploadingImage ? (
-                            <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
-                          ) : (
-                            <FiPlus size={18} />
-                          )}
-                          <span>Ajouter des images (max 10MB)</span>
-                          <input
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            onChange={handleImageUpload}
-                            disabled={isUploadingImage}
-                          />
-                        </label>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="hidden"
+                          ref={fileInputRef}
+                          onChange={handleImageUpload}
+                        />
+                        <Button
+                          variant="primary"
+                          className="w-full"
+                          isLoading={isUploadingImage}
+                          loadingText="Chargement..."
+                          disabled={saving}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <FiPlus size={18} />
+                          Ajouter des images (max 10MB)
+                        </Button>
                       </div>
 
                       {existingImages.length > 0 && (
@@ -1035,16 +1063,19 @@ export default function AdminProjectsPage() {
                                   idx={idx}
                                   total={existingImages.length}
                                   onMoveUp={(e) => {
+                                    if (saving || isUploadingImage) return;
                                     e.stopPropagation();
                                     moveImage(img.id, 'up');
                                   }}
                                   onMoveDown={(e) => {
+                                    if (saving || isUploadingImage) return;
                                     e.stopPropagation();
                                     moveImage(img.id, 'down');
                                   }}
                                   onDelete={(e) => {
+                                    if (saving || isUploadingImage) return;
                                     e.stopPropagation();
-                                    handleDeleteImage(img.id);
+                                    handleDeleteImage(img);
                                   }}
                                 />
                               ))}
@@ -1061,6 +1092,7 @@ export default function AdminProjectsPage() {
                   onClick={handleSave}
                   isLoading={saving}
                   loadingText={editingId ? 'Modification...' : 'Création...'}
+                  disabled={isUploadingImage}
                   fullWidth
                   className="mt-4"
                 >
@@ -1079,6 +1111,14 @@ export default function AdminProjectsPage() {
         message={`Le projet "${deleteTarget?.title}" sera supprimé définitivement.`}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
+      />
+
+      <ConfirmModal
+        isOpen={!!imageDeleteTarget}
+        title="Supprimer l'image"
+        message="Cette image sera supprimée définitivement du projet."
+        onConfirm={() => imageDeleteTarget && confirmDeleteImage(imageDeleteTarget.id)}
+        onCancel={() => setImageDeleteTarget(null)}
       />
 
       <ToastContainer toast={toast} onClose={hideToast} />

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { FiX, FiGithub, FiExternalLink, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { SKILL_ICONS } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
@@ -71,20 +72,26 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
           >
             {images.length > 0 ? (
               <AnimatePresence mode="popLayout">
-                <motion.img
+                <motion.div
                   key={currentImageIndex}
-                  src={images[currentImageIndex].url}
-                  alt={`${project.title} - screen ${currentImageIndex + 1}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="absolute inset-0 w-full h-full object-contain cursor-zoom-in"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsFullScreen(true);
-                  }}
-                />
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={images[currentImageIndex].url}
+                    alt={`${project.title} - screen ${currentImageIndex + 1}`}
+                    fill
+                    className="object-contain cursor-zoom-in"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsFullScreen(true);
+                    }}
+                    sizes="(max-width: 768px) 100vw, 65vw"
+                  />
+                </motion.div>
               </AnimatePresence>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -165,6 +172,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-1.5 sm:gap-2 flex-1 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white hover:bg-neutral-200 dark:hover:bg-neutral-700 font-medium transition-colors cursor-pointer min-w-0"
+                  data-umami-event={`Projet Code: ${project.title}`}
                 >
                   <FiGithub size={16} className="shrink-0 sm:w-[18px] sm:h-[18px]" />
                   <span className="text-xs sm:text-sm truncate">Code source</span>
@@ -176,6 +184,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-1.5 sm:gap-2 flex-1 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-medium shadow-lg hover:shadow-brand-500/25 transition-all cursor-pointer min-w-0"
+                  data-umami-event={`Projet Live: ${project.title}`}
                 >
                   <FiExternalLink size={16} className="shrink-0 sm:w-[18px] sm:h-[18px]" />
                   <span className="text-xs sm:text-sm truncate">Voir en ligne</span>
@@ -203,10 +212,13 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
               <FiX size={18} />
             </button>
 
-            <img
+            <Image
               src={images[currentImageIndex].url}
               alt={`${project.title} - fullscreen`}
-              className="w-full h-full object-contain"
+              fill
+              className="object-contain"
+              sizes="100vw"
+              priority
             />
 
             {images.length > 1 && (
