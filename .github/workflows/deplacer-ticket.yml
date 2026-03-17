@@ -27,8 +27,8 @@ jobs:
         uses: leonsteinhaeuser/project-beta-automations@v2.2.1
         with:
           gh_token: ${{ secrets.PROJECT_PAT }}
-          user: TON_PSEUDO # Remplace par ton pseudo GitHub (ou "organization: ton-orga" si c'est une org)
-          project_id: 1 # Remplace par le numéro de ton projet (regarde l'URL de ton tableau)
+          user: "Hedi1312"
+          project_id: 4
           resource_node_id: ${{ steps.find_issue.outputs.issue_number }}
           status_value: 'En attente de validation' # Le nom EXACT de ta colonne
 
