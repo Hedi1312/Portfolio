@@ -56,7 +56,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             data-host-url="/stats"
           />
         )}
-        
       </head>
       <body className="bg-background text-foreground transition-colors duration-300">
         <AppSessionProvider>

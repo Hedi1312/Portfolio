@@ -341,7 +341,7 @@ export default function AdminProjectsPage() {
 
   const { toast, showToast, hideToast } = useToast();
   const isDark = useIsDark();
-  
+
   // Prevent background scrolling when form is open
   useLockBodyScroll(formOpen);
 
@@ -805,10 +805,10 @@ export default function AdminProjectsPage() {
                 </button>
               </div>
 
-              <div 
+              <div
                 className={`space-y-5 transition-all duration-300 ${
-                  (saving || isUploadingImage) 
-                    ? 'opacity-60 saturate-[0.5] pointer-events-none' 
+                  saving || isUploadingImage
+                    ? 'opacity-60 saturate-[0.5] pointer-events-none'
                     : 'opacity-100 saturate-100'
                 }`}
               >

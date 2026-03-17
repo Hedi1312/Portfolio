@@ -26,9 +26,7 @@ import {
   FaWindows,
   FaLinux,
 } from 'react-icons/fa';
-import {
-  SiVercel,
-} from 'react-icons/si';
+import { SiVercel } from 'react-icons/si';
 import {
   Area,
   AreaChart,
@@ -144,41 +142,42 @@ function getCountryName(code: string) {
 }
 
 const BROWSER_MAP: Record<string, { label: string; icon: any; color: string; logoUrl?: string }> = {
-  chrome: { 
-    label: 'Chrome', 
-    icon: FaChrome, 
+  chrome: {
+    label: 'Chrome',
+    icon: FaChrome,
     color: '#4285F4',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome.svg'
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome.svg',
   },
-  firefox: { 
-    label: 'Firefox', 
-    icon: FaFirefox, 
+  firefox: {
+    label: 'Firefox',
+    icon: FaFirefox,
     color: '#FF7139',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox.svg'
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox.svg',
   },
-  safari: { 
-    label: 'Safari', 
-    icon: FaSafari, 
+  safari: {
+    label: 'Safari',
+    icon: FaSafari,
     color: '#00AEFF',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari.svg'
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari.svg',
   },
-  edge: { 
-    label: 'Edge', 
-    icon: FaEdge, 
+  edge: {
+    label: 'Edge',
+    icon: FaEdge,
     color: '#0078D7',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge.svg'
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge.svg',
   },
-  opera: { 
-    label: 'Opera', 
-    icon: FaOpera, 
+  opera: {
+    label: 'Opera',
+    icon: FaOpera,
     color: '#FF1B2D',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera.svg'
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera.svg',
   },
-  ie: { 
-    label: 'Internet Explorer', 
-    icon: FaEdge, 
+  ie: {
+    label: 'Internet Explorer',
+    icon: FaEdge,
     color: '#0078D7',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/archive/internet-explorer_9-11/internet-explorer_9-11.svg'
+    logoUrl:
+      'https://raw.githubusercontent.com/alrra/browser-logos/master/src/archive/internet-explorer_9-11/internet-explorer_9-11.svg',
   },
 };
 
@@ -190,62 +189,78 @@ const DEVICE_MAP: Record<string, { label: string; icon: any; color: string }> = 
 };
 
 const OS_MAP: Record<string, { label: string; icon: any; color: string; logoUrl?: string }> = {
-  ios: { 
-    label: 'iOS', 
-    icon: FaApple, 
+  ios: {
+    label: 'iOS',
+    icon: FaApple,
     color: '#555555',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/apple/apple.svg'
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/apple/apple.svg',
   },
-  android: { 
-    label: 'Android', 
-    icon: FaAndroid, 
+  android: {
+    label: 'Android',
+    icon: FaAndroid,
     color: '#3DDC84',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/android/android.svg'
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/android/android.svg',
   },
-  windows: { 
-    label: 'Windows', 
-    icon: FaWindows, 
+  windows: {
+    label: 'Windows',
+    icon: FaWindows,
     color: '#0078D7',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/refs/heads/master/src/windows/windows.svg'
+    logoUrl:
+      'https://raw.githubusercontent.com/alrra/browser-logos/refs/heads/master/src/windows/windows.svg',
   },
-  macos: { 
-    label: 'macOS', 
-    icon: FaApple, 
+  macos: {
+    label: 'macOS',
+    icon: FaApple,
     color: '#555555',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/apple/apple.svg'
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/apple/apple.svg',
   },
-  linux: { 
-    label: 'Linux', 
-    icon: FaLinux, 
+  linux: {
+    label: 'Linux',
+    icon: FaLinux,
     color: '#FCC624',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/archive/tux/tux.svg'
+    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/archive/tux/tux.svg',
   },
 };
 
-function formatLabel(label: string, map: Record<string, { label: string; icon: any; color: string; logoUrl?: string }>) {
+function formatLabel(
+  label: string,
+  map: Record<string, { label: string; icon: any; color: string; logoUrl?: string }>,
+) {
   if (!label) return { label: 'Inconnu', icon: AlertCircle, color: '#9CA3AF' };
   const lower = label.toLowerCase().trim();
-  
+
   if (lower.includes('windows')) return map['windows'];
-  if (lower.includes('mac') || lower.includes('ios') || lower.includes('apple')) return map['macos'];
+  if (lower.includes('mac') || lower.includes('ios') || lower.includes('apple'))
+    return map['macos'];
   if (lower.includes('android')) return map['android'];
   if (lower.includes('linux')) return map['linux'];
-  
-  return map[lower] || { label: label.charAt(0).toUpperCase() + label.slice(1), icon: Monitor, color: '#6B7280' };
+
+  return (
+    map[lower] || {
+      label: label.charAt(0).toUpperCase() + label.slice(1),
+      icon: Monitor,
+      color: '#6B7280',
+    }
+  );
 }
 
 // ─── Logo Component with Fallback ────────────────────────
-function BrandLogo({ logoUrl, label, icon: Icon, color }: { logoUrl?: string; label: string; icon: any; color: string }) {
+function BrandLogo({
+  logoUrl,
+  label,
+  icon: Icon,
+  color,
+}: {
+  logoUrl?: string;
+  label: string;
+  icon: any;
+  color: string;
+}) {
   const [error, setError] = useState(false);
 
   if (logoUrl && !error) {
     return (
-      <img
-        src={logoUrl}
-        alt=""
-        className="w-4 h-4 object-contain"
-        onError={() => setError(true)}
-      />
+      <img src={logoUrl} alt="" className="w-4 h-4 object-contain" onError={() => setError(true)} />
     );
   }
 
@@ -275,9 +290,9 @@ function ChartTooltip({
       {payload.map((entry, i) => (
         <div key={i} className="flex items-center justify-between gap-4 mt-1">
           <div className="flex items-center gap-2">
-            <div 
-              className="w-2 h-2 rounded-full" 
-              style={{ backgroundColor: entry.color || entry.fill }} 
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: entry.color || entry.fill }}
             />
             <span className="text-neutral-500 dark:text-neutral-400 text-xs italic">
               {entry.name}
@@ -495,11 +510,11 @@ export default function AnalyticsPage() {
                         <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid 
-                      strokeDasharray="3 3" 
-                      stroke="currentColor" 
-                      className="text-neutral-400 dark:text-neutral-500" 
-                      opacity={0.6} 
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="currentColor"
+                      className="text-neutral-400 dark:text-neutral-500"
+                      opacity={0.6}
                     />
                     <XAxis
                       dataKey="date"
@@ -513,7 +528,10 @@ export default function AnalyticsPage() {
                       axisLine={false}
                       tickLine={false}
                     />
-                    <Tooltip content={<ChartTooltip period={period} isDate={true} />} cursor={{ stroke: '#00d5be', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                    <Tooltip
+                      content={<ChartTooltip period={period} isDate={true} />}
+                      cursor={{ stroke: '#00d5be', strokeWidth: 1, strokeDasharray: '4 4' }}
+                    />
                     <Area
                       type="monotone"
                       dataKey="pageviews"
@@ -550,11 +568,11 @@ export default function AnalyticsPage() {
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={(data?.pages || []).slice(0, 8)} layout="vertical">
-                      <CartesianGrid 
-                        strokeDasharray="3 3" 
-                        stroke="currentColor" 
-                        className="text-neutral-400 dark:text-neutral-500" 
-                        opacity={0.6} 
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="currentColor"
+                        className="text-neutral-400 dark:text-neutral-500"
+                        opacity={0.6}
                       />
                       <XAxis
                         type="number"
@@ -570,7 +588,10 @@ export default function AnalyticsPage() {
                         axisLine={false}
                         tickLine={false}
                       />
-                      <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(0, 213, 190, 0.05)' }} />
+                      <Tooltip
+                        content={<ChartTooltip />}
+                        cursor={{ fill: 'rgba(0, 213, 190, 0.05)' }}
+                      />
                       <Bar dataKey="y" name="Vues" fill="#00bba7" radius={[0, 6, 6, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -651,9 +672,7 @@ export default function AnalyticsPage() {
                               <span className="text-sm font-bold text-neutral-900 dark:text-white block">
                                 {c.y.toLocaleString('fr-FR')}
                               </span>
-                              <span className="text-xs text-neutral-400 font-medium">
-                                {pct}%
-                              </span>
+                              <span className="text-xs text-neutral-400 font-medium">{pct}%</span>
                             </div>
                           </div>
                         );
@@ -685,10 +704,17 @@ export default function AnalyticsPage() {
                         return (
                           <div key={i} className="flex justify-between text-sm py-1">
                             <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
-                              <BrandLogo logoUrl={logoUrl} label={label} icon={Icon} color={color} />
+                              <BrandLogo
+                                logoUrl={logoUrl}
+                                label={label}
+                                icon={Icon}
+                                color={color}
+                              />
                               <span>{label}</span>
                             </span>
-                            <span className="font-medium text-neutral-900 dark:text-white">{b.y}</span>
+                            <span className="font-medium text-neutral-900 dark:text-white">
+                              {b.y}
+                            </span>
                           </div>
                         );
                       })}
@@ -705,10 +731,17 @@ export default function AnalyticsPage() {
                         return (
                           <div key={i} className="flex justify-between text-sm py-1">
                             <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
-                              <BrandLogo logoUrl={logoUrl} label={label} icon={Icon} color={color} />
+                              <BrandLogo
+                                logoUrl={logoUrl}
+                                label={label}
+                                icon={Icon}
+                                color={color}
+                              />
                               <span>{label}</span>
                             </span>
-                            <span className="font-medium text-neutral-900 dark:text-white">{o.y}</span>
+                            <span className="font-medium text-neutral-900 dark:text-white">
+                              {o.y}
+                            </span>
                           </div>
                         );
                       })}
@@ -732,7 +765,10 @@ export default function AnalyticsPage() {
                     {(data?.devices || []).map((d, i) => {
                       const { label, icon: Icon, color } = formatLabel(d.x, DEVICE_MAP);
                       return (
-                        <div key={i} className="flex justify-between items-center text-sm p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg">
+                        <div
+                          key={i}
+                          className="flex justify-between items-center text-sm p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg"
+                        >
                           <span className="text-neutral-700 dark:text-neutral-300 font-medium flex items-center gap-2">
                             <Icon className="w-4 h-4" style={{ color }} />
                             <span>{label}</span>
