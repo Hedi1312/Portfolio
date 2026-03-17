@@ -6,8 +6,6 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   FiActivity,
   FiArrowLeft,
-  FiArrowUpRight,
-  FiClock,
   FiEye,
   FiGlobe,
   FiMonitor,
@@ -26,31 +24,19 @@ import {
   FaWindows,
   FaLinux,
 } from 'react-icons/fa';
-import { SiVercel } from 'react-icons/si';
 import {
   Area,
   AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
-import {
-  AlertCircle,
-  Clock,
-  ExternalLink,
-  ChevronRight,
-  Monitor,
-  Laptop,
-  Smartphone,
-  Tablet,
-} from 'lucide-react';
+import { AlertCircle, Monitor, Laptop, Smartphone, Tablet } from 'lucide-react';
+import Image from 'next/image';
 
 // ─── Types ────────────────────────────────────────────
 interface AnalyticsData {
@@ -83,18 +69,7 @@ const PERIODS = [
   { label: '90 jours', value: '90d' },
 ];
 
-const COLORS = [
-  '#00bba7',
-  '#6366f1',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#10b981',
-  '#ec4899',
-  '#14b8a6',
-  '#f97316',
-  '#0ea5e9',
-];
+// Unused COLORS removed for lint
 
 const EVENT_LABELS: Record<string, string> = {
   'click-github-profile': 'GitHub profil',
@@ -136,12 +111,21 @@ function getCountryName(code: string) {
   try {
     const displayNames = new Intl.DisplayNames(['fr'], { type: 'region' });
     return displayNames.of(code.toUpperCase()) || code;
-  } catch (e) {
+  } catch (_e) {
     return code;
   }
 }
 
-const BROWSER_MAP: Record<string, { label: string; icon: any; color: string; logoUrl?: string }> = {
+type IconComponent = React.ComponentType<{
+  size?: number | string;
+  className?: string;
+  style?: React.CSSProperties;
+}>;
+
+const BROWSER_MAP: Record<
+  string,
+  { label: string; icon: IconComponent; color: string; logoUrl?: string }
+> = {
   chrome: {
     label: 'Chrome',
     icon: FaChrome,
@@ -181,14 +165,17 @@ const BROWSER_MAP: Record<string, { label: string; icon: any; color: string; log
   },
 };
 
-const DEVICE_MAP: Record<string, { label: string; icon: any; color: string }> = {
+const DEVICE_MAP: Record<string, { label: string; icon: IconComponent; color: string }> = {
   desktop: { label: 'Ordinateur', icon: Monitor, color: '#6366F1' },
   laptop: { label: 'PC Portable', icon: Laptop, color: '#8B5CF6' },
   mobile: { label: 'Mobile', icon: Smartphone, color: '#10B981' },
   tablet: { label: 'Tablette', icon: Tablet, color: '#F59E0B' },
 };
 
-const OS_MAP: Record<string, { label: string; icon: any; color: string; logoUrl?: string }> = {
+const OS_MAP: Record<
+  string,
+  { label: string; icon: IconComponent; color: string; logoUrl?: string }
+> = {
   ios: {
     label: 'iOS',
     icon: FaApple,
@@ -224,7 +211,7 @@ const OS_MAP: Record<string, { label: string; icon: any; color: string; logoUrl?
 
 function formatLabel(
   label: string,
-  map: Record<string, { label: string; icon: any; color: string; logoUrl?: string }>,
+  map: Record<string, { label: string; icon: IconComponent; color: string; logoUrl?: string }>,
 ) {
   if (!label) return { label: 'Inconnu', icon: AlertCircle, color: '#9CA3AF' };
   const lower = label.toLowerCase().trim();
@@ -247,20 +234,27 @@ function formatLabel(
 // ─── Logo Component with Fallback ────────────────────────
 function BrandLogo({
   logoUrl,
-  label,
+  label: _label,
   icon: Icon,
   color,
 }: {
   logoUrl?: string;
   label: string;
-  icon: any;
+  icon: IconComponent;
   color: string;
 }) {
   const [error, setError] = useState(false);
 
   if (logoUrl && !error) {
     return (
-      <img src={logoUrl} alt="" className="w-4 h-4 object-contain" onError={() => setError(true)} />
+      <Image
+        src={logoUrl}
+        alt=""
+        width={16}
+        height={16}
+        className="object-contain"
+        onError={() => setError(true)}
+      />
     );
   }
 
@@ -268,6 +262,13 @@ function BrandLogo({
 }
 
 // ─── Custom Tooltip ─────────────────────────────────────
+interface PayloadEntry {
+  name?: string;
+  value?: number | string;
+  color?: string;
+  fill?: string;
+}
+
 function ChartTooltip({
   active,
   payload,
@@ -276,7 +277,7 @@ function ChartTooltip({
   isDate = false,
 }: {
   active?: boolean;
-  payload?: any[];
+  payload?: PayloadEntry[];
   label?: string;
   period?: string;
   isDate?: boolean;
@@ -299,7 +300,9 @@ function ChartTooltip({
             </span>
           </div>
           <span className="font-bold text-neutral-900 dark:text-white">
-            {entry.value.toLocaleString('fr-FR')}
+            {typeof entry.value === 'number'
+              ? entry.value.toLocaleString('fr-FR')
+              : entry.value || 0}
           </span>
         </div>
       ))}
@@ -700,7 +703,9 @@ export default function AnalyticsPage() {
                     </h3>
                     <div className="space-y-1">
                       {(data?.browsers || []).map((b, i) => {
-                        const { label, icon: Icon, color, logoUrl } = formatLabel(b.x, BROWSER_MAP);
+                        const itemData = formatLabel(b.x, BROWSER_MAP);
+                        const logoUrl = 'logoUrl' in itemData ? itemData.logoUrl : undefined;
+                        const { label, icon: Icon, color } = itemData;
                         return (
                           <div key={i} className="flex justify-between text-sm py-1">
                             <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
@@ -727,7 +732,9 @@ export default function AnalyticsPage() {
                     </h3>
                     <div className="space-y-1">
                       {(data?.os || []).map((o, i) => {
-                        const { label, icon: Icon, color, logoUrl } = formatLabel(o.x, OS_MAP);
+                        const itemData = formatLabel(o.x, OS_MAP);
+                        const logoUrl = 'logoUrl' in itemData ? itemData.logoUrl : undefined;
+                        const { label, icon: Icon, color } = itemData;
                         return (
                           <div key={i} className="flex justify-between text-sm py-1">
                             <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
