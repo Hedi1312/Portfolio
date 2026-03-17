@@ -1,0 +1,43 @@
+name: Deplacer Ticket vers Staging ou Main
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - staging
+      - main
+
+jobs:
+  deplacer-ticket:
+    # On vérifie que la PR a bien été mergée (et pas juste fermée sans merge)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔍 Récupérer le numéro du ticket lié
+        id: find_issue
+        # Ce script fouille la description de ta PR pour trouver "fixes #12" ou "closes #12"
+        run: |
+          ISSUE_NUM=$(echo "${{ github.event.pull_request.body }}" | grep -ioE '(fixes|closes|resolves) #[0-9]+' | grep -oE '[0-9]+' | head -1)
+          echo "issue_number=$ISSUE_NUM" >> $GITHUB_OUTPUT
+
+      - name: 🟡 Déplacer vers "En attente de validation" (Si merge sur Staging)
+        if: github.base_ref == 'staging' && steps.find_issue.outputs.issue_number != ''
+        # On utilise une action open-source reconnue pour les GitHub Projects V2
+        uses: leonsteinhaeuser/project-beta-automations@v2.2.1
+        with:
+          gh_token: ${{ secrets.PROJECT_PAT }}
+          user: TON_PSEUDO # Remplace par ton pseudo GitHub (ou "organization: ton-orga" si c'est une org)
+          project_id: 1 # Remplace par le numéro de ton projet (regarde l'URL de ton tableau)
+          resource_node_id: ${{ steps.find_issue.outputs.issue_number }}
+          status_value: 'En attente de validation' # Le nom EXACT de ta colonne
+
+      - name: 🟢 Déplacer vers "Terminé" (Si merge sur Main)
+        if: github.base_ref == 'main' && steps.find_issue.outputs.issue_number != ''
+        uses: leonsteinhaeuser/project-beta-automations@v2.2.1
+        with:
+          gh_token: ${{ secrets.PROJECT_PAT }}
+          user: TON_PSEUDO
+          project_id: 1
+          resource_node_id: ${{ steps.find_issue.outputs.issue_number }}
+          status_value: 'Terminé'

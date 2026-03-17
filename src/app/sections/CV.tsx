@@ -3,10 +3,12 @@ import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FiEye, FiDownload, FiX } from 'react-icons/fi';
+import { Button } from '@/components/ui/Button';
 
 export default function CV() {
   const [cvUrl, setCvUrl] = useState('/cv/CV_OKBA_Hedi.pdf');
   const [isOpen, setIsOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/cv')
@@ -20,6 +22,26 @@ export default function CV() {
   }, []);
 
   useLockBodyScroll(isOpen);
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch(cvUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'CV_OKBA_Hedi.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <section
@@ -61,26 +83,25 @@ export default function CV() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <motion.button
+            <Button
               onClick={() => setIsOpen(true)}
-              className="btn-glow flex items-center justify-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-400 text-white rounded-xl font-semibold transition-colors cursor-pointer"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              variant="primary"
+              data-umami-event="click-cv-view"
             >
               <FiEye size={18} />
               Voir mon CV
-            </motion.button>
+            </Button>
 
-            <motion.a
-              href={cvUrl}
-              download
-              className="flex items-center justify-center gap-2 px-6 py-3 glass-card font-semibold transition-all hover:border-brand-400/30 cursor-pointer"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <Button
+              onClick={handleDownload}
+              variant="glass"
+              isLoading={isDownloading}
+              loadingText="Téléchargement en cours..."
+              data-umami-event="click-cv-download"
             >
               <FiDownload size={18} className="text-brand-400" />
               Télécharger
-            </motion.a>
+            </Button>
           </div>
         </motion.div>
       </div>
@@ -105,10 +126,10 @@ export default function CV() {
             >
               <button
                 onClick={() => setIsOpen(false)}
-                className="absolute top-4 right-4 p-2 rounded-xl hover:bg-brand-400/10 text-neutral-500 hover:text-foreground transition-all cursor-pointer"
+                className="absolute top-4 right-4 z-10 p-1.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 rounded-full transition-colors cursor-pointer shadow-sm"
                 aria-label="Fermer la modale"
               >
-                <FiX size={22} />
+                <FiX size={18} />
               </button>
 
               <iframe

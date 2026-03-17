@@ -1,19 +1,27 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// GET → Tous les messages triés par date (récents en premier) + compteur non lus
+// GET → Tous les contacts avec leurs messages et réponses
 export async function GET() {
   try {
-    const [messages, unreadCount] = await Promise.all([
-      prisma.contactMessage.findMany({
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.contactMessage.count({
-        where: { isRead: false },
-      }),
-    ]);
+    const contacts = await prisma.contact.findMany({
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        messages: {
+          orderBy: { createdAt: 'asc' },
+          include: {
+            replies: { orderBy: { createdAt: 'asc' } },
+          },
+        },
+      },
+    });
 
-    return NextResponse.json({ messages, unreadCount });
+    // Compter les messages non lus
+    const unreadCount = await prisma.contactMessage.count({
+      where: { isRead: false },
+    });
+
+    return NextResponse.json({ contacts, unreadCount });
   } catch (error) {
     console.error('Erreur récupération messages:', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });

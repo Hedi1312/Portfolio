@@ -13,7 +13,6 @@ model Admin {
   passwordUpdatedAt DateTime?
   createdAt         DateTime        @default(now())
 
-  // Changement ici : Relation 1-à-1 (un seul reset possible)
   passwordReset     PasswordReset?
 
   @@map("admins")
@@ -24,21 +23,88 @@ model PasswordReset {
   token     String   @unique
   expiresAt DateTime
 
-  // Relation avec l'Admin
   adminId   String   @unique
   admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@map("password_resets")
 }
 
+// Contact unique par email — regroupe toutes les conversations
+model Contact {
+  id        String           @id @default(cuid())
+  email     String           @unique
+  name      String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  messages  ContactMessage[]
+
+  @@map("contacts")
+}
+
 model ContactMessage {
-  id          String   @id @default(cuid())
-  name        String
-  email       String
+  id          String         @id @default(cuid())
+  email       String         @default("")
   message     String
-  attachments Json     @default("[]")
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  attachments Json           @default("[]")
+  isRead      Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  replies     MessageReply[]
+
+  contactId   String
+  contact     Contact        @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
   @@map("contact_messages")
+}
+
+model MessageReply {
+  id          String         @id @default(cuid())
+  message     String
+  attachments Json           @default("[]")
+  createdAt   DateTime       @default(now())
+
+  contactMessageId String
+  contactMessage   ContactMessage @relation(fields: [contactMessageId], references: [id], onDelete: Cascade)
+
+  @@map("message_replies")
+}
+
+// Projets affichés sur le portfolio
+model Project {
+  id          String         @id @default(cuid())
+  title       String
+  description String
+  gradient    String         @default("from-brand-400/20 to-brand-600/20")
+  link        String?
+  github      String?
+  order       Int            @default(0)
+  visible     Boolean        @default(true)
+  skills      ProjectSkill[]
+  images      ProjectImage[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("projects")
+}
+
+model ProjectSkill {
+  id        String  @id @default(cuid())
+  name      String
+  icon      String?
+  color     String  @default("#00D5BE")
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_skills")
+}
+
+model ProjectImage {
+  id        String  @id @default(cuid())
+  url       String
+  public_id String
+  order     Int     @default(0)
+  
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_images")
 }

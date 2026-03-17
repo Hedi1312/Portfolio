@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { render } from '@react-email/components';
-import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
-import { randomUUID } from 'crypto';
 
 import { AdminNotification } from '@/emails/AdminNotification';
 import { UserConfirmation } from '@/emails/UserConfirmation';
@@ -36,42 +33,53 @@ export async function POST(req: Request) {
     // Gérer les pièces jointes (multiple)
     const files = formData.getAll('files') as File[];
     const emailAttachments = [];
-    const dbAttachments: { filename: string; path: string }[] = [];
+    const dbAttachments: { filename: string; path: string; public_id?: string }[] = [];
 
     if (files.length > 0) {
-      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-      await mkdir(uploadsDir, { recursive: true });
+      const { uploadToCloudinary } = await import('@/lib/cloudinary');
 
       for (const file of files) {
         if (file && file.size > 0) {
+          if (file.size > 10 * 1024 * 1024) {
+            return NextResponse.json(
+              { error: `Le fichier "${file.name}" dépasse la limite de 10 Mo.` },
+              { status: 400 },
+            );
+          }
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
-          const ext = path.extname(file.name);
-          const uniqueName = `${randomUUID()}${ext}`;
-          const filePath = path.join(uploadsDir, uniqueName);
 
-          await writeFile(filePath, buffer);
+          // Upload vers Cloudinary
+          const uploaded = await uploadToCloudinary(buffer, file.name, 'emails');
 
           emailAttachments.push({
             filename: file.name,
-            content: buffer,
+            content: buffer, // Garder le buffer pour l'email nodemailer
           });
 
           dbAttachments.push({
             filename: file.name,
-            path: `/uploads/${uniqueName}`,
+            path: uploaded.url,
+            public_id: uploaded.public_id,
           });
         }
       }
     }
 
-    // Sauvegarder en base de données
+    // Upsert du contact (crée ou met à jour le nom)
+    const contact = await prisma.contact.upsert({
+      where: { email },
+      update: { name, updatedAt: new Date() },
+      create: { email, name },
+    });
+
+    // Sauvegarder le message
     await prisma.contactMessage.create({
       data: {
-        name,
         email,
         message,
         attachments: dbAttachments,
+        contactId: contact.id,
       },
     });
 
@@ -85,7 +93,7 @@ export async function POST(req: Request) {
       prefixe = '[LOCAL] ';
     }
 
-    const subject = `${prefixe} - Nouveau message de ${name}`;
+    const subject = `${prefixe}Nouveau message de ${name}`;
 
     const adminHtml = await render(AdminNotification({ name, email, message }));
     const userHtml = await render(UserConfirmation({ name }));
@@ -94,7 +102,7 @@ export async function POST(req: Request) {
       from: process.env.SMTP_FROM,
       to: destinataire,
       replyTo: email,
-      subject: subject,
+      subject,
       attachments: emailAttachments,
       html: adminHtml,
     });
@@ -102,7 +110,7 @@ export async function POST(req: Request) {
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: email,
-      subject: `${prefixe} - Merci pour ton message !`,
+      subject: `${prefixe}Merci pour ton message !`,
       html: userHtml,
     });
 

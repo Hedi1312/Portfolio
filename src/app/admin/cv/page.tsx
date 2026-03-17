@@ -4,6 +4,7 @@ import { GrDocumentPdf } from 'react-icons/gr';
 import { FiEye, FiDownload, FiX, FiArrowLeft } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
 
 export default function AdminCVPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -12,6 +13,8 @@ export default function AdminCVPage() {
   const [fileSize, setFileSize] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Charger le CV existant
@@ -37,6 +40,8 @@ export default function AdminCVPage() {
     e.preventDefault();
     if (!file) return;
 
+    setLoading(true);
+
     const formData = new FormData();
     formData.append('file', file);
 
@@ -56,6 +61,28 @@ export default function AdminCVPage() {
       if (fileInputRef.current) fileInputRef.current.value = '';
     } else {
       setMessage(`❌ Erreur : ${data.error}`);
+    }
+    setLoading(false);
+  };
+
+  const handleDownload = async () => {
+    if (!previewUrl) return;
+    setIsDownloading(true);
+    try {
+      const response = await fetch(previewUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName || 'CV.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement:', error);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -113,13 +140,9 @@ export default function AdminCVPage() {
             />
           </label>
 
-          <button
-            type="submit"
-            disabled={!file}
-            className="bg-brand-500 hover:bg-brand-400 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 cursor-pointer"
-          >
+          <Button type="submit" disabled={!file} isLoading={loading} loadingText="Mise à jour...">
             Mettre à jour le CV
-          </button>
+          </Button>
         </form>
 
         {/* === MESSAGE === */}
@@ -162,10 +185,10 @@ export default function AdminCVPage() {
                 </div>
 
                 <div className="flex gap-3">
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
                     onClick={() => setShowPreview(!showPreview)}
-                    className="flex items-center gap-2 bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer"
                   >
                     {showPreview ? (
                       <>
@@ -178,15 +201,16 @@ export default function AdminCVPage() {
                         Voir
                       </>
                     )}
-                  </button>
-                  <a
-                    href={previewUrl}
-                    download
-                    className="flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                  </Button>
+                  <Button
+                    onClick={handleDownload}
+                    variant="primary"
+                    isLoading={isDownloading}
+                    loadingText="Téléchargement en cours..."
                   >
                     <FiDownload />
                     Télécharger
-                  </a>
+                  </Button>
                 </div>
               </div>
 

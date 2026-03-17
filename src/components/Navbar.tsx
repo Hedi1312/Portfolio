@@ -35,7 +35,12 @@ export default function Navbar() {
   useEffect(() => {
     fetchUnread();
     const interval = setInterval(fetchUnread, 30000);
-    return () => clearInterval(interval);
+    const handleUnreadUpdate = () => fetchUnread();
+    window.addEventListener('unread-updated', handleUnreadUpdate);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('unread-updated', handleUnreadUpdate);
+    };
   }, [fetchUnread]);
 
   // Detect active section via IntersectionObserver
@@ -122,22 +127,8 @@ export default function Navbar() {
 
           {status === 'authenticated' && (
             <Link
-              href="/admin/dashboard"
-              className="relative p-3 rounded-xl text-danger-500 hover:text-danger-400 transition-all duration-300 group"
-              title="Admin"
-            >
-              <FaUnlockAlt
-                size={22}
-                className="transition-transform duration-200 group-hover:scale-110"
-              />
-              <span className="absolute inset-0 rounded-xl bg-danger-500/0 group-hover:bg-danger-500/10 transition-colors duration-300" />
-            </Link>
-          )}
-
-          {status === 'authenticated' && (
-            <Link
               href="/admin/messages"
-              className="relative p-3 rounded-xl text-brand-500 hover:text-brand-400 transition-all duration-300 group"
+              className="relative p-3 rounded-xl text-neutral-500 dark:text-neutral-400 hover:text-foreground transition-all duration-300 group"
               title="Messages"
             >
               <FaBell
@@ -150,6 +141,20 @@ export default function Navbar() {
                 </span>
               )}
               <span className="absolute inset-0 rounded-xl bg-brand-400/0 group-hover:bg-brand-400/10 transition-colors duration-300" />
+            </Link>
+          )}
+
+          {status === 'authenticated' && (
+            <Link
+              href="/admin/dashboard"
+              className="relative p-3 rounded-xl text-danger-500 hover:text-danger-400 transition-all duration-300 group"
+              title="Admin"
+            >
+              <FaUnlockAlt
+                size={22}
+                className="transition-transform duration-200 group-hover:scale-110"
+              />
+              <span className="absolute inset-0 rounded-xl bg-danger-500/0 group-hover:bg-danger-500/10 transition-colors duration-300" />
             </Link>
           )}
 
