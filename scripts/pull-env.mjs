@@ -51,7 +51,9 @@ try {
     }
   }
 
-  console.log(`✅ Succès ! ${addedCount} ajoutée(s), ${modifiedCount} modifiée(s), ${deletedCount} supprimée(s).`);
+  console.log(
+    `✅ Succès ! ${addedCount} ajoutée(s), ${modifiedCount} modifiée(s), ${deletedCount} supprimée(s).`,
+  );
 } catch (error) {
   console.error('❌ Erreur lors du téléchargement des secrets:', error.message);
   process.exit(1);
