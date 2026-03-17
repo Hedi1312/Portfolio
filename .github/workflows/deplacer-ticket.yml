@@ -27,7 +27,7 @@ jobs:
         uses: leonsteinhaeuser/project-beta-automations@v2.2.1
         with:
           gh_token: ${{ secrets.PROJECT_PAT }}
-          user: "Hedi1312"
+          user: 'Hedi1312'
           project_id: 4
           resource_node_id: ${{ steps.find_issue.outputs.issue_number }}
           status_value: 'En attente de validation' # Le nom EXACT de ta colonne

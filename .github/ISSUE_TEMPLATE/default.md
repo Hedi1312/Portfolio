@@ -1,5 +1,5 @@
 ---
-name: "🆕 Nouveau Ticket"
+name: '🆕 Nouveau Ticket'
 about: Créer une tâche ou un rapport
 title: ''
 labels: ''
