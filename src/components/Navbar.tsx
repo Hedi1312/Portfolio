@@ -3,7 +3,15 @@
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { FiMenu, FiX } from 'react-icons/fi';
-import { FaHome, FaUser, FaFolderOpen, FaEnvelope, FaUnlockAlt, FaBell } from 'react-icons/fa';
+import {
+  FaHome,
+  FaUser,
+  FaFolderOpen,
+  FaEnvelope,
+  FaLock,
+  FaUnlockAlt,
+  FaBell,
+} from 'react-icons/fa';
 import { LuFileText } from 'react-icons/lu';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
@@ -83,7 +91,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex justify-between items-center px-2">
         {/* Logo */}
         <Link href="/" className="group">
-          <h1 className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] tracking-tight">
+          <h1 className="text-3xl font-bold font-[family-name:var(--font-space-grotesk)] tracking-tight">
             <span className="gradient-text-animated">Hëdi</span>
             <span className="text-foreground ml-1 group-hover:text-brand-400 transition-colors duration-300">
               OKBA
@@ -144,19 +152,24 @@ export default function Navbar() {
             </Link>
           )}
 
-          {status === 'authenticated' && (
-            <Link
-              href="/admin/dashboard"
-              className="relative p-3 rounded-xl text-danger-500 hover:text-danger-400 transition-all duration-300 group"
-              title="Admin"
-            >
+          <Link
+            href={status === 'authenticated' ? '/admin/dashboard' : '/admin-login'}
+            className="relative p-3 rounded-xl text-danger-500 hover:text-danger-400 transition-all duration-300 group"
+            title="Admin"
+          >
+            {status === 'authenticated' ? (
               <FaUnlockAlt
                 size={22}
                 className="transition-transform duration-200 group-hover:scale-110"
               />
-              <span className="absolute inset-0 rounded-xl bg-danger-500/0 group-hover:bg-danger-500/10 transition-colors duration-300" />
-            </Link>
-          )}
+            ) : (
+              <FaLock
+                size={22}
+                className="transition-transform duration-200 group-hover:scale-110"
+              />
+            )}
+            <span className="absolute inset-0 rounded-xl bg-danger-500/0 group-hover:bg-danger-500/10 transition-colors duration-300" />
+          </Link>
 
           <div className="ml-2 pl-3 border-l border-neutral-300/30 dark:border-neutral-600/30">
             <ThemeToggle />
@@ -250,23 +263,23 @@ export default function Navbar() {
                   );
                 })}
 
+                <motion.div
+                  initial={{ x: 40, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: navLinks.length * 0.05 }}
+                >
+                  <Link
+                    href={status === 'authenticated' ? '/admin/dashboard' : '/admin-login'}
+                    onClick={handleLinkClick}
+                    className="flex items-center gap-4 px-4 py-3 rounded-xl text-danger-500 hover:bg-danger-500/10 transition-all duration-200"
+                  >
+                    {status === 'authenticated' ? <FaUnlockAlt size={22} /> : <FaLock size={22} />}
+                    <span className="font-medium">Admin</span>
+                  </Link>
+                </motion.div>
+
                 {status === 'authenticated' && (
                   <>
-                    <motion.div
-                      initial={{ x: 40, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: navLinks.length * 0.05 }}
-                    >
-                      <Link
-                        href="/admin/dashboard"
-                        onClick={handleLinkClick}
-                        className="flex items-center gap-4 px-4 py-3 rounded-xl text-danger-500 hover:bg-danger-500/10 transition-all duration-200"
-                      >
-                        <FaUnlockAlt size={22} />
-                        <span className="font-medium">Admin</span>
-                      </Link>
-                    </motion.div>
-
                     <motion.div
                       initial={{ x: 40, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}

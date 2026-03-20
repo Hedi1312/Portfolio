@@ -27,9 +27,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     let nextOrder = (maxOrderRes._max.order ?? -1) + 1;
 
     for (const file of files) {
-      if (file.size > 10 * 1024 * 1024) {
+      if (file.size > 100 * 1024 * 1024) {
         return NextResponse.json(
-          { error: `Fichier ${file.name} trop volumineux (max 10Mo).` },
+          { error: `Fichier ${file.name} trop volumineux (max 100Mo).` },
           { status: 400 },
         );
       }

@@ -46,7 +46,7 @@ export default function CV() {
   return (
     <section
       id="cv"
-      className="relative px-6 py-24 md:py-32 bg-white dark:bg-[#0f172a] text-center text-neutral-900 dark:text-white transition-colors duration-500"
+      className="relative px-6 py-24 md:py-32 bg-white dark:bg-neutral-900 text-center text-neutral-900 dark:text-white transition-colors duration-500"
     >
       <div className="max-w-2xl mx-auto">
         {/* Section heading */}
@@ -135,7 +135,7 @@ export default function CV() {
               <iframe
                 src={cvUrl}
                 title="CV Hedi OKBA"
-                className="w-full h-[80vh] rounded-xl border border-neutral-200/20 dark:border-neutral-700/30"
+                className="w-full h-[80vh] rounded-xl border border-neutral-200/20 dark:border-neutral-700/30 bg-white"
               />
               <p className="text-center text-neutral-500 dark:text-neutral-400 text-sm mt-4">
                 📱 Si l&apos;affichage n&apos;est pas optimal,{' '}

@@ -35,7 +35,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { AlertCircle, Monitor, Laptop, Smartphone, Tablet } from 'lucide-react';
+import { AlertCircle, Monitor, Laptop, Smartphone, Tablet, BarChart3 } from 'lucide-react';
 import Image from 'next/image';
 
 // ─── Types ────────────────────────────────────────────
@@ -98,13 +98,9 @@ function formatDuration(ms: number) {
 }
 
 // ─── Helpers ──────────────────────────────────────────
-function getCountryFlag(countryCode: string) {
-  if (!countryCode) return '🌍';
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map((char) => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
+function getCountryFlagUrl(countryCode: string) {
+  if (!countryCode) return null;
+  return `https://flagcdn.com/${countryCode.toLowerCase()}.svg`;
 }
 
 function getCountryName(code: string) {
@@ -405,7 +401,7 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 pb-16">
+    <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
       <div className="mx-auto max-w-7xl w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
@@ -417,8 +413,9 @@ export default function AnalyticsPage() {
               <FiArrowLeft size={20} />
             </Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900 dark:text-white">
-                📊 Statistiques
+              <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900 dark:text-white flex items-center gap-3">
+                <BarChart3 className="text-brand-500" />
+                Statistiques
               </h1>
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                 Données via Umami Analytics
@@ -501,58 +498,64 @@ export default function AnalyticsPage() {
                 Pages vues & Sessions
               </h2>
               <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#00bba7" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#00bba7" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="colorSess" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="currentColor"
-                      className="text-neutral-400 dark:text-neutral-500"
-                      opacity={0.6}
-                    />
-                    <XAxis
-                      dataKey="date"
-                      tickFormatter={(d) => formatDate(d, period)}
-                      tick={{ fontSize: 11, fill: '#9ca3af' }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: '#9ca3af' }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip
-                      content={<ChartTooltip period={period} isDate={true} />}
-                      cursor={{ stroke: '#00d5be', strokeWidth: 1, strokeDasharray: '4 4' }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="pageviews"
-                      name="Pages vues"
-                      stroke="#00bba7"
-                      fill="url(#colorPv)"
-                      strokeWidth={2}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="sessions"
-                      name="Sessions"
-                      stroke="#6366f1"
-                      fill="url(#colorSess)"
-                      strokeWidth={2}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                {chartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                      <defs>
+                        <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#00bba7" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#00bba7" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="colorSess" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="currentColor"
+                        className="text-neutral-400 dark:text-neutral-500"
+                        opacity={0.6}
+                      />
+                      <XAxis
+                        dataKey="date"
+                        tickFormatter={(d) => formatDate(d, period)}
+                        tick={{ fontSize: 11, fill: '#9ca3af' }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 11, fill: '#9ca3af' }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        content={<ChartTooltip period={period} isDate={true} />}
+                        cursor={{ stroke: '#00d5be', strokeWidth: 1, strokeDasharray: '4 4' }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="pageviews"
+                        name="Pages vues"
+                        stroke="#00bba7"
+                        fill="url(#colorPv)"
+                        strokeWidth={2}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="sessions"
+                        name="Sessions"
+                        stroke="#6366f1"
+                        fill="url(#colorSess)"
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-neutral-400 text-sm">
+                    Aucune donnée pour le moment
+                  </div>
+                )}
               </div>
             </motion.div>
 
@@ -569,35 +572,41 @@ export default function AnalyticsPage() {
                   Pages les plus visitées
                 </h2>
                 <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={(data?.pages || []).slice(0, 8)} layout="vertical">
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="currentColor"
-                        className="text-neutral-400 dark:text-neutral-500"
-                        opacity={0.6}
-                      />
-                      <XAxis
-                        type="number"
-                        tick={{ fontSize: 11, fill: '#9ca3af' }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        type="category"
-                        dataKey="x"
-                        width={120}
-                        tick={{ fontSize: 11, fill: '#9ca3af' }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip
-                        content={<ChartTooltip />}
-                        cursor={{ fill: 'rgba(0, 213, 190, 0.05)' }}
-                      />
-                      <Bar dataKey="y" name="Vues" fill="#00bba7" radius={[0, 6, 6, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {(data?.pages || []).length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={(data?.pages || []).slice(0, 8)} layout="vertical">
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="currentColor"
+                          className="text-neutral-400 dark:text-neutral-500"
+                          opacity={0.6}
+                        />
+                        <XAxis
+                          type="number"
+                          tick={{ fontSize: 11, fill: '#9ca3af' }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          type="category"
+                          dataKey="x"
+                          width={120}
+                          tick={{ fontSize: 11, fill: '#9ca3af' }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          content={<ChartTooltip />}
+                          cursor={{ fill: 'rgba(0, 213, 190, 0.05)' }}
+                        />
+                        <Bar dataKey="y" name="Vues" fill="#00bba7" radius={[0, 6, 6, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-neutral-400 text-sm">
+                      Aucune donnée pour le moment
+                    </div>
+                  )}
                 </div>
               </motion.div>
 
@@ -637,7 +646,9 @@ export default function AnalyticsPage() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-neutral-400 text-sm text-center py-8">Aucun événement</p>
+                  <div className="flex-1 flex items-center justify-center py-8">
+                    <p className="text-neutral-400 text-sm">Aucune donnée pour le moment</p>
+                  </div>
                 )}
               </motion.div>
             </div>
@@ -664,10 +675,19 @@ export default function AnalyticsPage() {
                         return (
                           <div key={i} className="flex items-center justify-between group">
                             <div className="flex items-center gap-3">
-                              <span className="text-xl leading-none" role="img" aria-label={c.x}>
-                                {getCountryFlag(c.x)}
-                              </span>
-                              <span className="text-sm text-neutral-700 dark:text-neutral-300 font-medium">
+                              <div className="w-5 h-3.5 relative overflow-hidden rounded-sm border border-neutral-100 dark:border-neutral-700/50 shrink-0 shadow-xs">
+                                {getCountryFlagUrl(c.x) ? (
+                                  <Image
+                                    src={getCountryFlagUrl(c.x)!}
+                                    alt={c.x}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                ) : (
+                                  <FiGlobe className="w-full h-full text-neutral-400" />
+                                )}
+                              </div>
+                              <span className="text-sm text-neutral-700 dark:text-neutral-300 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[140px]">
                                 {getCountryName(c.x)}
                               </span>
                             </div>
@@ -682,7 +702,9 @@ export default function AnalyticsPage() {
                       })}
                   </div>
                 ) : (
-                  <p className="text-neutral-400 text-sm text-center py-8">Aucune donnée</p>
+                  <div className="flex-1 flex items-center justify-center py-8">
+                    <p className="text-neutral-400 text-sm">Aucune donnée pour le moment</p>
+                  </div>
                 )}
               </motion.div>
 
@@ -696,65 +718,71 @@ export default function AnalyticsPage() {
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white px-6 pt-6 mb-4 flex items-center gap-2">
                   <FiMonitor size={18} /> Navigateurs & OS
                 </h2>
-                <div className="space-y-4 px-6 pb-6 overflow-y-auto max-h-[22rem]">
-                  <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
-                      Navigateurs
-                    </h3>
-                    <div className="space-y-1">
-                      {(data?.browsers || []).map((b, i) => {
-                        const itemData = formatLabel(b.x, BROWSER_MAP);
-                        const logoUrl = 'logoUrl' in itemData ? itemData.logoUrl : undefined;
-                        const { label, icon: Icon, color } = itemData;
-                        return (
-                          <div key={i} className="flex justify-between text-sm py-1">
-                            <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
-                              <BrandLogo
-                                logoUrl={logoUrl}
-                                label={label}
-                                icon={Icon}
-                                color={color}
-                              />
-                              <span>{label}</span>
-                            </span>
-                            <span className="font-medium text-neutral-900 dark:text-white">
-                              {b.y}
-                            </span>
-                          </div>
-                        );
-                      })}
+                {(data?.browsers?.length || 0) > 0 || (data?.os?.length || 0) > 0 ? (
+                  <div className="space-y-4 px-6 pb-6 overflow-y-auto max-h-88">
+                    <div>
+                      <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
+                        Navigateurs
+                      </h3>
+                      <div className="space-y-1">
+                        {(data?.browsers || []).map((b, i) => {
+                          const itemData = formatLabel(b.x, BROWSER_MAP);
+                          const logoUrl = 'logoUrl' in itemData ? itemData.logoUrl : undefined;
+                          const { label, icon: Icon, color } = itemData;
+                          return (
+                            <div key={i} className="flex justify-between text-sm py-1">
+                              <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
+                                <BrandLogo
+                                  logoUrl={logoUrl}
+                                  label={label}
+                                  icon={Icon}
+                                  color={color}
+                                />
+                                <span>{label}</span>
+                              </span>
+                              <span className="font-medium text-neutral-900 dark:text-white">
+                                {b.y}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <hr className="border-neutral-200 dark:border-neutral-700" />
+                    <div>
+                      <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
+                        Systèmes
+                      </h3>
+                      <div className="space-y-1">
+                        {(data?.os || []).map((o, i) => {
+                          const itemData = formatLabel(o.x, OS_MAP);
+                          const logoUrl = 'logoUrl' in itemData ? itemData.logoUrl : undefined;
+                          const { label, icon: Icon, color } = itemData;
+                          return (
+                            <div key={i} className="flex justify-between text-sm py-1">
+                              <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
+                                <BrandLogo
+                                  logoUrl={logoUrl}
+                                  label={label}
+                                  icon={Icon}
+                                  color={color}
+                                />
+                                <span>{label}</span>
+                              </span>
+                              <span className="font-medium text-neutral-900 dark:text-white">
+                                {o.y}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
-                  <hr className="border-neutral-200 dark:border-neutral-700" />
-                  <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
-                      Systèmes
-                    </h3>
-                    <div className="space-y-1">
-                      {(data?.os || []).map((o, i) => {
-                        const itemData = formatLabel(o.x, OS_MAP);
-                        const logoUrl = 'logoUrl' in itemData ? itemData.logoUrl : undefined;
-                        const { label, icon: Icon, color } = itemData;
-                        return (
-                          <div key={i} className="flex justify-between text-sm py-1">
-                            <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
-                              <BrandLogo
-                                logoUrl={logoUrl}
-                                label={label}
-                                icon={Icon}
-                                color={color}
-                              />
-                              <span>{label}</span>
-                            </span>
-                            <span className="font-medium text-neutral-900 dark:text-white">
-                              {o.y}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center py-8">
+                    <p className="text-neutral-400 text-sm">Aucune donnée pour le moment</p>
                   </div>
-                </div>
+                )}
               </motion.div>
 
               {/* Devices Only */}
@@ -787,7 +815,9 @@ export default function AnalyticsPage() {
                       );
                     })}
                     {!data?.devices?.length && (
-                      <p className="text-neutral-400 text-sm text-center py-8">Aucune donnée</p>
+                      <div className="flex-1 flex items-center justify-center py-8">
+                        <p className="text-neutral-400 text-sm">Aucune donnée pour le moment</p>
+                      </div>
                     )}
                   </div>
                 </div>

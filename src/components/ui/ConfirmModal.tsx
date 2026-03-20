@@ -1,7 +1,10 @@
 'use client';
+import { useRef } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { FiAlertTriangle } from 'react-icons/fi';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -24,6 +27,10 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  useLockBodyScroll(isOpen);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -39,6 +46,7 @@ export function ConfirmModal({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            ref={modalRef}
             className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-xl max-w-sm w-full p-6"
             onClick={(e) => e.stopPropagation()}
           >
