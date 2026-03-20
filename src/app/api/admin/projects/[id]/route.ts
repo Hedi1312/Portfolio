@@ -52,9 +52,16 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
       include: { images: true },
     });
 
-    if (project && project.images.length > 0) {
+    if (!project) {
+      return NextResponse.json({ error: 'Projet déjà supprimé ou introuvable.' }, { status: 404 });
+    }
+
+    if (project.images.length > 0) {
       await Promise.all(
-        project.images.map((img: { public_id: string }) => deleteFromCloudinary(img.public_id)),
+        project.images.map((img: { public_id: string; url: string }) => {
+          const isVideo = /\.(mp4|webm|mov|avi)$/i.test(img.url);
+          return deleteFromCloudinary(img.public_id, isVideo ? 'video' : 'image');
+        }),
       );
     }
 

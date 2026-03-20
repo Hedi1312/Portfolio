@@ -247,28 +247,34 @@ export default function MessagesPage() {
   };
 
   return (
-    <section className="min-h-screen bg-background transition-colors duration-300 pt-24 px-4 md:px-8 pb-12">
+    <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
       <ToastContainer toast={toast} onClose={hideToast} />
 
-      <div className="max-w-6xl mx-auto">
+      <div className="mx-auto max-w-7xl w-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <Link
               href="/admin/dashboard"
-              className="inline-flex items-center gap-2 text-neutral-600 dark:text-neutral-400 hover:text-brand-500 dark:hover:text-brand-400 transition-colors font-medium"
+              className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-600 dark:text-neutral-400"
+              aria-label="Retour au tableau de bord"
             >
-              <FiArrowLeft className="text-lg" />
-              Dashboard
+              <FiArrowLeft size={20} />
             </Link>
-            <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 dark:text-white">
-              Messages
-              {totalUnread > 0 && (
-                <span className="ml-3 text-sm font-bold bg-danger-500 text-white px-2.5 py-1 rounded-full">
-                  {totalUnread} non lu{totalUnread > 1 ? 's' : ''}
-                </span>
-              )}
-            </h1>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900 dark:text-white flex items-center gap-3">
+                <FiMail className="text-brand-500" />
+                Messages
+                {totalUnread > 0 && (
+                  <span className="ml-3 text-sm font-bold bg-danger-500 text-white px-2.5 py-1 rounded-full mt-1">
+                    {totalUnread} non lu{totalUnread > 1 ? 's' : ''}
+                  </span>
+                )}
+              </h1>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                Gérez vos correspondances et formulaires de contact
+              </p>
+            </div>
           </div>
         </div>
 

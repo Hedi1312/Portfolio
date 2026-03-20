@@ -9,6 +9,7 @@ import {
   FiPlus,
   FiEdit2,
   FiTrash2,
+  FiPlay,
   FiGithub,
   FiExternalLink,
   FiX,
@@ -38,11 +39,38 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/Button';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useToast, ToastContainer } from '@/components/ui/Toast';
 import { SKILL_ICONS } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
-import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { z } from 'zod';
+import imageCompression from 'browser-image-compression';
+import type { Modifier } from '@dnd-kit/core';
+import { FolderKanban } from 'lucide-react';
+
+// Custom modifiers (inline to avoid @dnd-kit/modifiers Docker resolution issues)
+const restrictToVerticalAxis: Modifier = ({ transform }) => ({
+  ...transform,
+  x: 0,
+});
+
+const restrictToParentElement: Modifier = ({ containerNodeRect, draggingNodeRect, transform }) => {
+  if (!containerNodeRect || !draggingNodeRect) return transform;
+
+  const minY = containerNodeRect.top - draggingNodeRect.top;
+  const maxY =
+    containerNodeRect.top +
+    containerNodeRect.height -
+    draggingNodeRect.top -
+    draggingNodeRect.height;
+
+  return {
+    ...transform,
+    x: 0,
+    y: Math.min(Math.max(transform.y, minY), maxY),
+  };
+};
 
 // ─── Zod Schema ──────────────────────────────────────
 const projectSchema = z.object({
@@ -107,26 +135,24 @@ function SortableProjectItem({
   });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
-    ...(isDragging ? { zIndex: 10, position: 'relative' as const } : {}),
+    ...(isDragging ? { zIndex: 50, position: 'relative' as const } : {}),
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-5 shadow-sm transition-all hover:shadow-md ${
-        !project.visible ? 'opacity-60' : ''
-      } ${isDragging ? 'shadow-lg ring-2 ring-brand-500/20' : ''}`}
+      {...attributes}
+      {...listeners}
+      className={`bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-[box-shadow,border-color,background-color] cursor-grab active:cursor-grabbing touch-pan-y ${
+        !project.visible ? 'opacity-50 saturate-50' : ''
+      } ${isDragging ? 'shadow-2xl ring-2 ring-brand-500/50 z-50 relative' : ''}`}
     >
       <div className="flex items-start justify-between gap-4">
-        {/* Drag Handle */}
-        <div
-          className="mt-1 cursor-grab active:cursor-grabbing text-neutral-400 hover:text-brand-500 p-1"
-          {...attributes}
-          {...listeners}
-        >
+        {/* Visual Drag Handle */}
+        <div className="mt-1 text-neutral-400 hover:text-brand-500 p-1 shrink-0 opacity-50 hover:opacity-100 transition-opacity">
           <FiMenu size={20} />
         </div>
 
@@ -236,6 +262,7 @@ function SortableImageItem({
   onMoveUp,
   onMoveDown,
   onDelete,
+  onPreview,
 }: {
   img: ProjectImage;
   idx: number;
@@ -243,41 +270,74 @@ function SortableImageItem({
   onMoveUp: (e: React.MouseEvent) => void;
   onMoveDown: (e: React.MouseEvent) => void;
   onDelete: (e: React.MouseEvent) => void;
+  onPreview: (e: React.MouseEvent) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: img.id,
   });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
-    ...(isDragging ? { zIndex: 10, position: 'relative' as const } : {}),
+    ...(isDragging ? { zIndex: 50, position: 'relative' as const } : {}),
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative group aspect-video rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 ${
-        isDragging ? 'shadow-lg ring-2 ring-brand-500/50' : ''
+      className={`relative group aspect-video rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 touch-none ${
+        isDragging ? 'shadow-xl ring-2 ring-brand-500/50' : ''
       }`}
     >
+      {/* Full Card Drag Hitbox */}
       <div
         className="absolute inset-0 cursor-grab active:cursor-grabbing z-0"
         {...attributes}
         {...listeners}
       />
-      <Image
-        src={img.url}
-        alt="Project image"
-        width={400}
-        height={225}
-        className="w-full h-full object-cover pointer-events-none"
-      />
+
+      {/* Hamburger Visual Indicator */}
+      <div className="absolute top-2 left-2 z-10 bg-black/50 backdrop-blur-md rounded-md p-1.5 text-white/90 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+        <FiMenu size={14} />
+      </div>
+      {img.url.match(/\.(mp4|webm|mov|avi)$/i) ? (
+        <>
+          <video
+            src={img.url}
+            className="w-full h-full object-cover pointer-events-none"
+            muted
+            playsInline
+            preload="metadata"
+          />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-black/50 p-3 rounded-full text-white backdrop-blur-sm shadow-lg border border-white/20">
+              <FiPlay fill="currentColor" size={20} className="ml-0.5" />
+            </div>
+          </div>
+        </>
+      ) : (
+        <Image
+          src={img.url}
+          alt="Project media"
+          width={400}
+          height={225}
+          className="w-full h-full object-cover pointer-events-none"
+        />
+      )}
 
       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 pointer-events-none">
         <div className="flex gap-2 relative z-10 pointer-events-auto">
           <button
+            type="button"
+            onClick={onPreview}
+            className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 text-brand-500 transition-colors cursor-pointer"
+            title="Aperçu"
+          >
+            <FiEye size={16} />
+          </button>
+          <button
+            type="button"
             onClick={onMoveUp}
             disabled={idx === 0}
             className="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded cursor-pointer disabled:opacity-50"
@@ -335,6 +395,12 @@ export default function AdminProjectsPage() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
   const [imageDeleteTarget, setImageDeleteTarget] = useState<ProjectImage | null>(null);
+  const [previewMedia, setPreviewMedia] = useState<string | null>(null);
+
+  useLockBodyScroll(formOpen);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, formOpen);
+
   const [skillInput, setSkillInput] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -531,7 +597,9 @@ export default function AdminProjectsPage() {
 
   // ─── Drag and Drop ───────────────────────────────
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
@@ -615,11 +683,60 @@ export default function AdminProjectsPage() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !editingId) return;
 
+    const filesArr = Array.from(e.target.files);
+
+    // Validation Client-Side stricte
+    let hasError = false;
+    for (const file of filesArr) {
+      if (file.type.startsWith('video/') && file.size > 100 * 1024 * 1024) {
+        showToast('error', `La vidéo dépasse 100 Mo.`);
+        hasError = true;
+      } else if (file.type.startsWith('image/') && file.size > 15 * 1024 * 1024) {
+        showToast('error', `L'image dépasse 15 Mo.`);
+        hasError = true;
+      } else if (!file.type.startsWith('video/') && !file.type.startsWith('image/')) {
+        showToast('error', `Format non supporté (Images/Vidéos uniquement).`);
+        hasError = true;
+      }
+    }
+
+    if (hasError) {
+      e.target.value = '';
+      return;
+    }
+
     setIsUploadingImage(true);
-    const formData = new FormData();
-    Array.from(e.target.files).forEach((file) => formData.append('files', file));
 
     try {
+      // Compression parallèle
+      const compressedFiles = await Promise.all(
+        filesArr.map(async (file) => {
+          if (!file.type.startsWith('image/')) return file;
+
+          try {
+            const options = {
+              maxSizeMB: 1, // On limite fortement le poids maximum
+              maxWidthOrHeight: 1920, // Résolution Full HD max
+              useWebWorker: true,
+              fileType: file.type,
+            };
+            const compressedBlob = await imageCompression(file, options);
+
+            // Créer un vrai objet File à partir du Blob pour formData
+            return new File([compressedBlob], file.name, {
+              type: compressedBlob.type || file.type,
+              lastModified: Date.now(),
+            });
+          } catch (error) {
+            console.error('Erreur compression image:', file.name, error);
+            return file; // Si échec, on renvoie l'original
+          }
+        }),
+      );
+
+      const formData = new FormData();
+      compressedFiles.forEach((file) => formData.append('files', file));
+
       const res = await fetch(`/api/admin/projects/${editingId}/images`, {
         method: 'POST',
         body: formData,
@@ -627,7 +744,7 @@ export default function AdminProjectsPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         setExistingImages((prev) => [...prev, ...data.images]);
-        showToast('success', 'Images ajoutées !');
+        showToast('success', 'Média(s) ajouté(s) !');
         fetchProjects(); // Rafraîchir la liste globale
       } else {
         showToast('error', data.error || 'Erreur lors du telechargement.');
@@ -716,31 +833,38 @@ export default function AdminProjectsPage() {
     'w-full rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 px-4 py-2.5 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors';
 
   return (
-    <section className="min-h-screen bg-linear-to-b from-neutral-50 to-neutral-200 dark:from-neutral-900 dark:to-neutral-800 text-neutral-900 dark:text-white p-6 pt-40 transition-colors duration-300">
+    <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-4xl mx-auto"
+        className="mx-auto max-w-7xl w-full"
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Link
-            href="/admin/dashboard"
-            className="inline-flex items-center gap-2 text-neutral-600 dark:text-neutral-400 hover:text-brand-500 dark:hover:text-brand-400 transition-colors font-medium"
-          >
-            <FiArrowLeft className="text-lg" />
-            Retour
-          </Link>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin/dashboard"
+              className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-600 dark:text-neutral-400"
+              aria-label="Retour au tableau de bord"
+            >
+              <FiArrowLeft size={20} />
+            </Link>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900 dark:text-white flex items-center gap-3">
+                <FolderKanban className="text-brand-500" />
+                Gestion des Projets
+              </h1>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                Gérez vos réalisations et leur ordre d&apos;affichage
+              </p>
+            </div>
+          </div>
           <Button onClick={openNew}>
             <FiPlus size={18} />
             Nouveau projet
           </Button>
         </div>
-
-        <h1 className="text-3xl font-bold mb-8 text-center text-brand-500 dark:text-brand-400">
-          Gestion des Projets
-        </h1>
 
         {/* Projects list */}
         {loading ? (
@@ -758,6 +882,7 @@ export default function AdminProjectsPage() {
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
           >
             <div className="space-y-4">
               <SortableContext items={projects} strategy={verticalListSortingStrategy}>
@@ -793,6 +918,7 @@ export default function AdminProjectsPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
+              ref={modalRef}
               className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6"
               onClick={(e) => e.stopPropagation()}
             >
@@ -1033,7 +1159,7 @@ export default function AdminProjectsPage() {
                         <input
                           type="file"
                           multiple
-                          accept="image/*"
+                          accept="image/*,video/*"
                           className="hidden"
                           ref={fileInputRef}
                           onChange={handleImageUpload}
@@ -1047,7 +1173,7 @@ export default function AdminProjectsPage() {
                           onClick={() => fileInputRef.current?.click()}
                         >
                           <FiPlus size={18} />
-                          Ajouter des images (max 10MB)
+                          Ajouter des médias (Photos/Vidéos max 100MB)
                         </Button>
                       </div>
 
@@ -1079,6 +1205,10 @@ export default function AdminProjectsPage() {
                                     if (saving || isUploadingImage) return;
                                     e.stopPropagation();
                                     handleDeleteImage(img);
+                                  }}
+                                  onPreview={(e) => {
+                                    e.stopPropagation();
+                                    setPreviewMedia(img.url);
                                   }}
                                 />
                               ))}
@@ -1123,6 +1253,51 @@ export default function AdminProjectsPage() {
         onConfirm={() => imageDeleteTarget && confirmDeleteImage(imageDeleteTarget.id)}
         onCancel={() => setImageDeleteTarget(null)}
       />
+
+      {/* Media Preview Lightbox */}
+      <AnimatePresence>
+        {previewMedia && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 sm:p-8"
+            onClick={() => setPreviewMedia(null)}
+          >
+            <button
+              onClick={() => setPreviewMedia(null)}
+              className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+            >
+              <FiX size={24} />
+            </button>
+            <div
+              className="relative w-full max-w-5xl h-full max-h-[85vh] flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {previewMedia.match(/\.(mp4|webm|mov|avi)$/i) ? (
+                <video
+                  src={previewMedia}
+                  className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                  autoPlay
+                  controls
+                  playsInline
+                />
+              ) : (
+                <div className="relative w-full h-full">
+                  <Image
+                    src={previewMedia}
+                    alt="Media Preview"
+                    fill
+                    className="object-contain drop-shadow-2xl"
+                    sizes="100vw"
+                    priority
+                  />
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ToastContainer toast={toast} onClose={hideToast} />
     </section>

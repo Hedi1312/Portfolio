@@ -8,31 +8,50 @@ on:
       - staging
 
 jobs:
-  vers-validation:
+  # ÉTAPE 1 : Trouver tous les tickets liés dans la description
+  extract-issues:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    outputs:
+      issues_list: ${{ steps.find_issues.outputs.issues }}
     steps:
-      - name: 🔍 Récupérer le numéro du ticket lié
-        id: find_issue
+      - name: 🔍 Extraire tous les numéros de tickets
+        id: find_issues
         run: |
-          ISSUE_NUM=$(echo "${{ github.event.pull_request.body }}" | grep -ioE '(fixes|closes|resolves) #[0-9]+' | grep -oE '[0-9]+' | head -1)
-          echo "issue_number=$ISSUE_NUM" >> $GITHUB_OUTPUT
+          # Le .{0,5} nous protège des espaces bizarres ou des crochets !
+          ISSUES=$(echo "${{ github.event.pull_request.body }}" | grep -ioE '(fixes|closes|resolves).{0,5}#[0-9]+' | grep -oE '[0-9]+' || true)
 
-      - name: 🆔 Récupérer le Node ID du ticket
+          if [ -z "$ISSUES" ]; then
+            echo "issues=[]" >> $GITHUB_OUTPUT
+          else
+            # Transforme les numéros trouvés en tableau JSON (ex: ["19", "29"])
+            JSON_ARRAY=$(echo "$ISSUES" | jq -R . | jq -s -c .)
+            echo "issues=$JSON_ARRAY" >> $GITHUB_OUTPUT
+          fi
+
+  # ÉTAPE 2 : Boucler et déplacer chaque ticket vers la bonne colonne
+  move-issues:
+    needs: extract-issues
+    if: needs.extract-issues.outputs.issues_list != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # C'est ici que la boucle se crée pour chaque ticket
+        issue_num: ${{ fromJson(needs.extract-issues.outputs.issues_list) }}
+    steps:
+      - name: 🆔 Récupérer le Node ID du ticket #${{ matrix.issue_num }}
         id: get_node_id
-        if: steps.find_issue.outputs.issue_number != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          NODE_ID=$(gh issue view ${{ steps.find_issue.outputs.issue_number }} --repo ${{ github.repository }} --json id --jq '.id')
+          NODE_ID=$(gh issue view ${{ matrix.issue_num }} --repo ${{ github.repository }} --json id --jq '.id')
           echo "node_id=$NODE_ID" >> $GITHUB_OUTPUT
 
-      - name: 🟡 Déplacer vers "En cours de validation"
-        if: steps.get_node_id.outputs.node_id != ''
+      - name: 🟣 Déplacer vers "En attente de validation"
         uses: leonsteinhaeuser/project-beta-automations@v2.2.1
         with:
           gh_token: ${{ secrets.PROJECT_PAT }}
           user: 'Hedi1312'
           project_id: 4
           resource_node_id: ${{ steps.get_node_id.outputs.node_id }}
-          status_value: 'En cours de validation'
+          status_value: 'En attente de validation'
