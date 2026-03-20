@@ -46,6 +46,7 @@ import { SKILL_ICONS } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
 import { z } from 'zod';
 import imageCompression from 'browser-image-compression';
+import { directUploadToCloudinary } from '@/lib/cloudinary-client';
 import type { Modifier } from '@dnd-kit/core';
 import { FolderKanban } from 'lucide-react';
 
@@ -734,12 +735,18 @@ export default function AdminProjectsPage() {
         }),
       );
 
-      const formData = new FormData();
-      compressedFiles.forEach((file) => formData.append('files', file));
+      // Direct Upload vers Cloudinary pour chaque fichier
+      const uploadedImages = await Promise.all(
+        compressedFiles.map((file) =>
+          directUploadToCloudinary(file, { subfolder: 'projets' }),
+        ),
+      );
 
+      // Envoyer les métadonnées au backend pour sauvegarde en BDD
       const res = await fetch(`/api/admin/projects/${editingId}/images`, {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: uploadedImages }),
       });
       const data = await res.json();
       if (res.ok && data.success) {

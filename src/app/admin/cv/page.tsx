@@ -1,5 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import { PDFDocument } from 'pdf-lib';
+import { directUploadToCloudinary } from '@/lib/cloudinary-client';
 import { GrDocumentPdf } from 'react-icons/gr';
 import { FiEye, FiDownload, FiX, FiArrowLeft, FiTrash2 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
@@ -116,26 +118,59 @@ export default function AdminCVPage() {
 
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append('file', file);
+    try {
+      // 1. Modifier les métadonnées PDF côté client
+      const bytes = await file.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(bytes);
+      pdfDoc.setTitle('CV_OKBA_Hedi');
+      pdfDoc.setAuthor('Hedi OKBA');
+      pdfDoc.setSubject('Curriculum Vitae');
+      pdfDoc.setProducer('Portfolio Hedi OKBA');
+      pdfDoc.setCreator('Portfolio Hedi OKBA');
 
-    const res = await fetch('/api/admin/cv', {
-      method: 'POST',
-      body: formData,
-    });
+      const modifiedPdfBytes = await pdfDoc.save();
+      const modifiedBlob = new Blob([modifiedPdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+      const modifiedFile = new File([modifiedBlob], 'CV_OKBA_Hedi.pdf', {
+        type: 'application/pdf',
+      });
+      const sizeStr = (modifiedPdfBytes.length / 1024).toFixed(1) + ' Ko';
 
-    const data = await res.json();
-    if (res.ok) {
-      showToast('success', 'CV mis à jour avec succès !');
-      setPreviewUrl(data.url);
-      setFileSize((file.size / 1024).toFixed(1) + ' Ko');
-      setFileName('CV_OKBA_Hedi.pdf');
-      setFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    } else {
-      showToast('error', `Erreur : ${data.error}`);
+      // 2. Direct Upload vers Cloudinary
+      const uploaded = await directUploadToCloudinary(modifiedFile, {
+        subfolder: 'cv',
+        resource_type: 'image',
+        public_id: 'CV_OKBA_Hedi',
+      });
+
+      // 3. Envoyer les métadonnées au backend
+      const res = await fetch('/api/admin/cv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: uploaded.url,
+          public_id: uploaded.public_id,
+          resource_type: uploaded.resource_type,
+          size: sizeStr,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        showToast('success', 'CV mis à jour avec succès !');
+        setPreviewUrl(data.url);
+        setFileSize(sizeStr);
+        setFileName('CV_OKBA_Hedi.pdf');
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      } else {
+        showToast('error', `Erreur : ${data.error}`);
+      }
+    } catch (err) {
+      console.error('Erreur upload CV:', err);
+      showToast('error', 'Erreur lors de l\'upload du CV.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDownload = async () => {
@@ -256,12 +291,12 @@ export default function AdminCVPage() {
 
                 {previewUrl ? (
                   <div className="flex-1 flex flex-col">
-                    <div className="flex items-center justify-between flex-wrap gap-4 mb-6 bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-xl border border-neutral-100 dark:border-neutral-800">
-                      <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="flex items-center justify-between flex-wrap lg:flex-nowrap gap-4 mb-6 bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-xl border border-neutral-100 dark:border-neutral-800">
+                      <div className="flex items-center gap-3 overflow-hidden min-w-0">
                         <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center shrink-0">
                           <GrDocumentPdf className="text-brand-500 text-xl" />
                         </div>
-                        <div className="min-w-0 pr-4">
+                        <div className="min-w-0">
                           <p className="font-semibold text-neutral-900 dark:text-white truncate">
                             {fileName || 'CV_OKBA_Hedi.pdf'}
                           </p>
@@ -271,7 +306,7 @@ export default function AdminCVPage() {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 justify-end">
+                      <div className="flex gap-2 shrink-0">
                         <Button
                           onClick={handleDeleteClick}
                           variant="danger"
@@ -289,7 +324,7 @@ export default function AdminCVPage() {
                         >
                           {showPreview ? (
                             <>
-                              <FiX className="text-neutral-500" />
+                              <FiX className="text-brand-500 dark:text-brand-400" />
                               Masquer
                             </>
                           ) : (

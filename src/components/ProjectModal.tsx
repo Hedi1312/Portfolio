@@ -36,15 +36,16 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
 
   const images = project.images || [];
   const [direction, setDirection] = useState(0);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (images.length <= 1 || isFullScreen) return;
     const interval = setInterval(() => {
       setDirection(1);
       setCurrentImageIndex((prev) => (prev + 1) % images.length);
     }, 7000);
     return () => clearInterval(interval);
-  }, [images.length, currentImageIndex]);
+  }, [images.length, currentImageIndex, isFullScreen]);
 
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -57,7 +58,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const [isFullScreen, setIsFullScreen] = useState(false);
+
 
   return (
     <>
