@@ -3,10 +3,23 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { FiX, FiGithub, FiExternalLink, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import {
+  FiX,
+  FiGithub,
+  FiExternalLink,
+  FiChevronLeft,
+  FiChevronRight,
+  FiPlay,
+} from 'react-icons/fi';
 import { SKILL_ICONS } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+
+const slideVariants = {
+  enter: { opacity: 0, scale: 0.98 },
+  center: { opacity: 1, scale: 1, zIndex: 1 },
+  exit: { opacity: 0, scale: 1.02, zIndex: 0 },
+};
 import { Project } from '@/app/sections/MesProjets';
 
 interface ProjectModalProps {
@@ -22,10 +35,12 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
   useLockBodyScroll(true);
 
   const images = project.images || [];
+  const [direction, setDirection] = useState(0);
 
   useEffect(() => {
     if (images.length <= 1) return;
     const interval = setInterval(() => {
+      setDirection(1);
       setCurrentImageIndex((prev) => (prev + 1) % images.length);
     }, 7000);
     return () => clearInterval(interval);
@@ -33,10 +48,12 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
 
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setDirection(1);
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
   const prevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setDirection(-1);
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
@@ -71,27 +88,57 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             className={`w-full md:w-[65%] h-[40vh] md:h-full shrink-0 relative bg-gradient-to-br ${project.gradient} overflow-hidden group`}
           >
             {images.length > 0 ? (
-              <AnimatePresence mode="popLayout">
-                <motion.div
-                  key={currentImageIndex}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="absolute inset-0"
-                >
-                  <Image
-                    src={images[currentImageIndex].url}
-                    alt={`${project.title} - screen ${currentImageIndex + 1}`}
-                    fill
-                    className="object-contain cursor-zoom-in"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsFullScreen(true);
-                    }}
-                    sizes="(max-width: 768px) 100vw, 65vw"
-                  />
-                </motion.div>
+              <AnimatePresence initial={false} custom={direction} mode="popLayout">
+                {images.map(
+                  (img, idx) =>
+                    idx === currentImageIndex && (
+                      <motion.div
+                        key={img.id}
+                        custom={direction}
+                        variants={slideVariants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        transition={{
+                          opacity: { duration: 0.4 },
+                          scale: { duration: 0.4, ease: 'easeOut' },
+                        }}
+                        className="absolute inset-0"
+                      >
+                        {img.url.match(/\.(mp4|webm|mov|avi)$/i) ? (
+                          <>
+                            <video
+                              src={img.url}
+                              className="object-contain w-full h-full cursor-zoom-in bg-black/30 backdrop-blur-md"
+                              autoPlay
+                              muted
+                              loop
+                              playsInline
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsFullScreen(true);
+                              }}
+                            />
+                            <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-white/90 text-xs font-medium flex items-center gap-1.5 pointer-events-none z-10">
+                              <FiPlay size={12} fill="currentColor" /> Vidéo
+                            </div>
+                          </>
+                        ) : (
+                          <Image
+                            src={img.url}
+                            alt={`${project.title} - screen ${idx + 1}`}
+                            fill
+                            className="object-contain cursor-zoom-in"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsFullScreen(true);
+                            }}
+                            sizes="(max-width: 768px) 100vw, 65vw"
+                          />
+                        )}
+                      </motion.div>
+                    ),
+                )}
               </AnimatePresence>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -104,14 +151,16 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             {images.length > 1 && (
               <>
                 <button
+                  type="button"
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full backdrop-blur-md transition-all pointer-events-auto cursor-pointer"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full backdrop-blur-md transition-all pointer-events-auto cursor-pointer z-10"
                 >
                   <FiChevronLeft size={24} />
                 </button>
                 <button
+                  type="button"
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full backdrop-blur-md transition-all pointer-events-auto cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full backdrop-blur-md transition-all pointer-events-auto cursor-pointer z-10"
                 >
                   <FiChevronRight size={24} />
                 </button>
@@ -212,14 +261,24 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
               <FiX size={18} />
             </button>
 
-            <Image
-              src={images[currentImageIndex].url}
-              alt={`${project.title} - fullscreen`}
-              fill
-              className="object-contain"
-              sizes="100vw"
-              priority
-            />
+            {images[currentImageIndex].url.match(/\.(mp4|webm|mov|avi)$/i) ? (
+              <video
+                src={images[currentImageIndex].url}
+                className="object-contain w-full h-full"
+                autoPlay
+                controls
+                playsInline
+              />
+            ) : (
+              <Image
+                src={images[currentImageIndex].url}
+                alt={`${project.title} - fullscreen`}
+                fill
+                className="object-contain"
+                sizes="100vw"
+                priority
+              />
+            )}
 
             {images.length > 1 && (
               <>

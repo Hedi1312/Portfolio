@@ -110,11 +110,13 @@ model ProjectImage {
 }
 
 model Cv {
-  id        String   @id @default(cuid())
-  url       String
-  public_id String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  url           String
+  public_id     String
+  resource_type String   @default("image")
+  size          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("cvs")
 }

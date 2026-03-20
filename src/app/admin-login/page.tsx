@@ -46,8 +46,8 @@ export default function LoginPage() {
   };
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-start pt-16 px-6 bg-background transition-colors duration-300">
-      <div className="w-full max-w-xl mx-auto rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-8 shadow-xl dark:shadow-2xl mb-12 mt-20 transition-colors duration-300">
+    <section className="min-h-screen flex flex-col items-center justify-start pt-18 px-6 bg-background transition-colors duration-300">
+      <div className="w-full max-w-xl mx-auto rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-8 shadow-xl dark:shadow-2xl mb-12 mt-34 transition-colors duration-300">
         <h1 className="text-3xl md:text-4xl font-extrabold text-neutral-900 dark:text-white text-center">
           👨🏻‍💻 Connexion Admin
         </h1>

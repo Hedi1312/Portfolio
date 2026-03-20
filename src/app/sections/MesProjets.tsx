@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { FiExternalLink, FiGithub, FiInfo } from 'react-icons/fi';
+import { FiExternalLink, FiGithub, FiInfo, FiPlay } from 'react-icons/fi';
 import { SKILL_ICONS } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
 import { ProjectModal } from '@/components/ProjectModal';
@@ -121,16 +121,33 @@ export default function MesProjets() {
               <div
                 className={`h-40 relative overflow-hidden ${!projet.images || projet.images.length === 0 ? `bg-gradient-to-br ${projet.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
               >
-                {projet.images && projet.images.length > 0 && (
-                  <Image
-                    src={projet.images[0].url}
-                    alt={projet.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-all duration-700"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    priority={index < 3}
-                  />
-                )}
+                {projet.images &&
+                  projet.images.length > 0 &&
+                  (projet.images[0].url.match(/\.(mp4|webm|mov|avi)$/i) ? (
+                    <>
+                      <video
+                        src={projet.images[0].url}
+                        className="object-cover w-full h-full group-hover:scale-105 transition-all duration-700 pointer-events-none"
+                        muted
+                        playsInline
+                        preload="metadata"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                        <div className="bg-black/50 p-3 rounded-full text-white backdrop-blur-sm shadow-lg border border-white/20">
+                          <FiPlay fill="currentColor" size={20} className="ml-0.5" />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <Image
+                      src={projet.images[0].url}
+                      alt={projet.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-all duration-700"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      priority={index < 3}
+                    />
+                  ))}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.4)_0%,transparent_60%)] dark:bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1)_0%,transparent_60%)] z-10" />
                 {/* Decorative elements */}
                 <div className="absolute top-4 right-4 w-12 h-12 rounded-full border border-black/10 dark:border-white/20 group-hover:scale-110 transition-transform duration-500" />

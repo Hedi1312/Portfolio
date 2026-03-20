@@ -13,12 +13,12 @@ export async function uploadToCloudinary(
   buffer: Buffer,
   filename: string,
   subfolder?: string,
-): Promise<{ url: string; public_id: string }> {
+): Promise<{ url: string; public_id: string; resource_type: string }> {
   return new Promise((resolve, reject) => {
     const baseFolder = process.env.CLOUDINARY_FOLDER || 'development';
     const folder = subfolder ? `${baseFolder}/${subfolder}` : baseFolder;
 
-    // Pour que Cloudinary gère bien le format (pdf, images, etc)
+    // On repasse en mode image pour que Cloudinary génère une vraie preview et conserve la nature PDF
     const isPdf = filename.toLowerCase().endsWith('.pdf');
     const resource_type = isPdf ? 'image' : 'auto';
 
@@ -27,8 +27,9 @@ export async function uploadToCloudinary(
         {
           folder,
           resource_type: resource_type,
-          // Si c'est un PDF, on force l'extension pour éviter les soucis avec certains viewers
+          // Optionnel : on peut forcer le nom pour bien avoir le .pdf affiché dans Cloudinary
           public_id: isPdf ? path.parse(filename).name : undefined,
+          invalidate: true,
         },
         (error, result) => {
           if (error) {
@@ -40,6 +41,7 @@ export async function uploadToCloudinary(
           resolve({
             url: result.secure_url,
             public_id: result.public_id,
+            resource_type: result.resource_type,
           });
         },
       )
@@ -47,11 +49,12 @@ export async function uploadToCloudinary(
   });
 }
 
-export async function deleteFromCloudinary(public_id: string): Promise<void> {
+export async function deleteFromCloudinary(
+  public_id: string,
+  resource_type: string = 'image',
+): Promise<void> {
   try {
-    // On laisse resource_type:'auto' ou on ne le passe pas ? Si c'était raw, il faut préciser.
-    // Cloudinary recommande de ne pas spécifier si image/video, mais pour raw il le faut parfois.
-    await cloudinary.uploader.destroy(public_id);
+    await cloudinary.uploader.destroy(public_id, { resource_type, invalidate: true });
   } catch (error) {
     console.error('Erreur lors de la suppression sur Cloudinary:', error);
   }

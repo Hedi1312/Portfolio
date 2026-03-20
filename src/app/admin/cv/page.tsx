@@ -1,21 +1,26 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { GrDocumentPdf } from 'react-icons/gr';
-import { FiEye, FiDownload, FiX, FiArrowLeft } from 'react-icons/fi';
+import { FiEye, FiDownload, FiX, FiArrowLeft, FiTrash2 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { useToast, ToastContainer } from '@/components/ui/Toast';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 export default function AdminCVPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [message, setMessage] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
   const [fileSize, setFileSize] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { toast, showToast, hideToast } = useToast();
 
   // Charger le CV existant
   useEffect(() => {
@@ -33,7 +38,76 @@ export default function AdminCVPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
+    if (selectedFile && selectedFile.size > 10 * 1024 * 1024) {
+      showToast('error', 'Le CV ne doit pas dépasser 10 Mo.');
+      e.target.value = '';
+      return;
+    }
     setFile(selectedFile);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+
+      if (droppedFile.size > 10 * 1024 * 1024) {
+        showToast('error', 'Le CV ne doit pas dépasser 10 Mo.');
+        return;
+      }
+
+      if (
+        droppedFile.type === 'application/pdf' ||
+        droppedFile.name.toLowerCase().endsWith('.pdf')
+      ) {
+        setFile(droppedFile);
+        if (fileInputRef.current) {
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(droppedFile);
+          fileInputRef.current.files = dataTransfer.files;
+        }
+      } else {
+        showToast('error', 'Veuillez déposer un fichier au format PDF.');
+      }
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setIsConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    setIsConfirmOpen(false);
+    setIsDeleting(true);
+    try {
+      const res = await fetch('/api/admin/cv', { method: 'DELETE' });
+      if (res.ok) {
+        showToast('success', 'CV supprimé avec succès !');
+        setPreviewUrl('');
+        setFileSize(null);
+        setFileName(null);
+        setShowPreview(false);
+      } else {
+        const data = await res.json();
+        showToast('error', `Erreur : ${data.error}`);
+      }
+    } catch (_err) {
+      showToast('error', 'Erreur réseau lors de la suppression.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,15 +126,14 @@ export default function AdminCVPage() {
 
     const data = await res.json();
     if (res.ok) {
-      setMessage('✅ CV mis à jour avec succès !');
-      setTimeout(() => setMessage(''), 5000);
+      showToast('success', 'CV mis à jour avec succès !');
       setPreviewUrl(data.url);
       setFileSize((file.size / 1024).toFixed(1) + ' Ko');
-      setFileName(data.name || file.name);
+      setFileName('CV_OKBA_Hedi.pdf');
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } else {
-      setMessage(`❌ Erreur : ${data.error}`);
+      showToast('error', `Erreur : ${data.error}`);
     }
     setLoading(false);
   };
@@ -87,162 +160,198 @@ export default function AdminCVPage() {
   };
 
   return (
-    <section className="min-h-screen bg-linear-to-b from-neutral-50 to-neutral-200 dark:from-neutral-900 dark:to-neutral-800 text-neutral-900 dark:text-white p-6 pt-40 transition-colors duration-300">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="bg-white/80 dark:bg-neutral-900/70 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-xl p-10 px-3 sm:px-10 w-full max-w-2xl mx-auto backdrop-blur-sm"
-      >
-        <Link
-          href="/admin/dashboard"
-          className="inline-flex items-center gap-2 text-neutral-600 dark:text-neutral-400 hover:text-brand-500 dark:hover:text-brand-400 transition-colors mb-8 font-medium"
-        >
-          <FiArrowLeft className="text-lg" />
-          Retour au tableau de bord
-        </Link>
+    <>
+      <ToastContainer toast={toast} onClose={hideToast} />
+      <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
+        <div className="mx-auto max-w-7xl w-full">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/admin/dashboard"
+                className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-600 dark:text-neutral-400"
+                aria-label="Retour au tableau de bord"
+              >
+                <FiArrowLeft size={20} />
+              </Link>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900 dark:text-white flex items-center gap-3">
+                  <GrDocumentPdf className="text-brand-500" />
+                  Gestion du CV
+                </h1>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                  Gérez votre document PDF public
+                </p>
+              </div>
+            </div>
+          </div>
 
-        <h1 className="text-3xl font-bold mb-8 text-center text-brand-500 dark:text-brand-400">
-          Gestion du CV
-        </h1>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full relative z-10">
+            {/* Colonne de gauche : Upload */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6">
+                  Uploader un nouveau CV
+                </h2>
 
-        {/* === FORMULAIRE UPLOAD === */}
-        <form onSubmit={handleSubmit} className="space-y-6 flex flex-col items-center">
-          <label
-            htmlFor="file"
-            className="flex flex-col items-center justify-center w-full border-2 border-dashed border-neutral-300 dark:border-neutral-600 bg-neutral-50/50 dark:bg-transparent rounded-xl p-10 cursor-pointer hover:border-brand-500 dark:hover:border-brand-400 transition-colors"
-          >
-            <GrDocumentPdf className="text-brand-500 dark:text-brand-400 text-5xl mb-4" />
-            <p className="text-neutral-600 dark:text-neutral-300 text-center">
-              {file ? (
-                <>
-                  <span className="font-semibold text-neutral-900 dark:text-white">
-                    {file.name}
-                  </span>{' '}
-                  prêt à être uploadé
-                </>
-              ) : (
-                <>
-                  Glisse ton fichier ici ou{' '}
-                  <span className="text-brand-500 dark:text-brand-400 underline">
-                    choisis-en un
-                  </span>
-                </>
-              )}
-            </p>
-            <input
-              id="file"
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </label>
-
-          <Button type="submit" disabled={!file} isLoading={loading} loadingText="Mise à jour...">
-            Mettre à jour le CV
-          </Button>
-        </form>
-
-        {/* === MESSAGE === */}
-        {message && (
-          <p
-            className={`my-6 rounded-lg text-center text-base p-3 ${
-              message.startsWith('✅')
-                ? 'bg-success-100 text-success-700'
-                : 'bg-danger-100 text-danger-700'
-            }`}
-          >
-            {message}
-          </p>
-        )}
-
-        {/* === APERÇU DU CV === */}
-        {previewUrl && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="pt-10 mt-10 border-t border-neutral-200 dark:border-neutral-700"
-          >
-            <h2 className="text-xl font-semibold mb-6 text-center text-neutral-800 dark:text-neutral-200">
-              CV actuel :
-            </h2>
-
-            <div className="bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6 shadow-md dark:shadow-lg hover:shadow-[0_0_15px_rgba(0,187,167,0.1)] transition-all">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-3">
-                  <GrDocumentPdf className="text-danger-500 text-3xl" />
-                  <div>
-                    <p className="font-medium text-neutral-900 dark:text-neutral-100 truncate max-w-[250px] sm:max-w-[300px]">
-                      {fileName || 'Fichier inconnu'}
+                <form onSubmit={handleSubmit} className="space-y-6 flex flex-col items-center">
+                  <label
+                    htmlFor="file"
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-8 cursor-pointer transition-colors ${
+                      isDragging
+                        ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/20 shadow-inner'
+                        : 'border-neutral-300 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50 hover:border-brand-500 dark:hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-500/10'
+                    }`}
+                  >
+                    <GrDocumentPdf className="text-neutral-400 dark:text-neutral-500 text-4xl mb-3" />
+                    <p className="text-neutral-600 dark:text-neutral-400 text-center text-sm">
+                      {file ? (
+                        <>
+                          <span className="font-semibold text-neutral-900 dark:text-white block mb-1">
+                            {file.name}
+                          </span>
+                          prêt à être uploadé
+                        </>
+                      ) : (
+                        <>
+                          Glissez votre fichier ici ou{' '}
+                          <span className="text-brand-500 dark:text-brand-400 font-medium">
+                            parcourez
+                          </span>
+                        </>
+                      )}
                     </p>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                      {fileSize || 'Taille inconnue'}
+                    <input
+                      id="file"
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+
+                  <Button
+                    type="submit"
+                    disabled={!file || loading}
+                    isLoading={loading}
+                    loadingText="Envoi en cours..."
+                    className="w-full"
+                  >
+                    Mettre à jour le CV
+                  </Button>
+                </form>
+              </div>
+            </div>
+
+            {/* Colonne de droite : Aperçu actuel */}
+            <div className="lg:col-span-7 flex flex-col gap-6">
+              <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6">
+                  Fichier actuel en ligne
+                </h2>
+
+                {previewUrl ? (
+                  <div className="flex-1 flex flex-col">
+                    <div className="flex items-center justify-between flex-wrap gap-4 mb-6 bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-xl border border-neutral-100 dark:border-neutral-800">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center shrink-0">
+                          <GrDocumentPdf className="text-brand-500 text-xl" />
+                        </div>
+                        <div className="min-w-0 pr-4">
+                          <p className="font-semibold text-neutral-900 dark:text-white truncate">
+                            {fileName || 'CV_OKBA_Hedi.pdf'}
+                          </p>
+                          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                            {fileSize || 'Taille inconnue'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        <Button
+                          onClick={handleDeleteClick}
+                          variant="danger"
+                          isLoading={isDeleting}
+                          className="py-2 px-3 h-auto text-sm"
+                          title="Supprimer"
+                        >
+                          <FiTrash2 />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() => setShowPreview(!showPreview)}
+                          className="py-2 px-3 h-auto text-sm"
+                        >
+                          {showPreview ? (
+                            <>
+                              <FiX className="text-neutral-500" />
+                              Masquer
+                            </>
+                          ) : (
+                            <>
+                              <FiEye className="text-brand-500 dark:text-brand-400" />
+                              Aperçu
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          onClick={handleDownload}
+                          variant="primary"
+                          isLoading={isDownloading}
+                          className="py-2 px-3 h-auto text-sm"
+                        >
+                          <FiDownload />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {showPreview ? (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="flex-1"
+                      >
+                        <iframe
+                          src={previewUrl}
+                          className="w-full h-[60vh] border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-inner bg-neutral-100 dark:bg-neutral-950"
+                          allow="fullscreen"
+                        />
+                      </motion.div>
+                    ) : (
+                      <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-xl bg-neutral-50/50 dark:bg-neutral-800/30 p-12">
+                        <FiEye className="text-neutral-300 dark:text-neutral-600 text-5xl mb-4" />
+                        <p className="text-neutral-500 dark:text-neutral-400 text-sm">
+                          Cliquez sur &quot;Aperçu&quot; pour visualiser le document
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-xl bg-neutral-50/50 dark:bg-neutral-800/30 p-12">
+                    <GrDocumentPdf className="text-neutral-300 dark:text-neutral-600 text-5xl mb-4" />
+                    <p className="text-neutral-500 dark:text-neutral-400 text-sm">
+                      Aucun CV actuellement en ligne.
                     </p>
                   </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setShowPreview(!showPreview)}
-                  >
-                    {showPreview ? (
-                      <>
-                        <FiX className="text-danger-400" />
-                        Fermer
-                      </>
-                    ) : (
-                      <>
-                        <FiEye className="text-brand-500 dark:text-brand-400" />
-                        Voir
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    onClick={handleDownload}
-                    variant="primary"
-                    isLoading={isDownloading}
-                    loadingText="Téléchargement en cours..."
-                  >
-                    <FiDownload />
-                    Télécharger
-                  </Button>
-                </div>
+                )}
               </div>
-
-              {showPreview && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="mt-6"
-                >
-                  <iframe
-                    src={previewUrl}
-                    className="w-full h-[70vh] sm:h-[80vh] border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-inner overflow-auto"
-                    allow="fullscreen"
-                  />
-                  <p className="text-center mt-3 text-neutral-500 dark:text-neutral-400 text-sm">
-                    📱 Si la lecture est difficile,{' '}
-                    <a
-                      href={previewUrl}
-                      target="_blank"
-                      className="text-brand-500 dark:text-brand-400 underline"
-                    >
-                      ouvre le PDF en plein écran
-                    </a>
-                    .
-                  </p>
-                </motion.div>
-              )}
             </div>
-          </motion.div>
-        )}
-      </motion.div>
-    </section>
+          </div>
+        </div>
+      </section>
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Supprimer le CV"
+        message="Êtes-vous sûr de vouloir supprimer définitivement votre CV ? Le web ne pardonne pas."
+        onConfirm={confirmDelete}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
+    </>
   );
 }
