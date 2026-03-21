@@ -212,14 +212,17 @@ function formatLabel(
   if (!label) return { label: 'Inconnu', icon: AlertCircle, color: '#9CA3AF' };
   const lower = label.toLowerCase().trim();
 
-  if (lower.includes('windows')) return map['windows'];
-  if (lower.includes('mac') || lower.includes('ios') || lower.includes('apple'))
+  // OS specific checks only if map has these keys
+  if (lower.includes('windows') && map['windows']) return map['windows'];
+  if ((lower.includes('mac') || lower.includes('ios') || lower.includes('apple')) && map['macos'])
     return map['macos'];
-  if (lower.includes('android')) return map['android'];
-  if (lower.includes('linux')) return map['linux'];
+  if (lower.includes('android') && map['android']) return map['android'];
+  if (lower.includes('linux') && map['linux']) return map['linux'];
+
+  const matchedKey = Object.keys(map).find((key) => lower.includes(key) || key.includes(lower));
 
   return (
-    map[lower] || {
+    (matchedKey ? map[matchedKey] : null) || {
       label: label.charAt(0).toUpperCase() + label.slice(1),
       icon: Monitor,
       color: '#6B7280',

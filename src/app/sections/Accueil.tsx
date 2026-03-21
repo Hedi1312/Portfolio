@@ -37,7 +37,7 @@ export default function Accueil() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 text-sm font-medium text-neutral-600 dark:text-neutral-300"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-12 text-sm font-medium text-neutral-600 dark:text-neutral-300"
         >
           <span className="w-2 h-2 bg-success-400 rounded-full animate-pulse" />
           Disponible pour des projets
@@ -45,7 +45,7 @@ export default function Accueil() {
 
         {/* Title */}
         <motion.h2
-          className="text-5xl md:text-7xl font-extrabold mb-6 font-[family-name:var(--font-space-grotesk)] tracking-tight"
+          className="text-5xl md:text-7xl font-extrabold mb-12 font-[family-name:var(--font-space-grotesk)] tracking-tight"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -69,7 +69,7 @@ export default function Accueil() {
 
         {/* Subtitle */}
         <motion.p
-          className="text-lg md:text-xl text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto mb-10 leading-relaxed"
+          className="text-lg md:text-xl text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto mb-12 leading-relaxed"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.6 }}
