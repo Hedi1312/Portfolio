@@ -219,9 +219,7 @@ function formatLabel(
   if (lower.includes('android') && map['android']) return map['android'];
   if (lower.includes('linux') && map['linux']) return map['linux'];
 
-  const matchedKey = Object.keys(map).find(
-    (key) => lower.includes(key) || key.includes(lower),
-  );
+  const matchedKey = Object.keys(map).find((key) => lower.includes(key) || key.includes(lower));
 
   return (
     (matchedKey ? map[matchedKey] : null) || {
