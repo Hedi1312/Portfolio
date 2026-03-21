@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { FiExternalLink, FiGithub, FiInfo, FiPlay } from 'react-icons/fi';
-import { SKILL_ICONS } from '@/lib/skill-icons';
+import { findSkillIcon } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
 import { ProjectModal } from '@/components/ProjectModal';
 
@@ -166,22 +166,21 @@ export default function MesProjets() {
                 {/* Skills with icons */}
                 {projet.skills.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-5">
-                    {projet.skills.map((skill) => {
-                      const match = SKILL_ICONS[skill.name.toLowerCase()];
+                    {projet.skills.map((skill, index) => {
+                      const match = findSkillIcon(skill.icon || skill.name);
                       const Icon = match?.icon;
+
+                      // Fallback pour la couleur si skill.color n'existe pas ou match.color est différent
+                      const color = isDark
+                        ? match?.color || skill.color || '#00D5BE'
+                        : match?.colorLight || match?.color || skill.color || '#00D5BE';
+
                       return (
                         <span
-                          key={skill.id}
+                          key={`${skill.name}-${index}`}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[0.8125rem] font-medium rounded-full bg-brand-400/10 text-brand-600 dark:text-brand-400 border border-brand-400/20 shadow-sm"
                         >
-                          {Icon && (
-                            <Icon
-                              size={12}
-                              style={{
-                                color: isDark ? match.color : match.colorLight || match.color,
-                              }}
-                            />
-                          )}
+                          {Icon && <Icon size={12} style={{ color }} />}
                           {skill.name}
                         </span>
                       );

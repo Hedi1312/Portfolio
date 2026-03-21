@@ -13,6 +13,7 @@ import {
   Eye,
   FileText,
   ArrowRight,
+  UserCircle,
 } from 'lucide-react';
 import { GrDocumentPdf } from 'react-icons/gr';
 
@@ -119,13 +120,6 @@ export default function DashboardPage() {
   // ─── Quick Actions ─────────────────────────────────
   const actions = [
     {
-      title: 'Modifier mon CV',
-      description: 'Upload ou remplace ton CV PDF public.',
-      icon: <GrDocumentPdf className="h-6 w-6" />,
-      href: '/admin/cv',
-      accent: 'group-hover:text-brand-500',
-    },
-    {
       title: 'Messages reçus',
       description:
         kpi.unread > 0
@@ -137,6 +131,20 @@ export default function DashboardPage() {
       badge: kpi.unread,
     },
     {
+      title: 'Statistiques',
+      description: 'Consulte les visites et événements trackés.',
+      icon: <BarChart3 className="h-6 w-6" />,
+      href: '/admin/analytics',
+      accent: 'group-hover:text-emerald-500',
+    },
+    {
+      title: 'Modifier mon CV',
+      description: 'Upload ou remplace ton CV PDF public.',
+      icon: <GrDocumentPdf className="h-6 w-6" />,
+      href: '/admin/cv',
+      accent: 'group-hover:text-brand-500',
+    },
+    {
       title: 'Gérer mes projets',
       description: `${kpi.projects} projet${kpi.projects > 1 ? 's' : ''} publié${kpi.projects > 1 ? 's' : ''}`,
       icon: <FolderKanban className="h-6 w-6" />,
@@ -144,11 +152,11 @@ export default function DashboardPage() {
       accent: 'group-hover:text-amber-500',
     },
     {
-      title: 'Statistiques',
-      description: 'Consulte les visites et événements trackés.',
-      icon: <BarChart3 className="h-6 w-6" />,
-      href: '/admin/analytics',
-      accent: 'group-hover:text-emerald-500',
+      title: 'Section À propos',
+      description: 'Modifie ta présentation et tes technologies.',
+      icon: <UserCircle className="h-6 w-6" />,
+      href: '/admin/about',
+      accent: 'group-hover:text-purple-500',
     },
   ];
 

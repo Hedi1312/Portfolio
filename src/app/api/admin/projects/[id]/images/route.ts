@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { uploadToCloudinary } from '@/lib/cloudinary';
+
+interface UploadedImage {
+  url: string;
+  public_id: string;
+  resource_type: string;
+}
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -10,11 +15,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const project = await prisma.project.findUnique({ where: { id } });
     if (!project) return NextResponse.json({ error: 'Projet introuvable' }, { status: 404 });
 
-    const formData = await req.formData();
-    const files = formData.getAll('files') as File[];
+    const body = await req.json();
+    const images: UploadedImage[] = body.images;
 
-    if (!files || files.length === 0) {
-      return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 });
+    if (!images || images.length === 0) {
+      return NextResponse.json({ error: 'Aucune image fournie' }, { status: 400 });
+    }
+
+    // Vérifier que chaque image a les champs requis
+    for (const img of images) {
+      if (!img.url || !img.public_id) {
+        return NextResponse.json(
+          { error: 'Chaque image doit avoir un url et un public_id.' },
+          { status: 400 },
+        );
+      }
     }
 
     const uploadedImages = [];
@@ -26,23 +41,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     });
     let nextOrder = (maxOrderRes._max.order ?? -1) + 1;
 
-    for (const file of files) {
-      if (file.size > 100 * 1024 * 1024) {
-        return NextResponse.json(
-          { error: `Fichier ${file.name} trop volumineux (max 100Mo).` },
-          { status: 400 },
-        );
-      }
-
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const uploaded = await uploadToCloudinary(buffer, file.name, 'projets');
-
+    for (const img of images) {
       const projectImage = await prisma.projectImage.create({
         data: {
-          url: uploaded.url,
-          public_id: uploaded.public_id,
+          url: img.url,
+          public_id: img.public_id,
           order: nextOrder++,
           projectId: id,
         },
@@ -53,7 +56,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     return NextResponse.json({ success: true, images: uploadedImages }, { status: 201 });
   } catch (error) {
-    console.error('Erreur upload images projet:', error);
+    console.error('Erreur enregistrement images projet:', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

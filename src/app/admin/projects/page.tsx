@@ -42,10 +42,11 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useToast, ToastContainer } from '@/components/ui/Toast';
-import { SKILL_ICONS } from '@/lib/skill-icons';
+import { SKILL_ICONS, findSkillIcon } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
 import { z } from 'zod';
 import imageCompression from 'browser-image-compression';
+import { directUploadToCloudinary } from '@/lib/cloudinary-client';
 import type { Modifier } from '@dnd-kit/core';
 import { FolderKanban } from 'lucide-react';
 
@@ -130,6 +131,7 @@ function SortableProjectItem({
   openEdit: (p: Project) => void;
   setDeleteTarget: (p: Project) => void;
 }) {
+  const isDark = useIsDark();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: project.id,
   });
@@ -172,14 +174,24 @@ function SortableProjectItem({
           {/* Skills tags */}
           {project.skills.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-3">
-              {project.skills.map((skill) => (
-                <span
-                  key={skill.id}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-brand-400/10 text-brand-600 dark:text-brand-400 border border-brand-400/20"
-                >
-                  {skill.name}
-                </span>
-              ))}
+              {project.skills.map((skill) => {
+                const match = findSkillIcon(skill.icon || skill.name);
+                const Icon = match?.icon;
+
+                const color = isDark
+                  ? match?.color || skill.color || '#00D5BE'
+                  : match?.colorLight || match?.color || skill.color || '#00D5BE';
+
+                return (
+                  <span
+                    key={skill.id}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-brand-400/10 text-brand-600 dark:text-brand-400 border border-brand-400/20 shadow-sm"
+                  >
+                    {Icon && <Icon size={10} style={{ color }} className="mr-0.5" />}
+                    {skill.name}
+                  </span>
+                );
+              })}
             </div>
           )}
 
@@ -436,8 +448,10 @@ export default function AdminProjectsPage() {
     setSkillInput(value);
     const search = value.toLowerCase().trim();
     if (search.length > 0) {
-      // Filtrer les clés qui matchent
-      const matchingKeys = Object.keys(SKILL_ICONS).filter((k) => k.includes(search));
+      // Filtrer les clés qui matchent sur la clé OU sur le label
+      const matchingKeys = Object.entries(SKILL_ICONS)
+        .filter(([k, v]) => k.includes(search) || v.label.toLowerCase().includes(search))
+        .map(([k]) => k);
 
       // Dédoublonner par `label` pour ne pas avoir "next.js" et "nextjs"
       const uniqueLabels = new Set<string>();
@@ -457,23 +471,41 @@ export default function AdminProjectsPage() {
   };
 
   const addSkill = (name: string) => {
-    const key = name.toLowerCase().trim();
-    if (form.skills.some((s) => s.name.toLowerCase() === key)) return;
+    const search = name.toLowerCase().trim();
+    const matchData = Object.entries(SKILL_ICONS).find(
+      ([k, v]) => k === search || v.label.toLowerCase() === search,
+    );
 
-    const match = SKILL_ICONS[key];
+    const canonicalName = matchData ? matchData[1].label : name;
+    const canonicalKey = matchData ? matchData[0] : null;
+
+    const isDuplicate = form.skills.some(
+      (s) =>
+        s.name.toLowerCase() === canonicalName.toLowerCase() ||
+        (s.icon && canonicalKey && s.icon === canonicalKey),
+    );
+
+    if (isDuplicate) {
+      showToast('error', `"${canonicalName}" empêché : déjà ajouté.`);
+      return;
+    }
+
     const skill: Skill = {
-      name: match ? match.label : name, // Utiliser le label bien formaté si trouvé
-      icon: match ? key : null,
-      color: match?.color || '#00D5BE',
+      name: canonicalName,
+      icon: canonicalKey,
+      color: matchData ? matchData[1].color : '#00D5BE',
     };
     setForm((f) => ({ ...f, skills: [...f.skills, skill] }));
+    showToast('success', `"${canonicalName}" ajouté.`);
     setSkillInput('');
     setSuggestions([]);
     setSelectedIndex(-1);
   };
 
   const removeSkill = (index: number) => {
+    const removedName = form.skills[index].name;
     setForm((f) => ({ ...f, skills: f.skills.filter((_, i) => i !== index) }));
+    showToast('success', `"${removedName}" retiré.`);
   };
 
   // ─── Open edit form ──────────────────────────────
@@ -734,12 +766,16 @@ export default function AdminProjectsPage() {
         }),
       );
 
-      const formData = new FormData();
-      compressedFiles.forEach((file) => formData.append('files', file));
+      // Direct Upload vers Cloudinary pour chaque fichier
+      const uploadedImages = await Promise.all(
+        compressedFiles.map((file) => directUploadToCloudinary(file, { subfolder: 'projets' })),
+      );
 
+      // Envoyer les métadonnées au backend pour sauvegarde en BDD
       const res = await fetch(`/api/admin/projects/${editingId}/images`, {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: uploadedImages }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -1056,7 +1092,7 @@ export default function AdminProjectsPage() {
                         }
                       }}
                       className={inputClasses}
-                      placeholder="Tape un nom de techno (React, Docker...)..."
+                      placeholder="Ajouter une technologie (React, Docker...)"
                       disabled={saving || isUploadingImage}
                     />
                     {/* Autocomplete dropdown */}
@@ -1099,21 +1135,18 @@ export default function AdminProjectsPage() {
                   {form.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {form.skills.map((skill, i) => {
-                        const match = SKILL_ICONS[skill.name.toLowerCase()];
+                        const match = findSkillIcon(skill.icon || skill.name);
                         const Icon = match?.icon;
+                        const color = isDark
+                          ? match?.color || skill.color || '#00D5BE'
+                          : match?.colorLight || match?.color || skill.color || '#00D5BE';
+
                         return (
                           <span
                             key={i}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 rounded-full text-sm font-medium"
                           >
-                            {Icon && (
-                              <Icon
-                                size={14}
-                                style={{
-                                  color: isDark ? match.color : match.colorLight || match.color,
-                                }}
-                              />
-                            )}
+                            {Icon && <Icon size={14} style={{ color }} />}
                             {skill.name}
                             <button
                               type="button"
