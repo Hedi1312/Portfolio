@@ -114,7 +114,14 @@ export const SKILL_ICONS: Record<string, SkillIconEntry> = {
  * Retourne l'entrée du dictionnaire ou undefined si pas trouvée.
  */
 export function findSkillIcon(name: string): SkillIconEntry | undefined {
-  return SKILL_ICONS[name.toLowerCase().trim()];
+  const search = name.toLowerCase().trim();
+  // 1. Direct match by key
+  if (SKILL_ICONS[search]) return SKILL_ICONS[search];
+  // 2. Fallback match by label
+  const matchEntry = Object.values(SKILL_ICONS).find(
+    (entry) => entry.label.toLowerCase() === search,
+  );
+  return matchEntry;
 }
 
 /**

@@ -93,7 +93,7 @@ export default function Navbar() {
         <Link href="/" className="group">
           <h1 className="text-3xl font-bold font-[family-name:var(--font-space-grotesk)] tracking-tight">
             <span className="gradient-text-animated">Hëdi</span>
-            <span className="text-foreground ml-1 group-hover:text-brand-400 transition-colors duration-300">
+            <span className="text-foreground ml-2 group-hover:text-brand-400 transition-colors duration-300">
               OKBA
             </span>
           </h1>

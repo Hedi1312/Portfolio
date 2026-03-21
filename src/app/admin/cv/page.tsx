@@ -129,7 +129,9 @@ export default function AdminCVPage() {
       pdfDoc.setCreator('Portfolio Hedi OKBA');
 
       const modifiedPdfBytes = await pdfDoc.save();
-      const modifiedBlob = new Blob([modifiedPdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+      const modifiedBlob = new Blob([modifiedPdfBytes.buffer as ArrayBuffer], {
+        type: 'application/pdf',
+      });
       const modifiedFile = new File([modifiedBlob], 'CV_OKBA_Hedi.pdf', {
         type: 'application/pdf',
       });
@@ -167,7 +169,7 @@ export default function AdminCVPage() {
       }
     } catch (err) {
       console.error('Erreur upload CV:', err);
-      showToast('error', 'Erreur lors de l\'upload du CV.');
+      showToast('error', "Erreur lors de l'upload du CV.");
     } finally {
       setLoading(false);
     }

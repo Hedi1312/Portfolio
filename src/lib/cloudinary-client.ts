@@ -39,7 +39,7 @@ export async function directUploadToCloudinary(
 
   if (!signRes.ok) {
     const err = await signRes.json();
-    throw new Error(err.error || 'Impossible d\'obtenir la signature.');
+    throw new Error(err.error || "Impossible d'obtenir la signature.");
   }
 
   const { timestamp, signature, cloudName, apiKey, folder } = await signRes.json();
@@ -63,7 +63,7 @@ export async function directUploadToCloudinary(
 
   if (!uploadRes.ok) {
     const err = await uploadRes.json();
-    throw new Error(err.error?.message || 'Erreur lors de l\'upload vers Cloudinary.');
+    throw new Error(err.error?.message || "Erreur lors de l'upload vers Cloudinary.");
   }
 
   const result = await uploadRes.json();

@@ -11,7 +11,7 @@ import {
   FiChevronRight,
   FiPlay,
 } from 'react-icons/fi';
-import { SKILL_ICONS } from '@/lib/skill-icons';
+import { findSkillIcon } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 
@@ -57,8 +57,6 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
     setDirection(-1);
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
-
-
 
   return (
     <>
@@ -144,7 +142,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className="bg-white/60 dark:bg-black/40 text-neutral-800 dark:text-white/90 px-6 py-3 rounded-2xl backdrop-blur-md font-medium shadow-sm">
-                  Aucune image pour ce projet
+                  Aucune image/vidéo pour ce projet
                 </span>
               </div>
             )}
@@ -188,19 +186,19 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
 
             <div className="flex flex-wrap gap-2 mb-6">
               {project.skills.map((skill) => {
-                const match = SKILL_ICONS[skill.name.toLowerCase()];
+                const match = findSkillIcon(skill.icon || skill.name);
                 const Icon = match?.icon;
+
+                const color = isDark
+                  ? match?.color || skill.color || '#00D5BE'
+                  : match?.colorLight || match?.color || skill.color || '#00D5BE';
+
                 return (
                   <span
                     key={skill.id}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full bg-brand-400/10 text-brand-600 dark:text-brand-400 border border-brand-400/20"
                   >
-                    {Icon && (
-                      <Icon
-                        size={14}
-                        style={{ color: isDark ? match.color : match.colorLight || match.color }}
-                      />
-                    )}
+                    {Icon && <Icon size={14} style={{ color }} />}
                     {skill.name}
                   </span>
                 );
