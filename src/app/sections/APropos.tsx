@@ -145,7 +145,7 @@ export default function APropos() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <p className="text-center text-sm uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-8 font-medium">
+            <p className="text-center text-sm uppercase tracking-widest text-neutral-900 dark:text-white mb-8 font-medium">
               Technologies
             </p>
             <motion.div
