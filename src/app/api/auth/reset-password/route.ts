@@ -6,11 +6,12 @@ import bcrypt from 'bcrypt';
 
 import { prisma } from '@/lib/prisma';
 import { newPasswordSchema } from '@/lib/schemas/auth';
+const { verifySync } = require('otplib');
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { token, password, confirmPassword } = body;
+    const { token, password, confirmPassword, otpCode } = body;
 
     if (!token || typeof token !== 'string') {
       return NextResponse.json({ error: 'Token manquant.' }, { status: 400 });
@@ -40,6 +41,25 @@ export async function POST(req: Request) {
         { error: 'Ce lien a expiré. Veuillez refaire une demande.' },
         { status: 400 },
       );
+    }
+
+    // A2F Verification
+    if (!otpCode || typeof otpCode !== 'string') {
+      return NextResponse.json({ error: 'Le code OTP est requis.' }, { status: 400 });
+    }
+
+    const admin = resetRecord.admin;
+    if (admin.otpSecret) {
+      // A2F active: verify real TOTP code
+      const result = verifySync({ token: otpCode, secret: admin.otpSecret, window: 1 });
+      if (!result.valid) {
+        return NextResponse.json({ error: 'Code OTP invalide ou expiré.' }, { status: 400 });
+      }
+    } else {
+      // A2F inactive: only accept '000000'
+      if (otpCode !== '000000') {
+        return NextResponse.json({ error: 'Code OTP invalide.' }, { status: 400 });
+      }
     }
 
     // Hash the new password and update the admin

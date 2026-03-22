@@ -2,10 +2,21 @@
 
 import { newPasswordSchema, passwordRegex } from '@/lib/schemas/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, Suspense } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
-import { Eye, EyeOff, ShieldCheck, Lock, ArrowLeft, Check, AlertTriangle } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  Lock,
+  ArrowLeft,
+  Check,
+  AlertTriangle,
+  KeyRound,
+} from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -16,9 +27,17 @@ function ResetPasswordForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // A2F Modal state
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const otpModalRef = useRef<HTMLDivElement>(null);
+
+  useLockBodyScroll(showOtpModal);
 
   const criteria = [
     { label: '8 caractères minimum', test: passwordRegex.min },
@@ -28,38 +47,65 @@ function ResetPasswordForm() {
     { label: 'Un caractère spécial', test: passwordRegex.special },
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Close modal on outside click
+  useEffect(() => {
+    if (!showOtpModal) return;
+    const handleClick = (e: MouseEvent) => {
+      if (otpModalRef.current && !otpModalRef.current.contains(e.target as Node)) {
+        setShowOtpModal(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showOtpModal]);
+
+  // Step 1: Validate form and show OTP modal
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
     setSuccess('');
 
     const validation = newPasswordSchema.safeParse({ password, confirmPassword });
     if (!validation.success) {
       setError(validation.error.issues[0].message);
-      setLoading(false);
       return;
     }
+
+    // Show A2F modal
+    setOtpCode('');
+    setOtpError('');
+    setShowOtpModal(true);
+  };
+
+  // Step 2: Submit with OTP code
+  const handleConfirmWithOtp = async () => {
+    if (otpCode.length !== 6) return;
+    setOtpLoading(true);
+    setOtpError('');
 
     try {
       const res = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password, confirmPassword }),
+        body: JSON.stringify({ token, password, confirmPassword, otpCode }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Une erreur est survenue.');
+        if (data.error?.includes('OTP')) {
+          setOtpError(data.error);
+        } else {
+          setShowOtpModal(false);
+          setError(data.error || 'Une erreur est survenue.');
+        }
       } else {
-        setSuccess('Mot de passe mis à jour ! Redirection...');
-        setTimeout(() => router.push('/admin-login'), 2000);
+        router.push('/admin-login');
       }
     } catch {
-      setError('Erreur de connexion au serveur.');
+      setOtpError('Erreur de connexion au serveur.');
     } finally {
-      setLoading(false);
+      setOtpLoading(false);
     }
   };
 
@@ -231,8 +277,6 @@ function ResetPasswordForm() {
 
             <Button
               type="submit"
-              isLoading={loading}
-              loadingText="Mise à jour..."
               fullWidth
               className="mt-2 btn-glow shadow-[0_0_20px_rgba(0,187,167,0.3)] disabled:hover:shadow-none"
             >
@@ -253,6 +297,87 @@ function ResetPasswordForm() {
           </div>
         </div>
       </div>
+      {/* A2F Verification Modal */}
+      <AnimatePresence>
+        {showOtpModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-9999 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 10 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              ref={otpModalRef}
+              className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-xl max-w-sm w-full p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleConfirmWithOtp();
+                }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-brand-100 dark:bg-brand-500/15 text-brand-500">
+                    <ShieldCheck size={20} />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-900 dark:text-white">
+                    Vérification A2F
+                  </h3>
+                </div>
+
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed">
+                  Entre le code de ton application d&apos;authentification pour confirmer le
+                  changement de mot de passe.
+                </p>
+
+                {otpError && (
+                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm border border-red-200 dark:border-red-500/20 mb-4">
+                    {otpError}
+                  </div>
+                )}
+
+                <div className="relative mb-5">
+                  <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="one-time-code"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="000000"
+                    className="w-full rounded-xl bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 pl-10 pr-4 py-3 text-lg tracking-[0.5em] font-mono text-center text-neutral-900 dark:text-white focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                    maxLength={6}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowOtpModal(false)}
+                    className="px-4 py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={otpCode.length !== 6 || otpLoading}
+                    className="px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors cursor-pointer bg-brand-500 hover:bg-brand-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {otpLoading ? 'Confirmation...' : 'Confirmer'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

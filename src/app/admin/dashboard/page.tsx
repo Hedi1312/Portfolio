@@ -14,6 +14,7 @@ import {
   FileText,
   ArrowRight,
   UserCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import { GrDocumentPdf } from 'react-icons/gr';
 
@@ -120,15 +121,11 @@ export default function DashboardPage() {
   // ─── Quick Actions ─────────────────────────────────
   const actions = [
     {
-      title: 'Messages reçus',
-      description:
-        kpi.unread > 0
-          ? `${kpi.unread} message${kpi.unread > 1 ? 's' : ''} non lu${kpi.unread > 1 ? 's' : ''}`
-          : 'Aucun nouveau message',
-      icon: <Mail className="h-6 w-6" />,
-      href: '/admin/messages',
-      accent: 'group-hover:text-indigo-500',
-      badge: kpi.unread,
+      title: 'Sécurité (A2F)',
+      description: 'Gère ton authentification à double facteur.',
+      icon: <ShieldCheck className="h-6 w-6" />,
+      href: '/admin/security',
+      accent: 'group-hover:text-cyan-500',
     },
     {
       title: 'Statistiques',
@@ -143,6 +140,17 @@ export default function DashboardPage() {
       icon: <GrDocumentPdf className="h-6 w-6" />,
       href: '/admin/cv',
       accent: 'group-hover:text-brand-500',
+    },
+    {
+      title: 'Messages reçus',
+      description:
+        kpi.unread > 0
+          ? `${kpi.unread} message${kpi.unread > 1 ? 's' : ''} non lu${kpi.unread > 1 ? 's' : ''}`
+          : 'Aucun nouveau message',
+      icon: <Mail className="h-6 w-6" />,
+      href: '/admin/messages',
+      accent: 'group-hover:text-indigo-500',
+      badge: kpi.unread,
     },
     {
       title: 'Gérer mes projets',
