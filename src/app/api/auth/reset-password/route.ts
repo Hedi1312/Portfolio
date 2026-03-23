@@ -5,12 +5,28 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 
 import { prisma } from '@/lib/prisma';
+import { rateLimit } from '@/lib/rate-limit';
 import { newPasswordSchema } from '@/lib/schemas/auth';
+const { verifySync } = require('otplib');
+
+// Rate limit : 5 tentatives par minute par IP (anti brute-force OTP)
+const limiter = rateLimit({ interval: 60_000, limit: 5 });
 
 export async function POST(req: Request) {
+  // Rate limiting par IP
+  const forwarded = req.headers.get('x-forwarded-for');
+  const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
+  const { success, retryAfter } = limiter.check(ip);
+
+  if (!success) {
+    return NextResponse.json(
+      { error: `Trop de tentatives. Réessayez dans ${retryAfter}s.` },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    );
+  }
   try {
     const body = await req.json();
-    const { token, password, confirmPassword } = body;
+    const { token, password, confirmPassword, otpCode } = body;
 
     if (!token || typeof token !== 'string') {
       return NextResponse.json({ error: 'Token manquant.' }, { status: 400 });
@@ -40,6 +56,25 @@ export async function POST(req: Request) {
         { error: 'Ce lien a expiré. Veuillez refaire une demande.' },
         { status: 400 },
       );
+    }
+
+    // A2F Verification
+    if (!otpCode || typeof otpCode !== 'string') {
+      return NextResponse.json({ error: 'Le code OTP est requis.' }, { status: 400 });
+    }
+
+    const admin = resetRecord.admin;
+    if (admin.otpSecret) {
+      // A2F active: verify real TOTP code
+      const result = verifySync({ token: otpCode, secret: admin.otpSecret, window: 1 });
+      if (!result.valid) {
+        return NextResponse.json({ error: 'Code OTP invalide ou expiré.' }, { status: 400 });
+      }
+    } else {
+      // A2F inactive: only accept '000000'
+      if (otpCode !== '000000') {
+        return NextResponse.json({ error: 'Code OTP invalide.' }, { status: 400 });
+      }
     }
 
     // Hash the new password and update the admin

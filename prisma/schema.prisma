@@ -11,6 +11,7 @@ model Admin {
   email             String          @unique
   passwordHash      String
   passwordUpdatedAt DateTime?
+  otpSecret         String?
   createdAt         DateTime        @default(now())
 
   passwordReset     PasswordReset?
