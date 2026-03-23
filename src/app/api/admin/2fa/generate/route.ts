@@ -1,9 +1,24 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { rateLimit } from '@/lib/rate-limit';
 const { generateSecret, generateURI } = require('otplib');
 import { NextResponse } from 'next/server';
 
-export async function POST() {
+// Rate limit : 5 requêtes par minute par IP
+const limiter = rateLimit({ interval: 60_000, limit: 5 });
+
+export async function POST(req: Request) {
+  // Rate limiting par IP
+  const forwarded = req.headers.get('x-forwarded-for');
+  const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
+  const { success, retryAfter } = limiter.check(ip);
+
+  if (!success) {
+    return NextResponse.json(
+      { error: `Trop de tentatives. Réessayez dans ${retryAfter}s.` },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    );
+  }
   try {
     const session = await auth();
     // @api-security-best-practices: Strong Authentication check

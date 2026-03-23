@@ -12,8 +12,6 @@ export const authConfig = {
       const isProtectedAdminPath = nextUrl.pathname.startsWith('/admin') && !isLoginPath;
       const isProtectedApiAdminPath = nextUrl.pathname.startsWith('/api/admin');
 
-      console.log('[PROXY LOG] Intercepted:', nextUrl.pathname, '| User Auth:', isLoggedIn);
-
       // Bloquer les APIs Admin non authentifiées (401 direct, sans redirection client)
       if (isProtectedApiAdminPath && !isLoggedIn) {
         return Response.json({ error: 'Unauthorized' }, { status: 401 });

@@ -19,6 +19,7 @@
     "up": "docker compose up -d",
     "up:build": "docker compose up --build -d",
     "clean": "docker compose down -v && docker compose up --build -d && npm run db:init",
+    "docker:purge": "docker system prune -a --volumes -f && docker builder prune -a -f && echo \"\" && echo \"\" && echo --- VERIFICATION --- && echo \"\" && echo \"\" && docker ps -a && docker images && docker volume ls",
     "down": "docker compose down",
     "logs": "docker compose logs -f app",
     "start": "next start",
