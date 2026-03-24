@@ -24,6 +24,7 @@ export const emailSchema = z
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, 'Le mot de passe est requis'),
+  otpCode: z.string().optional(),
 });
 
 export const resetSchema = z.object({

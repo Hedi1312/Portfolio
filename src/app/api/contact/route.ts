@@ -5,6 +5,7 @@ import { render } from '@react-email/components';
 import { AdminNotification } from '@/emails/AdminNotification';
 import { UserConfirmation } from '@/emails/UserConfirmation';
 import { prisma } from '@/lib/prisma';
+import { contactSchema } from '@/lib/schemas/contact';
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -21,13 +22,16 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
+    const subject = formData.get('subject') as string;
     const message = formData.get('message') as string;
     const honeypot = formData.get('company') as string;
 
     if (honeypot) return NextResponse.json({ success: true });
 
-    if (!name || !email || !message) {
-      return NextResponse.json({ error: 'Champs requis.' }, { status: 400 });
+    // Validation Zod
+    const validation = contactSchema.safeParse({ name, email, subject, message });
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
     }
 
     // Gérer les pièces jointes (multiple)
@@ -77,6 +81,7 @@ export async function POST(req: Request) {
     await prisma.contactMessage.create({
       data: {
         email,
+        subject,
         message,
         attachments: dbAttachments,
         contactId: contact.id,
@@ -93,16 +98,16 @@ export async function POST(req: Request) {
       prefixe = '[LOCAL] ';
     }
 
-    const subject = `${prefixe}Nouveau message de ${name}`;
+    const emailSubject = `${prefixe}[${subject}] Nouveau message de ${name}`;
 
-    const adminHtml = await render(AdminNotification({ name, email, message }));
+    const adminHtml = await render(AdminNotification({ name, email, subject, message }));
     const userHtml = await render(UserConfirmation({ name }));
 
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: destinataire,
       replyTo: email,
-      subject,
+      subject: emailSubject,
       attachments: emailAttachments,
       html: adminHtml,
     });

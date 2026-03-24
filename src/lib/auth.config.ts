@@ -10,10 +10,14 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const isLoginPath = nextUrl.pathname === '/admin-login';
       const isProtectedAdminPath = nextUrl.pathname.startsWith('/admin') && !isLoginPath;
+      const isProtectedApiAdminPath = nextUrl.pathname.startsWith('/api/admin');
 
-      console.log('[PROXY LOG] Intercepted:', nextUrl.pathname, '| User Auth:', isLoggedIn);
+      // Bloquer les APIs Admin non authentifiées (401 direct, sans redirection client)
+      if (isProtectedApiAdminPath && !isLoggedIn) {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      }
 
-      // Si l'utilisateur tente d'accéder à l'espace admin sans être connecté
+      // Rediriger vers le login si on accède aux pages Admin sans être connecté
       if (isProtectedAdminPath) {
         if (isLoggedIn) return true;
         return Response.redirect(new URL('/admin-login', nextUrl));
@@ -22,7 +26,7 @@ export const authConfig = {
       // Si l'utilisateur est déjà connecté et tente d'aller sur la page de login
       if (isLoginPath) {
         if (isLoggedIn) return Response.redirect(new URL('/admin/dashboard', nextUrl));
-        return true; // Laisse passer s'il n'est pas connecté
+        return true;
       }
 
       return true;
