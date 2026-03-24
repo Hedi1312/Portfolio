@@ -93,12 +93,12 @@ export default function Navbar() {
         <Link href="/" className="group flex items-center" onClick={(e) => { if (window.location.pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }}>
           <h1 className="text-3xl font-bold font-(family-name:--font-space-grotesk) tracking-tight flex items-center">
             <span className="relative inline-flex">
-              <span className="gradient-text-animated">Hëdi</span>
-              <span className="absolute inset-0 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Hëdi</span>
+              <span className="gradient-text-animated opacity-100 group-hover:opacity-0 transition-opacity duration-150">Hëdi</span>
+              <span className="absolute inset-0 text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">Hëdi</span>
             </span>
             <span className="relative inline-flex ml-2">
-              <span className="text-foreground">OKBA</span>
-              <span className="absolute inset-0 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">OKBA</span>
+              <span className="text-foreground opacity-100 group-hover:opacity-0 transition-opacity duration-150">OKBA</span>
+              <span className="absolute inset-0 text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">OKBA</span>
             </span>
           </h1>
         </Link>

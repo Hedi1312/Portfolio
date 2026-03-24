@@ -346,26 +346,26 @@ body {
    MARQUEE ANIMATIONS
    ═══════════════════════════════════════════════ */
 
-@keyframes scrollLeft {
-  from {
+@keyframes marqueeLeft {
+  0% {
     transform: translateX(0);
   }
-  to {
-    transform: translateX(calc(-100% - 1.5rem));
+  100% {
+    transform: translateX(-50%);
   }
 }
-@keyframes scrollRight {
-  from {
-    transform: translateX(calc(-100% - 1.5rem));
+@keyframes marqueeRight {
+  0% {
+    transform: translateX(-50%);
   }
-  to {
+  100% {
     transform: translateX(0);
   }
 }
 
-.animate-scroll-left {
-  animation: scrollLeft 55s linear infinite;
+.animate-marquee-left {
+  animation: marqueeLeft 100s linear infinite;
 }
-.animate-scroll-right {
-  animation: scrollRight 55s linear infinite;
+.animate-marquee-right {
+  animation: marqueeRight 100s linear infinite;
 }

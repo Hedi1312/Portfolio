@@ -7,6 +7,7 @@ import AppSessionProvider from '@/components/AppSessionProvider';
 import ScrollToTop from '@/components/ui/ScrollToTop';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import Script from 'next/script';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Anti-flash script : check localStorage avant le 1er rendu React */}
         <script
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               try {
@@ -49,11 +51,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
-          <script
-            defer
+          <Script
             src="/stats/script.js"
             data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
             data-host-url="/stats"
+            strategy="afterInteractive"
           />
         )}
       </head>

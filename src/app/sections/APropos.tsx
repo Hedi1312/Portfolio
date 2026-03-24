@@ -1,8 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { SKILL_ICONS } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
+import { SKILL_ICONS } from '@/lib/skill-icons';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 interface StatItem {
   value: string;
@@ -69,19 +69,25 @@ const TechMarquee = ({
   reverse?: boolean;
   isDark: boolean;
 }) => {
-  // Repeat items ONLY ONCE to ensure a seamless loop without overloading the screen
-  const repeatedItems = [...items, ...items];
-  const content = (
-    <div
-      className={`flex gap-6 py-2 items-center shrink-0 group-hover:[animation-play-state:paused] ${reverse ? 'animate-scroll-right' : 'animate-scroll-left'}`}
-    >
-      {repeatedItems.map((tech, i) => renderTechTag(tech, i, isDark))}
+  // En créant 2 moitiés strictement identiques et en ne déplaçant que le parent de exactement -50%,
+  // le navigateur n'a plus qu'une seule couche graphique à calculer (au lieu de 6).
+  // L'animation devient instantanément parfaitement fluide à 60 FPS.
+  const multipliedItems = [...items, ...items, ...items, ...items];
+  
+  const halfBlock = (
+    <div className="flex gap-6 pr-6 items-center shrink-0">
+      {multipliedItems.map((tech, i) => renderTechTag(tech, i, isDark))}
     </div>
   );
+
   return (
-    <div className="flex overflow-hidden gap-6 group relative w-full mb-4 mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-      {content}
-      {content}
+    <div className="flex overflow-hidden group relative w-full mb-4 mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+      <div
+        className={`flex w-max ${reverse ? 'animate-marquee-right' : 'animate-marquee-left'} group-hover:[animation-play-state:paused]`}
+      >
+        {halfBlock}
+        {halfBlock}
+      </div>
     </div>
   );
 };
@@ -244,7 +250,7 @@ export default function APropos() {
             </div>
 
             {isAnimated ? (
-              <div className="relative w-screen left-1/2 -translate-x-1/2 flex flex-col gap-2">
+              <div className="relative w-screen left-1/2 -translate-x-1/2 flex flex-col gap-4 sm:gap-6">
                 <TechMarquee items={row1} isDark={isDark} />
                 <TechMarquee items={row2} reverse={true} isDark={isDark} />
               </div>
