@@ -1,15 +1,5 @@
 import * as React from 'react';
-import {
-  Html,
-  Body,
-  Head,
-  Container,
-  Preview,
-  Section,
-  Text,
-  Hr,
-  Img,
-} from '@react-email/components';
+import { Html, Body, Head, Container, Preview, Text, Hr } from '@react-email/components';
 
 interface AdminReplyProps {
   recipientName: string;
@@ -18,137 +8,123 @@ interface AdminReplyProps {
 
 export const AdminReply = ({ recipientName, replyMessage }: AdminReplyProps) => (
   <Html>
-    <Head>
-      <style>{`
-        @media only screen and (max-width: 600px) {
-          .container { width: 100% !important; padding: 16px !important; }
-        }
-      `}</style>
-    </Head>
+    <Head />
     <Preview>Réponse de Hëdi OKBA à votre message</Preview>
     <Body style={body}>
-      <Container style={card} className="container">
-        {/* Gradient header */}
-        <Section style={header}>
-          <Img
-            src="https://img.icons8.com/fluency/96/reply-all-arrow.png"
-            width="48"
-            height="48"
-            alt=""
-            style={{ margin: '0 auto 12px' }}
-          />
-          <Text style={headerTitle}>Vous avez une réponse</Text>
-          <Text style={headerSub}>Suite à votre message sur le portfolio</Text>
-        </Section>
+      <Container style={container}>
+        <table
+          width="100%"
+          border={0}
+          cellPadding="0"
+          cellSpacing="0"
+          role="presentation"
+          className="inner-table"
+        >
+          <tbody>
+            <tr>
+              <td style={contentPadding}>
+                <div style={header}>
+                  <Text style={metaText}>PORTFOLIO</Text>
+                  <Text style={h1}>Nouvelle réponse</Text>
+                </div>
 
-        {/* Content */}
-        <Section style={content}>
-          <Text style={greeting}>Bonjour {recipientName},</Text>
+                <div style={content}>
+                  <Text style={greeting}>Bonjour {recipientName},</Text>
 
-          {/* Reply box */}
-          <Section style={replyCard}>
-            <Text style={replyText}>{replyMessage}</Text>
-          </Section>
+                  <div style={replyCard}>
+                    <Text style={replyText}>{replyMessage}</Text>
+                  </div>
+                </div>
 
-          <Hr style={divider} />
+                <Hr style={divider} />
 
-          <Text style={signoff}>Cordialement,</Text>
-          <Text style={signature}>Hëdi OKBA</Text>
-        </Section>
-
-        {/* Footer */}
-        <Section style={footer}>
-          <Text style={footerText}>
-            Cette réponse a été envoyée depuis le portfolio de Hëdi OKBA.
-          </Text>
-        </Section>
+                <div style={footer}>
+                  <Text style={signature}>Hëdi OKBA</Text>
+                  <Text style={footerText}>
+                    Cette réponse a été envoyée depuis mon portfolio personnel.
+                  </Text>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </Container>
     </Body>
   </Html>
 );
 
 const body = {
-  backgroundColor: '#edf2f7',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  padding: '40px 16px',
+  backgroundColor: '#f6f9fc',
+  color: '#334155',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   margin: '0',
+  padding: '60px 0',
 };
-const card = {
-  maxWidth: '520px',
+
+const container = {
   margin: '0 auto',
   backgroundColor: '#ffffff',
-  borderRadius: '16px',
+  maxWidth: '560px',
+  borderRadius: '8px',
+  border: '1px solid #e2e8f0',
   overflow: 'hidden' as const,
-  boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
 };
-const header = {
-  background: 'linear-gradient(135deg, #0d9488 0%, #00bba7 50%, #06b6d4 100%)',
-  padding: '36px 32px 28px',
-  textAlign: 'center' as const,
+
+const contentPadding = {
+  padding: '48px 40px',
 };
-const headerTitle = {
-  color: '#ffffff',
-  fontSize: '20px',
-  fontWeight: '700' as const,
-  margin: '0 0 4px',
-  letterSpacing: '-0.3px',
-};
-const headerSub = {
-  color: 'rgba(255,255,255,0.8)',
+
+const header = { paddingBottom: '24px', borderBottom: '1px solid #f1f5f9', marginBottom: '32px' };
+const metaText = {
   fontSize: '13px',
+  color: '#00d5be',
+  letterSpacing: '0.5px',
+  textTransform: 'uppercase' as const,
+  margin: '0 0 8px',
+  fontWeight: '600' as const,
+};
+const h1 = {
+  fontSize: '24px',
+  fontWeight: '600' as const,
   margin: '0',
+  color: '#0f172a',
+  letterSpacing: '-0.5px',
 };
-const content = {
-  padding: '28px 32px 20px',
-};
+
+const content = { paddingTop: '0' };
 const greeting = {
-  color: '#4a5568',
   fontSize: '15px',
-  margin: '0 0 16px',
+  fontWeight: '500' as const,
+  color: '#0f172a',
+  margin: '0 0 24px',
   lineHeight: '22px',
 };
+
 const replyCard = {
-  backgroundColor: '#f0fdfa',
-  border: '1px solid #99f6e4',
-  borderLeft: '4px solid #00bba7',
-  borderRadius: '0 12px 12px 0',
-  padding: '20px',
-  marginBottom: '24px',
+  borderLeft: '3px solid #00d5be',
+  padding: '16px 20px',
+  backgroundColor: '#f8fafc',
+  borderRadius: '4px',
+  marginBottom: '32px',
 };
 const replyText = {
-  color: '#1a202c',
-  fontSize: '14px',
-  lineHeight: '22px',
+  color: '#334155',
+  fontSize: '15px',
+  lineHeight: '26px',
   margin: '0',
   whiteSpace: 'pre-wrap' as const,
   wordBreak: 'break-word' as const,
 };
-const divider = {
-  borderColor: '#e2e8f0',
-  margin: '0 0 16px',
-};
-const signoff = {
-  color: '#718096',
-  fontSize: '14px',
-  margin: '0',
-  lineHeight: '20px',
-};
+
+const divider = { borderColor: '#e2e8f0', margin: '0 0 24px' };
+const footer = { paddingTop: '0' };
 const signature = {
-  color: '#1a202c',
-  fontSize: '14px',
+  fontSize: '15px',
   fontWeight: '600' as const,
-  margin: '4px 0 0',
+  margin: '0 0 4px',
+  color: '#0f172a',
 };
-const footer = {
-  backgroundColor: '#f7fafc',
-  padding: '16px 32px',
-  borderTop: '1px solid #e2e8f0',
-};
-const footerText = {
-  color: '#a0aec0',
-  fontSize: '11px',
-  textAlign: 'center' as const,
-  margin: '0',
-};
+const footerText = { fontSize: '13px', color: '#94a3b8', margin: '0' };
 
 export default AdminReply;

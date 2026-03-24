@@ -32,6 +32,7 @@ interface Reply {
 
 interface Message {
   id: string;
+  subject: string;
   message: string;
   attachments: Attachment[];
   isRead: boolean;
@@ -335,15 +336,28 @@ export default function MessagesPage() {
                         </div>
                         <p className="text-xs text-neutral-500 mb-1 truncate">{contact.email}</p>
                         {lastMsg && (
-                          <p
-                            className={`text-sm truncate ${
-                              unread > 0
-                                ? 'text-neutral-700 dark:text-neutral-300'
-                                : 'text-neutral-500 dark:text-neutral-500'
-                            }`}
-                          >
-                            {lastMsg.message}
-                          </p>
+                          <>
+                            {lastMsg.subject && (
+                              <p
+                                className={`text-sm font-medium truncate ${
+                                  unread > 0
+                                    ? 'text-neutral-800 dark:text-neutral-200'
+                                    : 'text-neutral-600 dark:text-neutral-400'
+                                }`}
+                              >
+                                {lastMsg.subject}
+                              </p>
+                            )}
+                            <p
+                              className={`text-sm truncate ${
+                                unread > 0
+                                  ? 'text-neutral-700 dark:text-neutral-300'
+                                  : 'text-neutral-500 dark:text-neutral-500'
+                              }`}
+                            >
+                              {lastMsg.message}
+                            </p>
+                          </>
                         )}
                         <div className="flex items-center gap-2 mt-1">
                           {contact.messages.length > 1 && (
@@ -433,6 +447,11 @@ export default function MessagesPage() {
                                     {formatFull(msg.createdAt)}
                                   </span>
                                 </div>
+                                {msg.subject && (
+                                  <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 mb-1 px-4 pt-3">
+                                    Sujet : {msg.subject}
+                                  </p>
+                                )}
                                 <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-xl rounded-tl-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap break-words">
                                   {msg.message}
                                 </div>

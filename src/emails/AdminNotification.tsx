@@ -1,182 +1,145 @@
 import * as React from 'react';
-import {
-  Html,
-  Body,
-  Head,
-  Container,
-  Preview,
-  Section,
-  Text,
-  Hr,
-  Img,
-} from '@react-email/components';
+import { Html, Body, Head, Container, Preview, Text, Hr } from '@react-email/components';
 
 interface AdminNotificationProps {
   name: string;
   email: string;
+  subject: string;
   message: string;
 }
 
-export const AdminNotification = ({ name, email, message }: AdminNotificationProps) => (
+export const AdminNotification = ({ name, email, subject, message }: AdminNotificationProps) => (
   <Html>
     <Head>
       <style>{`
         @media only screen and (max-width: 600px) {
-          .container { width: 100% !important; padding: 16px !important; }
+          .inner-table td { padding: 32px 24px !important; }
         }
       `}</style>
     </Head>
-    <Preview>💬 {name} t&apos;a écrit sur ton portfolio</Preview>
+    <Preview>Nouveau message de {name}</Preview>
     <Body style={body}>
-      <Container style={card} className="container">
-        {/* Gradient header */}
-        <Section style={header}>
-          <Img
-            src="https://img.icons8.com/fluency/96/new-message.png"
-            width="48"
-            height="48"
-            alt=""
-            style={{ margin: '0 auto 12px' }}
-          />
-          <Text style={headerTitle}>Nouveau message</Text>
-          <Text style={headerSub}>Quelqu&apos;un t&apos;a contacté via ton portfolio</Text>
-        </Section>
+      <Container style={container}>
+        <table
+          width="100%"
+          border={0}
+          cellPadding="0"
+          cellSpacing="0"
+          role="presentation"
+          className="inner-table"
+        >
+          <tbody>
+            <tr>
+              <td style={contentPadding}>
+                <div style={header}>
+                  <Text style={metaText}>NOTIFICATION</Text>
+                  <Text style={h1}>Nouveau contact</Text>
+                </div>
 
-        {/* Content */}
-        <Section style={content}>
-          {/* Sender info */}
-          <table style={senderTable}>
-            <tbody>
-              <tr>
-                <td style={avatar}>{name.charAt(0).toUpperCase()}</td>
-                <td style={{ paddingLeft: '14px' }}>
-                  <Text style={senderName}>{name}</Text>
-                  <Text style={senderEmail}>{email}</Text>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                <div style={metadataBox}>
+                  <Text style={dataRow}>
+                    <strong style={label}>De :</strong> {name}
+                  </Text>
+                  <Text style={dataRow}>
+                    <strong style={label}>Email :</strong> {email}
+                  </Text>
+                  <Text style={dataRow}>
+                    <strong style={label}>Sujet :</strong> {subject || 'Non spécifié'}
+                  </Text>
+                </div>
 
-          <Hr style={divider} />
+                <div style={messageBox}>
+                  <Text style={metaTextAction}>Message :</Text>
+                  <Text style={p}>{message}</Text>
+                </div>
 
-          {/* Message */}
-          <Section style={messageCard}>
-            <Text style={messageText}>{message}</Text>
-          </Section>
+                <Hr style={divider} />
 
-          {/* Action hint */}
-          <Text style={hint}>
-            Réponds directement depuis ton dashboard admin ou en répondant à cet email.
-          </Text>
-        </Section>
-
-        {/* Footer */}
-        <Section style={footer}>
-          <Text style={footerText}>Portfolio — Notification automatique</Text>
-        </Section>
+                <div style={footer}>
+                  <Text style={footerText}>Message reçu depuis le formulaire du portfolio.</Text>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </Container>
     </Body>
   </Html>
 );
 
 const body = {
-  backgroundColor: '#edf2f7',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  padding: '40px 16px',
+  backgroundColor: '#f6f9fc',
+  color: '#334155',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   margin: '0',
+  padding: '60px 0',
 };
-const card = {
-  maxWidth: '520px',
+
+const container = {
   margin: '0 auto',
   backgroundColor: '#ffffff',
-  borderRadius: '16px',
+  maxWidth: '560px',
+  borderRadius: '8px',
+  border: '1px solid #e2e8f0',
   overflow: 'hidden' as const,
-  boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
 };
-const header = {
-  background: 'linear-gradient(135deg, #0d9488 0%, #00bba7 50%, #06b6d4 100%)',
-  padding: '36px 32px 28px',
-  textAlign: 'center' as const,
+
+const contentPadding = {
+  padding: '48px 40px',
 };
-const headerTitle = {
-  color: '#ffffff',
-  fontSize: '20px',
-  fontWeight: '700' as const,
-  margin: '0 0 4px',
-  letterSpacing: '-0.3px',
-};
-const headerSub = {
-  color: 'rgba(255,255,255,0.8)',
+
+const header = { paddingBottom: '24px', borderBottom: '1px solid #f1f5f9', marginBottom: '32px' };
+const metaText = {
   fontSize: '13px',
-  margin: '0',
+  color: '#00d5be',
+  letterSpacing: '0.5px',
+  textTransform: 'uppercase' as const,
+  margin: '0 0 8px',
+  fontWeight: '600' as const,
 };
-const content = {
-  padding: '28px 32px 20px',
-};
-const senderTable = {
-  width: '100%' as const,
-  borderCollapse: 'collapse' as const,
-};
-const avatar = {
-  width: '44px',
-  height: '44px',
-  borderRadius: '50%',
-  backgroundColor: '#00bba7',
-  color: '#ffffff',
-  fontSize: '18px',
-  fontWeight: '700' as const,
-  textAlign: 'center' as const,
-  verticalAlign: 'middle' as const,
-  lineHeight: '44px',
-};
-const senderName = {
-  color: '#1a202c',
-  fontSize: '15px',
+const h1 = {
+  fontSize: '24px',
   fontWeight: '600' as const,
   margin: '0',
-  lineHeight: '20px',
+  color: '#0f172a',
+  letterSpacing: '-0.5px',
 };
-const senderEmail = {
-  color: '#718096',
-  fontSize: '13px',
-  margin: '2px 0 0',
-  lineHeight: '18px',
-};
-const divider = {
-  borderColor: '#e2e8f0',
-  margin: '20px 0',
-};
-const messageCard = {
-  backgroundColor: '#f7fafc',
+
+const metadataBox = {
+  padding: '24px',
+  backgroundColor: '#f8fafc',
+  borderRadius: '6px',
   border: '1px solid #e2e8f0',
-  borderRadius: '12px',
-  padding: '20px',
-  marginBottom: '20px',
+  marginBottom: '32px',
 };
-const messageText = {
-  color: '#2d3748',
-  fontSize: '14px',
-  lineHeight: '22px',
+const dataRow = { fontSize: '14px', margin: '0 0 10px', color: '#0f172a', lineHeight: '20px' };
+const label = {
+  color: '#64748b',
+  fontWeight: '500' as const,
+  display: 'inline-block',
+  width: '80px',
+};
+
+const messageBox = { marginBottom: '32px' };
+const metaTextAction = {
+  fontSize: '13px',
+  color: '#64748b',
+  fontWeight: '500' as const,
+  margin: '0 0 12px',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.5px',
+};
+const p = {
+  fontSize: '15px',
+  lineHeight: '26px',
   margin: '0',
+  color: '#334155',
   whiteSpace: 'pre-wrap' as const,
-  wordBreak: 'break-word' as const,
 };
-const hint = {
-  color: '#a0aec0',
-  fontSize: '12px',
-  textAlign: 'center' as const,
-  margin: '0',
-};
-const footer = {
-  backgroundColor: '#f7fafc',
-  padding: '16px 32px',
-  borderTop: '1px solid #e2e8f0',
-};
-const footerText = {
-  color: '#a0aec0',
-  fontSize: '11px',
-  textAlign: 'center' as const,
-  margin: '0',
-};
+
+const divider = { borderColor: '#e2e8f0', margin: '0 0 24px' };
+const footer = { paddingTop: '0' };
+const footerText = { fontSize: '13px', color: '#94a3b8', margin: '0' };
 
 export default AdminNotification;

@@ -1,5 +1,6 @@
 'use client';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import { contactSchema } from '@/lib/schemas/contact';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { FiMail, FiX, FiSend, FiCheckCircle, FiPaperclip } from 'react-icons/fi';
@@ -7,11 +8,12 @@ import { Button } from '@/components/ui/Button';
 
 export default function Contact() {
   const [isOpen, setIsOpen] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [honeypot, setHoneypot] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [fileError, setFileError] = useState('');
 
   useLockBodyScroll(isOpen);
@@ -19,7 +21,7 @@ export default function Contact() {
   const handleClose = () => {
     setIsOpen(false);
     setTimeout(() => {
-      setForm({ name: '', email: '', message: '' });
+      setForm({ name: '', email: '', subject: '', message: '' });
       setHoneypot('');
       setFiles([]);
       setSubmitted(false);
@@ -59,11 +61,20 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    const validation = contactSchema.safeParse(form);
+    if (!validation.success) {
+      setError(validation.error.issues[0].message);
+      return;
+    }
+
     setIsSubmitting(true);
 
     const formData = new FormData();
     formData.append('name', form.name);
     formData.append('email', form.email);
+    formData.append('subject', form.subject);
     formData.append('message', form.message);
     formData.append('company', honeypot);
 
@@ -77,7 +88,7 @@ export default function Contact() {
 
       if (res.ok) {
         setSubmitted(true);
-        setForm({ name: '', email: '', message: '' });
+        setForm({ name: '', email: '', subject: '', message: '' });
         setHoneypot('');
         setFiles([]);
         if (typeof window !== 'undefined' && window.umami)
@@ -177,6 +188,12 @@ export default function Contact() {
                 Je te réponds en moins de 24h.
               </p>
 
+              {error && (
+                <div className="mb-4 rounded-xl bg-danger-50 dark:bg-danger-100/10 border border-danger-200 dark:border-danger-500/30 p-3 text-center text-danger-600 dark:text-danger-400 text-sm font-medium">
+                  {error}
+                </div>
+              )}
+
               {!submitted ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <input
@@ -216,6 +233,22 @@ export default function Contact() {
                       required
                       className={inputClasses}
                       placeholder="exemple@exemple.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                      Sujet
+                    </label>
+                    <input
+                      type="text"
+                      name="subject"
+                      value={form.subject}
+                      onChange={handleChange}
+                      required
+                      className={inputClasses}
+                      placeholder="Ex : Proposition de collaboration"
+                      maxLength={150}
                     />
                   </div>
 

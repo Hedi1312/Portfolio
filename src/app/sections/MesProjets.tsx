@@ -54,12 +54,11 @@ export default function MesProjets() {
   const isDark = useIsDark();
 
   useEffect(() => {
-    fetch('/api/admin/projects')
+    fetch('/api/projects')
       .then((res) => res.json())
       .then((data: Project[] | { error: string }) => {
         if (Array.isArray(data)) {
-          // Ne garder que les projets visibles (le backend les envoie tous)
-          setProjets(data.filter((p: Project & { visible?: boolean }) => p.visible !== false));
+          setProjets(data);
         } else {
           console.error('Erreur API:', data.error);
         }
