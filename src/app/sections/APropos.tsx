@@ -73,7 +73,7 @@ const TechMarquee = ({
   // le navigateur n'a plus qu'une seule couche graphique à calculer (au lieu de 6).
   // L'animation devient instantanément parfaitement fluide à 60 FPS.
   const multipliedItems = [...items, ...items, ...items, ...items];
-  
+
   const halfBlock = (
     <div className="flex gap-6 pr-6 items-center shrink-0">
       {multipliedItems.map((tech, i) => renderTechTag(tech, i, isDark))}

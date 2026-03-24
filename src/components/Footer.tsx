@@ -16,15 +16,32 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-12 gap-12 md:gap-8 lg:gap-12">
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-5 flex flex-col items-center md:items-start text-center md:text-left">
-            <Link href="/" className="group flex items-center justify-center md:justify-start w-fit mb-4 mx-auto md:mx-0" onClick={(e) => { if (window.location.pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }}>
+            <Link
+              href="/"
+              className="group flex items-center justify-center md:justify-start w-fit mb-4 mx-auto md:mx-0"
+              onClick={(e) => {
+                if (window.location.pathname === '/') {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+            >
               <h3 className="text-2xl font-bold font-(family-name:--font-space-grotesk) tracking-tight flex items-center">
                 <span className="relative inline-flex">
-                  <span className="gradient-text-animated opacity-100 group-hover:opacity-0 transition-opacity duration-150">Hëdi</span>
-                  <span className="absolute inset-0 text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">Hëdi</span>
+                  <span className="gradient-text-animated opacity-100 group-hover:opacity-0 transition-opacity duration-150">
+                    Hëdi
+                  </span>
+                  <span className="absolute inset-0 text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
+                    Hëdi
+                  </span>
                 </span>
                 <span className="relative inline-flex ml-2">
-                  <span className="text-foreground opacity-100 group-hover:opacity-0 transition-opacity duration-150">OKBA</span>
-                  <span className="absolute inset-0 text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">OKBA</span>
+                  <span className="text-foreground opacity-100 group-hover:opacity-0 transition-opacity duration-150">
+                    OKBA
+                  </span>
+                  <span className="absolute inset-0 text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
+                    OKBA
+                  </span>
                 </span>
               </h3>
             </Link>

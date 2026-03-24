@@ -39,8 +39,8 @@ export default function Accueil() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-12 text-sm font-medium text-neutral-600 dark:text-neutral-300"
         >
-          <span className="w-2 h-2 bg-success-400 rounded-full animate-pulse" />
-          À l&apos;écoute d&apos;opportunités
+          <span className="w-2 h-2 bg-success-400 rounded-full animate-pulse" />À l&apos;écoute
+          d&apos;opportunités
         </motion.div>
 
         {/* Title */}
