@@ -341,3 +341,31 @@ body {
   background: rgba(0, 213, 190, 0.3);
   color: inherit;
 }
+
+/* ═══════════════════════════════════════════════
+   MARQUEE ANIMATIONS
+   ═══════════════════════════════════════════════ */
+
+@keyframes scrollLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - 1.5rem));
+  }
+}
+@keyframes scrollRight {
+  from {
+    transform: translateX(calc(-100% - 1.5rem));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-scroll-left {
+  animation: scrollLeft 55s linear infinite;
+}
+.animate-scroll-right {
+  animation: scrollRight 55s linear infinite;
+}
