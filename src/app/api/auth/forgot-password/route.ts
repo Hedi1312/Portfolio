@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
     // Generate a secure token with 1-hour expiry
     const token = randomUUID();
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     // Upsert: replace any existing token for this admin
     await prisma.passwordReset.upsert({

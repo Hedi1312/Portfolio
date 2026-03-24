@@ -1,16 +1,5 @@
 import * as React from 'react';
-import {
-  Html,
-  Body,
-  Head,
-  Container,
-  Preview,
-  Section,
-  Text,
-  Hr,
-  Img,
-  Link,
-} from '@react-email/components';
+import { Html, Body, Head, Container, Preview, Text, Hr, Link } from '@react-email/components';
 
 interface PasswordResetProps {
   resetLink: string;
@@ -21,152 +10,145 @@ export const PasswordReset = ({ resetLink }: PasswordResetProps) => (
     <Head>
       <style>{`
         @media only screen and (max-width: 600px) {
-          .container { width: 100% !important; padding: 16px !important; }
+          .inner-table td { padding: 32px 24px !important; }
         }
       `}</style>
     </Head>
-    <Preview>🔒 Réinitialisation de ton mot de passe admin</Preview>
+    <Preview>Demande de réinitialisation de mot de passe</Preview>
     <Body style={body}>
-      <Container style={card} className="container">
-        {/* Gradient header */}
-        <Section style={header}>
-          <Img
-            src="https://img.icons8.com/fluency/96/lock-2.png"
-            width="48"
-            height="48"
-            alt=""
-            style={{ margin: '0 auto 12px' }}
-          />
-          <Text style={headerTitle}>Réinitialisation du mot de passe</Text>
-          <Text style={headerSub}>Une demande de réinitialisation a été effectuée</Text>
-        </Section>
+      <Container style={container}>
+        <table
+          width="100%"
+          border={0}
+          cellPadding="0"
+          cellSpacing="0"
+          role="presentation"
+          className="inner-table"
+        >
+          <tbody>
+            <tr>
+              <td style={contentPadding}>
+                <div style={header}>
+                  <Text style={metaTextWarning}>SÉCURITÉ</Text>
+                  <Text style={h1}>Réinitialisation accès</Text>
+                </div>
 
-        {/* Content */}
-        <Section style={content}>
-          <Text style={messageText}>
-            Tu as demandé à réinitialiser ton mot de passe admin. Clique sur le bouton ci-dessous
-            pour en définir un nouveau.
-          </Text>
+                <div style={content}>
+                  <Text style={p}>
+                    Bonjour,
+                    <br />
+                    <br />
+                    Une demande de réinitialisation de mot de passe pour votre compte administrateur
+                    a été effectuée. Si vous en êtes l&apos;auteur, veuillez cliquer sur le bouton
+                    ci-dessous. Le lien expirera dans 10 minutes.
+                  </Text>
 
-          {/* CTA Button */}
-          <Section style={buttonContainer}>
-            <Link href={resetLink} style={button}>
-              Réinitialiser mon mot de passe
-            </Link>
-          </Section>
+                  <div style={ctaSection}>
+                    <Link href={resetLink} style={button}>
+                      Réinitialiser mon mot de passe
+                    </Link>
+                  </div>
 
-          <Hr style={divider} />
+                  <div style={fallbackBox}>
+                    <Text style={metaTextLabel}>Lien direct :</Text>
+                    <Text style={rawLink}>{resetLink}</Text>
+                  </div>
+                </div>
 
-          <Text style={hint}>
-            Ce lien est valable pendant <strong>1 heure</strong>. Si tu n&apos;as pas demandé cette
-            réinitialisation, tu peux ignorer cet email.
-          </Text>
+                <Hr style={divider} />
 
-          <Text style={linkFallback}>
-            Si le bouton ne fonctionne pas, copie ce lien dans ton navigateur :
-          </Text>
-          <Text style={linkUrl}>{resetLink}</Text>
-        </Section>
-
-        {/* Footer */}
-        <Section style={footer}>
-          <Text style={footerText}>Portfolio — Notification automatique</Text>
-        </Section>
+                <div style={footer}>
+                  <Text style={footerText}>
+                    Message généré par le système de sécurité portfolio.
+                  </Text>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </Container>
     </Body>
   </Html>
 );
 
 const body = {
-  backgroundColor: '#edf2f7',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  padding: '40px 16px',
+  backgroundColor: '#f6f9fc',
+  color: '#334155',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   margin: '0',
+  padding: '60px 0',
 };
-const card = {
-  maxWidth: '520px',
+
+const container = {
   margin: '0 auto',
   backgroundColor: '#ffffff',
-  borderRadius: '16px',
+  maxWidth: '560px',
+  borderRadius: '8px',
+  border: '1px solid #e2e8f0',
   overflow: 'hidden' as const,
-  boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
 };
-const header = {
-  background: 'linear-gradient(135deg, #0d9488 0%, #00bba7 50%, #06b6d4 100%)',
-  padding: '36px 32px 28px',
-  textAlign: 'center' as const,
+
+const contentPadding = {
+  padding: '48px 40px',
 };
-const headerTitle = {
-  color: '#ffffff',
-  fontSize: '20px',
-  fontWeight: '700' as const,
-  margin: '0 0 4px',
-  letterSpacing: '-0.3px',
-};
-const headerSub = {
-  color: 'rgba(255,255,255,0.8)',
+
+const header = { paddingBottom: '24px', borderBottom: '1px solid #f1f5f9', marginBottom: '32px' };
+const metaTextWarning = {
   fontSize: '13px',
-  margin: '0',
-};
-const content = {
-  padding: '28px 32px 20px',
-};
-const messageText = {
-  color: '#2d3748',
-  fontSize: '14px',
-  lineHeight: '22px',
-  margin: '0 0 24px',
-  textAlign: 'center' as const,
-};
-const buttonContainer = {
-  textAlign: 'center' as const,
-  margin: '0 0 24px',
-};
-const button = {
-  display: 'inline-block',
-  backgroundColor: '#00bba7',
-  color: '#ffffff',
-  fontSize: '15px',
+  color: '#ef4444',
+  letterSpacing: '0.5px',
+  textTransform: 'uppercase' as const,
+  margin: '0 0 8px',
   fontWeight: '600' as const,
+};
+const h1 = {
+  fontSize: '24px',
+  fontWeight: '600' as const,
+  margin: '0',
+  color: '#0f172a',
+  letterSpacing: '-0.5px',
+};
+
+const content = { paddingTop: '0' };
+const p = { fontSize: '15px', lineHeight: '26px', margin: '0 0 32px', color: '#475569' };
+
+const ctaSection = { margin: '0 0 36px 0', textAlign: 'center' as const };
+const button = {
+  backgroundColor: '#ef4444',
+  color: '#ffffff',
+  fontSize: '14px',
   padding: '14px 32px',
-  borderRadius: '12px',
+  borderRadius: '6px',
+  display: 'inline-block',
   textDecoration: 'none',
-  textAlign: 'center' as const,
+  fontWeight: '500' as const,
+  letterSpacing: '0.2px',
 };
-const divider = {
-  borderColor: '#e2e8f0',
-  margin: '20px 0',
+
+const fallbackBox = {
+  backgroundColor: '#fafafa',
+  border: '1px solid #f1f5f9',
+  padding: '16px 20px',
+  borderRadius: '6px',
+  marginBottom: '32px',
 };
-const hint = {
-  color: '#718096',
-  fontSize: '13px',
-  textAlign: 'center' as const,
-  margin: '0 0 16px',
-  lineHeight: '20px',
+const metaTextLabel = {
+  fontSize: '12px',
+  color: '#64748b',
+  margin: '0 0 8px',
+  fontWeight: '500' as const,
 };
-const linkFallback = {
-  color: '#a0aec0',
-  fontSize: '11px',
-  textAlign: 'center' as const,
-  margin: '0 0 4px',
-};
-const linkUrl = {
-  color: '#0d9488',
-  fontSize: '11px',
-  textAlign: 'center' as const,
-  margin: '0',
+const rawLink = {
+  fontSize: '12px',
+  color: '#ef4444',
   wordBreak: 'break-all' as const,
-};
-const footer = {
-  backgroundColor: '#f7fafc',
-  padding: '16px 32px',
-  borderTop: '1px solid #e2e8f0',
-};
-const footerText = {
-  color: '#a0aec0',
-  fontSize: '11px',
-  textAlign: 'center' as const,
   margin: '0',
+  lineHeight: '18px',
 };
+
+const divider = { borderColor: '#e2e8f0', margin: '0 0 24px' };
+const footer = { paddingTop: '0' };
+const footerText = { fontSize: '13px', color: '#94a3b8', margin: '0' };
 
 export default PasswordReset;
