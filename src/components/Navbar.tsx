@@ -90,11 +90,15 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center px-2">
         {/* Logo */}
-        <Link href="/" className="group">
-          <h1 className="text-3xl font-bold font-[family-name:var(--font-space-grotesk)] tracking-tight">
-            <span className="gradient-text-animated">Hëdi</span>
-            <span className="text-foreground ml-2 group-hover:text-brand-400 transition-colors duration-300">
-              OKBA
+        <Link href="/" className="group flex items-center" onClick={(e) => { if (window.location.pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }}>
+          <h1 className="text-3xl font-bold font-(family-name:--font-space-grotesk) tracking-tight flex items-center">
+            <span className="relative inline-flex">
+              <span className="gradient-text-animated">Hëdi</span>
+              <span className="absolute inset-0 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">Hëdi</span>
+            </span>
+            <span className="relative inline-flex ml-2">
+              <span className="text-foreground">OKBA</span>
+              <span className="absolute inset-0 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">OKBA</span>
             </span>
           </h1>
         </Link>
