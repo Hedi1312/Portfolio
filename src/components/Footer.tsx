@@ -1,8 +1,7 @@
 'use client';
-import { FaGithub, FaLinkedin, FaHome, FaUser, FaFolderOpen, FaEnvelope } from 'react-icons/fa';
-import { LuFileText } from 'react-icons/lu';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { FaEnvelope, FaFolderOpen, FaGithub, FaHome, FaLinkedin, FaUser } from 'react-icons/fa';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -68,17 +67,31 @@ export default function Footer() {
             </h4>
             <ul className="flex flex-col gap-3">
               {[
-                { label: 'Accueil', href: '#accueil', icon: FaHome },
-                { label: 'À propos', href: '#a-propos', icon: FaUser },
-                { label: 'Projets', href: '#projets', icon: FaFolderOpen },
-                { label: 'CV', href: '#cv', icon: LuFileText },
-                { label: 'Contact', href: '#contact', icon: FaEnvelope },
+                { label: 'Accueil', href: '#home', section: 'home', icon: FaHome },
+                { label: 'À propos', href: '#a-propos', section: 'a-propos', icon: FaUser },
+                {
+                  label: 'Projets',
+                  href: '#mes-projets',
+                  section: 'mes-projets',
+                  icon: FaFolderOpen,
+                },
+                {
+                  label: 'Contact & CV',
+                  href: '#next-steps',
+                  section: 'next-steps',
+                  icon: FaEnvelope,
+                },
               ].map((link) => {
                 const Icon = link.icon;
                 return (
                   <li key={link.label}>
                     <Link
                       href={link.href}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const el = document.getElementById(link.section);
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }}
                       className="text-sm hover:text-brand-400 hover:translate-x-2 transition-all duration-300 flex items-center gap-2.5 w-fit"
                     >
                       <Icon size={15} />

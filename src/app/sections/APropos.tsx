@@ -81,7 +81,7 @@ const TechMarquee = ({
   );
 
   return (
-    <div className="flex overflow-hidden group relative w-full mb-4 mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+    <div className="flex overflow-hidden group relative w-full py-4 -my-4 mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
       <div
         className={`flex w-max ${reverse ? 'animate-marquee-right' : 'animate-marquee-left'} group-hover:[animation-play-state:paused]`}
       >
@@ -136,7 +136,7 @@ export default function APropos() {
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
+          viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.5 }}
         >
           <h3 className="text-3xl md:text-4xl section-heading">À propos</h3>

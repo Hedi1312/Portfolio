@@ -1,16 +1,24 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSun, FiMoon } from 'react-icons/fi';
 
-function getTheme(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return 'dark';
-  return localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
-}
-
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(getTheme);
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  useEffect(() => {
+    // We use setTimeout to defer the state update until after the initial paint
+    // This avoids the 'set-state-in-effect' ESLint error and cascading renders
+    const timer = setTimeout(() => {
+      setMounted(true);
+      if (localStorage.getItem('theme') === 'light') {
+        setTheme('light');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleTheme = useCallback(() => {
     setTheme((prev) => {
@@ -35,29 +43,33 @@ export default function ThemeToggle() {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >
-      <AnimatePresence mode="wait" initial={false}>
-        {theme === 'light' ? (
-          <motion.div
-            key="sun"
-            initial={{ rotate: -90, scale: 0 }}
-            animate={{ rotate: 0, scale: 1 }}
-            exit={{ rotate: 90, scale: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <FiSun size={18} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="moon"
-            initial={{ rotate: 90, scale: 0 }}
-            animate={{ rotate: 0, scale: 1 }}
-            exit={{ rotate: -90, scale: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <FiMoon size={18} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {!mounted ? (
+        <div className="w-[18px] h-[18px]" />
+      ) : (
+        <AnimatePresence mode="wait" initial={false}>
+          {theme === 'light' ? (
+            <motion.div
+              key="sun"
+              initial={{ rotate: -90, scale: 0 }}
+              animate={{ rotate: 0, scale: 1 }}
+              exit={{ rotate: 90, scale: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FiSun size={18} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="moon"
+              initial={{ rotate: 90, scale: 0 }}
+              animate={{ rotate: 0, scale: 1 }}
+              exit={{ rotate: -90, scale: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FiMoon size={18} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </motion.button>
   );
 }

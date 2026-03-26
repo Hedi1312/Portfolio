@@ -25,10 +25,10 @@ export default function Accueil() {
       className="relative flex flex-col items-center justify-center text-center min-h-screen px-6 overflow-hidden bg-neutral-50 dark:bg-[#0a0f1a] text-neutral-900 dark:text-white transition-colors duration-500"
     >
       {/* Animated grid background */}
-      <div className="hero-grid opacity-30 dark:opacity-20" />
+      <div className="hero-grid opacity-50 dark:opacity-30" />
 
       {/* Radial gradient overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,213,190,0.08)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,213,190,0.15)_0%,transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(0,213,190,0.12)_0%,transparent_70%)]" />
 
       {/* Content */}
       <div className="relative z-10 max-w-3xl">
@@ -45,7 +45,7 @@ export default function Accueil() {
 
         {/* Title */}
         <motion.h2
-          className="text-5xl md:text-7xl font-extrabold mb-12 font-[family-name:var(--font-space-grotesk)] tracking-tight"
+          className="text-5xl md:text-7xl font-extrabold mb-12 font-(family-name:--font-space-grotesk) tracking-tight"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -79,20 +79,21 @@ export default function Accueil() {
         </motion.p>
 
         {/* CTA Button */}
-        <motion.a
-          href="#mes-projets"
-          className="btn-glow inline-flex items-center gap-2 px-8 py-4 bg-brand-500 hover:bg-brand-400 text-white rounded-xl font-semibold text-lg transition-colors"
+        <motion.button
+          onClick={() => {
+            const el = document.getElementById('mes-projets');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold bg-brand-500 hover:bg-brand-400 text-white shadow-lg shadow-brand-500/20 cursor-pointer transition-all duration-300"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.8 }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
+          <FiChevronDown size={16} />
           Voir mes projets
-          <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-            →
-          </motion.span>
-        </motion.a>
+        </motion.button>
       </div>
 
       {/* Scroll indicator */}

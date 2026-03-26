@@ -35,9 +35,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        {/* Anti-flash script : check localStorage avant le 1er rendu React */}
-        <script
-          suppressHydrationWarning
+        <Script
+          id="anti-flash"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               try {

@@ -14,7 +14,6 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [fileError, setFileError] = useState('');
 
   useLockBodyScroll(isOpen);
 
@@ -40,7 +39,7 @@ export default function Contact() {
     if (selectedFiles) {
       const filesArray = Array.from(selectedFiles);
       if (filesArray.length > MAX_FILES) {
-        setFileError(`Maximum ${MAX_FILES} fichiers autorisés.`);
+        setError('Veuillez sélectionner uniquement des fichiers .pdf, .doc ou .docx');
         setFiles([]);
         e.target.value = '';
         return;
@@ -54,7 +53,7 @@ export default function Contact() {
         e.target.value = '';
         return;
       }
-      setFileError('');
+      setError('');
       setFiles(filesArray);
     }
   };
@@ -107,53 +106,46 @@ export default function Contact() {
     'w-full p-3.5 rounded-xl bg-neutral-50/50 dark:bg-neutral-800/50 border border-neutral-200/80 dark:border-neutral-700/50 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:outline-none transition-all duration-200';
 
   return (
-    <section
-      id="contact"
-      className="relative px-6 py-24 md:py-32 bg-neutral-50 dark:bg-[#0a0f1a] text-center text-neutral-900 dark:text-white transition-colors duration-500"
-    >
-      {/* Background accent */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,213,190,0.06)_0%,transparent_60%)]" />
+    <>
+      <motion.div
+        className="glass-card p-8 md:p-12 text-left h-full flex flex-col relative overflow-hidden group cursor-pointer"
+        whileHover={{ y: -5 }}
+        transition={{ duration: 0.15 }}
+        onClick={() => {
+          setSubmitted(false);
+          setIsOpen(true);
+        }}
+      >
+        {/* Glow effect */}
+        <div className="absolute -inset-x-0 -bottom-0 h-1/2 bg-brand-400/5 group-hover:bg-brand-400/15 blur-2xl transition-all duration-200 pointer-events-none" />
 
-      <div className="relative max-w-2xl mx-auto">
-        {/* Section heading */}
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h3 className="text-3xl md:text-4xl section-heading">Contact</h3>
-        </motion.div>
+        <div className="w-16 h-16 mb-6 rounded-2xl bg-brand-400/10 flex items-center justify-center text-brand-400">
+          <FiMail size={28} />
+        </div>
 
-        <motion.p
-          className="text-neutral-500 dark:text-neutral-400 mb-8"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
-        >
-          Tu veux collaborer ou discuter d&apos;un projet ?
-        </motion.p>
+        <h4 className="text-3xl font-bold mb-3 font-[family-name:var(--font-space-grotesk)] text-neutral-900 dark:text-white">
+          Discutons de ton projet
+        </h4>
 
-        <motion.button
-          onClick={() => {
+        <p className="text-neutral-500 dark:text-neutral-400 mb-8 max-w-md flex-grow leading-relaxed">
+          Tu as une idée en tête, un besoin technique spécifique ou tu cherches un développeur pour
+          rejoindre ton équipe ? Je lis tous mes messages et réponds très rapidement.
+        </p>
+
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
             setSubmitted(false);
             setIsOpen(true);
           }}
-          className="btn-glow inline-flex items-center gap-2 px-8 py-4 bg-brand-500 hover:bg-brand-400 text-white rounded-xl font-semibold text-lg transition-colors cursor-pointer"
+          variant="primary"
+          className="w-fit hover:scale-105 hover:-translate-y-1 hover:shadow-xl"
           data-umami-event="click-contact-open"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.15 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
         >
-          <FiMail size={20} />
-          Me contacter
-        </motion.button>
-      </div>
+          <FiMail size={18} />
+          M&apos;envoyer un message
+        </Button>
+      </motion.div>
 
       {/* Modal */}
       <AnimatePresence>
@@ -162,15 +154,15 @@ export default function Contact() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.15 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4"
             onClick={handleClose}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
               className="glass-card max-w-lg w-full p-8 relative text-left"
               onClick={(e) => e.stopPropagation()}
             >
@@ -262,28 +254,38 @@ export default function Contact() {
                       onChange={handleChange}
                       required
                       rows={4}
-                      className={`${inputClasses} resize-none`}
-                      placeholder="Mon message..."
+                      className={inputClasses}
+                      placeholder="Ton message..."
                     ></textarea>
                   </div>
 
+                  {/* Upload Fichiers Multiples UI */}
                   <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2">
-                      Pièces jointes
+                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                      Pièces jointes (optionnel - max 10 Mo)
                     </label>
-                    <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-50/50 dark:bg-neutral-800/50 border border-neutral-200/80 dark:border-neutral-700/50 text-neutral-500 dark:text-neutral-400 hover:border-brand-400 hover:text-brand-400 cursor-pointer transition-all text-sm">
-                      <FiPaperclip size={16} />
-                      Parcourir les fichiers
+                    <div className="relative group">
                       <input
                         type="file"
-                        accept=".png,.jpg,.jpeg,.pdf"
                         multiple
                         onChange={handleFileChange}
-                        className="hidden"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        title="Ajouter des fichiers"
                       />
-                    </label>
-                    {fileError && <p className="text-xs text-danger-500 mt-1.5">{fileError}</p>}
-                    <p className="text-xs text-neutral-400 mt-4">Max 3 fichiers, 10 Mo chacun</p>
+                      <div className="w-full flex items-center justify-between p-3.5 rounded-xl border border-dashed border-neutral-300 dark:border-neutral-600 bg-neutral-50/30 dark:bg-neutral-800/20 group-hover:bg-neutral-100 dark:group-hover:bg-neutral-800 transition-colors">
+                        <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+                          <FiPaperclip size={16} />
+                          {files.length > 0 ? (
+                            <span className="text-foreground font-medium">
+                              {files.length} fichier(s) sélectionné(s)
+                            </span>
+                          ) : (
+                            <span>Clique ou glisse tes fichiers ici</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    {/* Liste des fichiers sélectionnés */}
                     {files.length > 0 && (
                       <div className="flex items-center gap-1.5 flex-wrap mt-2">
                         {files.map((f, i) => (
@@ -296,7 +298,7 @@ export default function Contact() {
                             <button
                               type="button"
                               onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
-                              className="text-neutral-400 hover:text-danger-500 cursor-pointer"
+                              className="text-neutral-400 hover:text-danger-500 cursor-pointer ml-1"
                             >
                               <FiX size={12} />
                             </button>
@@ -349,6 +351,6 @@ export default function Contact() {
           </motion.div>
         )}
       </AnimatePresence>
-    </section>
+    </>
   );
 }

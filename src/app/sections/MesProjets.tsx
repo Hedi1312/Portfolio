@@ -90,7 +90,7 @@ export default function MesProjets() {
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
+          viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.5 }}
         >
           <h3 className="text-3xl md:text-4xl section-heading">Mes Projets</h3>
@@ -118,7 +118,7 @@ export default function MesProjets() {
             >
               {/* Preview area */}
               <div
-                className={`h-40 relative overflow-hidden ${!projet.images || projet.images.length === 0 ? `bg-gradient-to-br ${projet.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
+                className={`h-40 relative overflow-hidden ${!projet.images || projet.images.length === 0 ? `bg-linear-to-br ${projet.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
               >
                 {projet.images &&
                   projet.images.length > 0 &&
@@ -155,10 +155,10 @@ export default function MesProjets() {
 
               {/* Card content */}
               <div className="p-6 flex flex-col grow">
-                <h4 className="text-xl font-bold mb-3 font-(family-name:--font-space-grotesk) group-hover:text-brand-400 transition-colors duration-300 break-words line-clamp-2">
+                <h4 className="text-xl font-bold mb-3 font-(family-name:--font-space-grotesk) group-hover:text-brand-400 transition-colors duration-300 wrap-break-word line-clamp-2">
                   {projet.title}
                 </h4>
-                <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed mb-6 break-words line-clamp-3">
+                <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed mb-6 wrap-break-word line-clamp-3">
                   {projet.description}
                 </p>
 

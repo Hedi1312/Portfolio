@@ -1,28 +1,27 @@
 'use client';
 
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useState, useEffect, useCallback } from 'react';
-import { FiMenu, FiX } from 'react-icons/fi';
+import { usePathname } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  FaHome,
-  FaUser,
-  FaFolderOpen,
+  FaBell,
   FaEnvelope,
+  FaFolderOpen,
+  FaHome,
   FaLock,
   FaUnlockAlt,
-  FaBell,
+  FaUser,
 } from 'react-icons/fa';
-import { LuFileText } from 'react-icons/lu';
-import { motion, AnimatePresence } from 'framer-motion';
-import ThemeToggle from '@/components/ui/ThemeToggle';
-import { useSession } from 'next-auth/react';
+import { FiMenu, FiX } from 'react-icons/fi';
 
 const navLinks = [
   { href: '/', icon: FaHome, label: 'Accueil', section: 'home' },
   { href: '/#a-propos', icon: FaUser, label: 'À propos', section: 'a-propos' },
   { href: '/#mes-projets', icon: FaFolderOpen, label: 'Projets', section: 'mes-projets' },
-  { href: '/#cv', icon: LuFileText, label: 'CV', section: 'cv' },
-  { href: '/#contact', icon: FaEnvelope, label: 'Contact', section: 'contact' },
+  { href: '/#next-steps', icon: FaEnvelope, label: 'Contact & CV', section: 'next-steps' },
 ];
 
 export default function Navbar() {
@@ -31,6 +30,11 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { status } = useSession();
   const [unreadCount, setUnreadCount] = useState(0);
+  const pathname = usePathname();
+
+  const isAdminPage = pathname.startsWith('/admin') || pathname === '/admin-login';
+  const isMessagesPage = pathname === '/admin/messages';
+  const isDashboardPage = pathname.startsWith('/admin') && !isMessagesPage;
 
   const fetchUnread = useCallback(() => {
     if (status !== 'authenticated') return;
@@ -51,26 +55,55 @@ export default function Navbar() {
     };
   }, [fetchUnread]);
 
-  // Detect active section via IntersectionObserver
+  // Detect active section via IntersectionObserver (only on homepage)
+  // Sections render asynchronously (API calls), so we poll until they all appear in the DOM
   useEffect(() => {
-    const sections = navLinks
-      .map((l) => document.getElementById(l.section))
-      .filter(Boolean) as HTMLElement[];
+    if (isAdminPage) {
+      // Return early; no IntersectionObserver needed dynamically for admin pages
+      return;
+    }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '-40% 0px -50% 0px', threshold: 0 },
-    );
+    let observer: IntersectionObserver | null = null;
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
 
-    sections.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
-  }, []);
+    const setupObserver = () => {
+      const sections = navLinks
+        .map((l) => document.getElementById(l.section))
+        .filter(Boolean) as HTMLElement[];
+
+      // If not all sections are in the DOM yet, keep polling
+      if (sections.length < navLinks.length) return false;
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveSection(entry.target.id);
+            }
+          });
+        },
+        { rootMargin: '-10% 0px -80% 0px', threshold: 0 },
+      );
+
+      sections.forEach((s) => observer!.observe(s));
+      return true;
+    };
+
+    // Try immediately, then poll every 200ms until all sections are mounted
+    if (!setupObserver()) {
+      pollTimer = setInterval(() => {
+        if (setupObserver() && pollTimer) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+      }, 200);
+    }
+
+    return () => {
+      if (pollTimer) clearInterval(pollTimer);
+      if (observer) observer.disconnect();
+    };
+  }, [isAdminPage, pathname]);
 
   // Detect scroll for navbar background
   useEffect(() => {
@@ -129,6 +162,13 @@ export default function Navbar() {
               <Link
                 key={link.section}
                 href={link.href}
+                onClick={(e) => {
+                  if (window.location.pathname === '/') {
+                    e.preventDefault();
+                    const el = document.getElementById(link.section);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className={`relative p-3 rounded-xl transition-all duration-300 group ${
                   isActive
                     ? 'text-brand-400'
@@ -157,7 +197,11 @@ export default function Navbar() {
           {status === 'authenticated' && (
             <Link
               href="/admin/messages"
-              className="relative p-3 rounded-xl text-neutral-500 dark:text-neutral-400 hover:text-foreground transition-all duration-300 group"
+              className={`relative p-3 rounded-xl transition-all duration-300 group ${
+                isMessagesPage
+                  ? 'text-brand-400'
+                  : 'text-neutral-500 dark:text-neutral-400 hover:text-foreground'
+              }`}
               title="Messages"
             >
               <FaBell
@@ -169,13 +213,20 @@ export default function Navbar() {
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
+              {isMessagesPage && (
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full" />
+              )}
               <span className="absolute inset-0 rounded-xl bg-brand-400/0 group-hover:bg-brand-400/10 transition-colors duration-300" />
             </Link>
           )}
 
           <Link
             href={status === 'authenticated' ? '/admin/dashboard' : '/admin-login'}
-            className="relative p-3 rounded-xl text-danger-500 hover:text-danger-400 transition-all duration-300 group"
+            className={`relative p-3 rounded-xl transition-all duration-300 group ${
+              isDashboardPage || pathname === '/admin-login'
+                ? 'text-danger-500'
+                : 'text-danger-500 hover:text-danger-400'
+            }`}
             title="Admin"
           >
             {status === 'authenticated' ? (
@@ -188,6 +239,9 @@ export default function Navbar() {
                 size={22}
                 className="transition-transform duration-200 group-hover:scale-110"
               />
+            )}
+            {(isDashboardPage || pathname === '/admin-login') && (
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full" />
             )}
             <span className="absolute inset-0 rounded-xl bg-danger-500/0 group-hover:bg-danger-500/10 transition-colors duration-300" />
           </Link>
@@ -270,7 +324,14 @@ export default function Navbar() {
                     >
                       <Link
                         href={link.href}
-                        onClick={handleLinkClick}
+                        onClick={(e) => {
+                          handleLinkClick();
+                          if (window.location.pathname === '/') {
+                            e.preventDefault();
+                            const el = document.getElementById(link.section);
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                         className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
                           isActive
                             ? 'bg-brand-400/15 text-brand-400'

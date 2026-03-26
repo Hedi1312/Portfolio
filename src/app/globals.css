@@ -195,12 +195,15 @@ body {
 .hero-grid::before {
   content: '';
   position: absolute;
-  inset: -50%;
+  inset: -100%;
   background-image:
     linear-gradient(var(--glass-border) 1px, transparent 1px),
     linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
   background-size: 60px 60px;
-  animation: grid-move 20s linear infinite;
+  animation: grid-move 30s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* ═══════════════════════════════════════════════
@@ -243,10 +246,10 @@ body {
 
 @keyframes grid-move {
   0% {
-    transform: translate(0, 0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translate(60px, 60px);
+    transform: translate3d(60px, 60px, 0);
   }
 }
 
