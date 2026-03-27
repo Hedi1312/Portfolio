@@ -17,8 +17,7 @@ export async function GET() {
     }
 
     return NextResponse.json(aboutMe);
-  } catch (error) {
-    console.error('Erreur récupération à propos:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }
@@ -60,8 +59,7 @@ export async function PUT(req: Request) {
     });
 
     return NextResponse.json(updated);
-  } catch (error) {
-    console.error('Erreur mise à jour à propos:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

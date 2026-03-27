@@ -3,10 +3,10 @@
 import { useState, useRef } from 'react';
 import QRCode from 'qrcode';
 import { Button } from '@/components/ui/Button';
-import { Shield, ShieldCheck, Smartphone, KeyRound, Loader2 } from 'lucide-react';
+import { Shield, ShieldCheck, KeyRound, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FiArrowLeft, FiAlertTriangle } from 'react-icons/fi';
+import { FiArrowLeft, FiAlertTriangle, FiLock } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
@@ -208,7 +208,7 @@ export default function SecuritySettingsClient({
                       {loading ? (
                         <Loader2 className="w-4 h-4 animate-spin mr-2" />
                       ) : (
-                        <Smartphone className="w-4 h-4 mr-2" />
+                        <FiLock className="w-4 h-4 mr-2" />
                       )}
                       Activer l&apos;A2F
                     </Button>
@@ -307,7 +307,7 @@ export default function SecuritySettingsClient({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-9999 p-4"
             onClick={() => setShowDisableModal(false)}
           >
             <motion.div

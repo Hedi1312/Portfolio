@@ -54,8 +54,7 @@ export async function POST(req: Request) {
       apiKey: cloudinary.config().api_key,
       folder,
     });
-  } catch (error) {
-    console.error('Erreur signature Cloudinary:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

@@ -1,36 +1,44 @@
 'use client';
 
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useState, useEffect, useCallback } from 'react';
-import { FiMenu, FiX } from 'react-icons/fi';
+import { usePathname } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  FaHome,
-  FaUser,
-  FaFolderOpen,
+  FaBell,
   FaEnvelope,
+  FaFolderOpen,
+  FaHome,
   FaLock,
   FaUnlockAlt,
-  FaBell,
+  FaUser,
 } from 'react-icons/fa';
-import { LuFileText } from 'react-icons/lu';
-import { motion, AnimatePresence } from 'framer-motion';
-import ThemeToggle from '@/components/ui/ThemeToggle';
-import { useSession } from 'next-auth/react';
+import { FiMenu, FiX } from 'react-icons/fi';
+import { smoothScrollTo } from '@/lib/utils/scroll';
 
 const navLinks = [
   { href: '/', icon: FaHome, label: 'Accueil', section: 'home' },
   { href: '/#a-propos', icon: FaUser, label: 'À propos', section: 'a-propos' },
   { href: '/#mes-projets', icon: FaFolderOpen, label: 'Projets', section: 'mes-projets' },
-  { href: '/#cv', icon: LuFileText, label: 'CV', section: 'cv' },
-  { href: '/#contact', icon: FaEnvelope, label: 'Contact', section: 'contact' },
+  { href: '/#contact', icon: FaEnvelope, label: 'Contact & CV', section: 'contact' },
 ];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const { status } = useSession();
   const [unreadCount, setUnreadCount] = useState(0);
+  const pathname = usePathname();
+
+  useLockBodyScroll(isOpen);
+
+  const isAdminPage = pathname.startsWith('/admin') || pathname === '/admin-login';
+  const isMessagesPage = pathname === '/admin/messages';
+  const isDashboardPage = pathname.startsWith('/admin') && !isMessagesPage;
 
   const fetchUnread = useCallback(() => {
     if (status !== 'authenticated') return;
@@ -51,26 +59,91 @@ export default function Navbar() {
     };
   }, [fetchUnread]);
 
-  // Detect active section via IntersectionObserver
+  // Detect active section via IntersectionObserver (only on homepage)
+  // Sections render asynchronously (API calls), so we poll until they all appear in the DOM
   useEffect(() => {
-    const sections = navLinks
-      .map((l) => document.getElementById(l.section))
-      .filter(Boolean) as HTMLElement[];
+    if (isAdminPage) {
+      // Return early; no IntersectionObserver needed dynamically for admin pages
+      return;
+    }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+    let observer: IntersectionObserver | null = null;
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
+
+    const setupObserver = () => {
+      const sections = navLinks
+        .map((l) => document.getElementById(l.section))
+        .filter(Boolean) as HTMLElement[];
+
+      // If not all sections are in the DOM yet, keep polling
+      if (sections.length < navLinks.length) return false;
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveSection(entry.target.id);
+            }
+          });
+        },
+        { rootMargin: '-10% 0px -80% 0px', threshold: 0 },
+      );
+
+      sections.forEach((s) => observer!.observe(s));
+      return true;
+    };
+
+    // Try immediately, then poll every 200ms until all sections are mounted
+    if (!setupObserver()) {
+      pollTimer = setInterval(() => {
+        if (setupObserver() && pollTimer) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+      }, 200);
+    }
+
+    return () => {
+      if (pollTimer) clearInterval(pollTimer);
+      if (observer) observer.disconnect();
+    };
+  }, [isAdminPage, pathname]);
+
+  // Sync activeSection with URL and reset when returning to home at top
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (pathname === '/') {
+        if (window.scrollY < 100 && activeSection !== 'home') {
+          setActiveSection('home');
+        }
+      } else if (activeSection !== null) {
+        setActiveSection(null);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [pathname, activeSection]);
+
+  // Handle hash scroll on fresh navigation to home
+  useEffect(() => {
+    if (pathname === '/' && window.location.hash) {
+      const hash = window.location.hash;
+      // Wait for components to mount and animations to settle
+      const timer = setTimeout(() => {
+        smoothScrollTo(hash.substring(1), 2500);
+        // Clear hash from URL after scroll finishes for consistency
+        setTimeout(() => {
+          if (window.location.hash === hash) {
+            history.replaceState(
+              '',
+              document.title,
+              window.location.pathname + window.location.search,
+            );
           }
-        });
-      },
-      { rootMargin: '-40% 0px -50% 0px', threshold: 0 },
-    );
-
-    sections.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
-  }, []);
+        }, 2600);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname]);
 
   // Detect scroll for navbar background
   useEffect(() => {
@@ -84,17 +157,41 @@ export default function Navbar() {
   return (
     <header
       className={`fixed w-full z-50 transition-all duration-500 ${
-        scrolled ? 'glass shadow-lg py-4' : 'bg-transparent py-6'
+        scrolled ? 'glass bg-white! dark:bg-[#0a0f1a]! shadow-lg py-4' : 'bg-transparent py-6'
       }`}
       style={{ padding: scrolled ? '1rem 1.5rem' : '1.5rem' }}
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center px-2">
         {/* Logo */}
-        <Link href="/" className="group">
-          <h1 className="text-3xl font-bold font-[family-name:var(--font-space-grotesk)] tracking-tight">
-            <span className="gradient-text-animated">Hëdi</span>
-            <span className="text-foreground ml-2 group-hover:text-brand-400 transition-colors duration-300">
-              OKBA
+        <Link
+          href="/"
+          className="group flex items-center"
+          onClick={(e) => {
+            if (window.location.pathname === '/') {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+        >
+          <h1
+            aria-label="Hëdi OKBA"
+            className="text-3xl font-bold font-(family-name:--font-space-grotesk) tracking-tight flex items-center"
+          >
+            <span aria-hidden="true" className="relative inline-flex">
+              <span className="gradient-text-animated opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+                Hëdi
+              </span>
+              <span className="absolute inset-0 text-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                Hëdi
+              </span>
+            </span>
+            <span aria-hidden="true" className="relative inline-flex ml-2">
+              <span className="text-foreground opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+                OKBA
+              </span>
+              <span className="absolute inset-0 text-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                OKBA
+              </span>
             </span>
           </h1>
         </Link>
@@ -103,11 +200,17 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => {
             const Icon = link.icon;
-            const isActive = activeSection === link.section;
+            const isActive = pathname === '/' && activeSection === link.section;
             return (
               <Link
                 key={link.section}
                 href={link.href}
+                onClick={(e) => {
+                  if (pathname === '/') {
+                    e.preventDefault();
+                    smoothScrollTo(link.section, 2500);
+                  }
+                }}
                 className={`relative p-3 rounded-xl transition-all duration-300 group ${
                   isActive
                     ? 'text-brand-400'
@@ -136,7 +239,11 @@ export default function Navbar() {
           {status === 'authenticated' && (
             <Link
               href="/admin/messages"
-              className="relative p-3 rounded-xl text-neutral-500 dark:text-neutral-400 hover:text-foreground transition-all duration-300 group"
+              className={`relative p-3 rounded-xl transition-all duration-300 group ${
+                isMessagesPage
+                  ? 'text-brand-400'
+                  : 'text-neutral-500 dark:text-neutral-400 hover:text-foreground'
+              }`}
               title="Messages"
             >
               <FaBell
@@ -148,13 +255,24 @@ export default function Navbar() {
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
+              {isMessagesPage && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
               <span className="absolute inset-0 rounded-xl bg-brand-400/0 group-hover:bg-brand-400/10 transition-colors duration-300" />
             </Link>
           )}
 
           <Link
             href={status === 'authenticated' ? '/admin/dashboard' : '/admin-login'}
-            className="relative p-3 rounded-xl text-danger-500 hover:text-danger-400 transition-all duration-300 group"
+            className={`relative p-3 rounded-xl transition-all duration-300 group ${
+              isDashboardPage || pathname === '/admin-login'
+                ? 'text-danger-500'
+                : 'text-danger-500 hover:text-danger-400'
+            }`}
             title="Admin"
           >
             {status === 'authenticated' ? (
@@ -166,6 +284,13 @@ export default function Navbar() {
               <FaLock
                 size={22}
                 className="transition-transform duration-200 group-hover:scale-110"
+              />
+            )}
+            {(isDashboardPage || pathname === '/admin-login') && (
+              <motion.div
+                layoutId="activeIndicator"
+                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full"
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
             <span className="absolute inset-0 rounded-xl bg-danger-500/0 group-hover:bg-danger-500/10 transition-colors duration-300" />
@@ -226,7 +351,7 @@ export default function Navbar() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed top-0 right-0 h-full w-72 glass md:hidden flex flex-col pt-20 pb-8 px-6 z-50"
+              className="fixed top-0 right-0 h-full w-72 glass bg-white/95! dark:bg-[#0a0f1a]/95! md:hidden flex flex-col pt-20 pb-8 px-6 z-50"
             >
               <button
                 onClick={handleLinkClick}
@@ -249,7 +374,14 @@ export default function Navbar() {
                     >
                       <Link
                         href={link.href}
-                        onClick={handleLinkClick}
+                        onClick={(e) => {
+                          handleLinkClick();
+                          if (window.location.pathname === '/') {
+                            e.preventDefault();
+                            const el = document.getElementById(link.section);
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                         className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
                           isActive
                             ? 'bg-brand-400/15 text-brand-400'

@@ -115,13 +115,12 @@ body {
   border: 1px solid var(--glass-border);
   border-radius: 1rem;
   box-shadow: 0 4px 24px var(--glass-shadow);
-  transition:
-    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.3s ease;
+  /* Transitions are handled via Framer Motion in most components for more control */
+  transition: border-color 0.3s ease;
 }
 
-.glass-card:hover {
+/* Base hover if not handled by Framer Motion */
+.glass-card.css-hover-only:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px var(--glow-brand);
   border-color: rgba(0, 213, 190, 0.3);
@@ -195,12 +194,15 @@ body {
 .hero-grid::before {
   content: '';
   position: absolute;
-  inset: -50%;
+  inset: -100%;
   background-image:
     linear-gradient(var(--glass-border) 1px, transparent 1px),
     linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
   background-size: 60px 60px;
-  animation: grid-move 20s linear infinite;
+  animation: grid-move 30s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* ═══════════════════════════════════════════════
@@ -243,10 +245,10 @@ body {
 
 @keyframes grid-move {
   0% {
-    transform: translate(0, 0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translate(60px, 60px);
+    transform: translate3d(60px, 60px, 0);
   }
 }
 
@@ -340,4 +342,32 @@ body {
 ::selection {
   background: rgba(0, 213, 190, 0.3);
   color: inherit;
+}
+
+/* ═══════════════════════════════════════════════
+   MARQUEE ANIMATIONS
+   ═══════════════════════════════════════════════ */
+
+@keyframes marqueeLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+@keyframes marqueeRight {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-marquee-left {
+  animation: marqueeLeft 100s linear infinite;
+}
+.animate-marquee-right {
+  animation: marqueeRight 100s linear infinite;
 }

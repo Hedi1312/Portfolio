@@ -13,8 +13,7 @@ export async function GET() {
       orderBy: { order: 'asc' },
     });
     return NextResponse.json(projects);
-  } catch (error) {
-    console.error('Erreur récupération projets:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

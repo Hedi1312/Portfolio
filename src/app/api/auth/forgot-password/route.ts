@@ -72,11 +72,8 @@ export async function POST(req: Request) {
       html,
     });
 
-    console.log(`🔒 [RESET] Email de réinitialisation envoyé à : ${admin.email}`);
-
     return NextResponse.json({ message: SUCCESS_MESSAGE });
-  } catch (error) {
-    console.error('Erreur forgot-password:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

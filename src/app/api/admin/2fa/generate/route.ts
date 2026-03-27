@@ -45,8 +45,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ secret, otpauthUrl });
-  } catch (error) {
-    console.error('[2FA_GENERATE_ERROR]:', error);
+  } catch (_error) {
     // @api-security-best-practices: Sanitize error messages
     return NextResponse.json({ error: 'An error occurred during generation' }, { status: 500 });
   }

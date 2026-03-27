@@ -123,10 +123,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       data: { updatedAt: new Date() },
     });
 
-    console.log(`📤 [REPLY] Réponse envoyée à : ${contact.email}`);
     return NextResponse.json({ success: true, reply: savedReply });
-  } catch (error) {
-    console.error('Erreur envoi réponse:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

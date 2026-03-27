@@ -759,8 +759,7 @@ export default function AdminProjectsPage() {
               type: compressedBlob.type || file.type,
               lastModified: Date.now(),
             });
-          } catch (error) {
-            console.error('Erreur compression image:', file.name, error);
+          } catch (_error) {
             return file; // Si échec, on renvoie l'original
           }
         }),

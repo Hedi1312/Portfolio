@@ -55,8 +55,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
 
     return NextResponse.json({ success: true, images: uploadedImages }, { status: 201 });
-  } catch (error) {
-    console.error('Erreur enregistrement images projet:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

@@ -8,8 +8,7 @@ export async function GET() {
       where: { isRead: false },
     });
     return NextResponse.json({ count });
-  } catch (error) {
-    console.error('Erreur compteur non lus:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

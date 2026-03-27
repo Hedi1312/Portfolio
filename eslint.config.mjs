@@ -18,8 +18,8 @@ const eslintConfig = defineConfig([
     },
     rules: {
       'eslint-comments/no-use': 'error', // Installer : npm install --save-dev eslint-plugin-eslint-comments et npm install --save-dev eslint-config-prettier
-      //'no-console': 'error',
-      //'no-alert': 'error',
+      'no-console': 'error',
+      'no-alert': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-unused-vars': [

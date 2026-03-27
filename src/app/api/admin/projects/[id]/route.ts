@@ -35,8 +35,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     });
 
     return NextResponse.json(project);
-  } catch (error) {
-    console.error('Erreur modification projet:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }
@@ -67,8 +66,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
     await prisma.project.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Erreur suppression projet:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

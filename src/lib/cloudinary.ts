@@ -33,7 +33,6 @@ export async function uploadToCloudinary(
         },
         (error, result) => {
           if (error) {
-            console.error('Cloudinary upload error:', error);
             return reject(error);
           }
           if (!result) return reject(new Error('Cloudinary upload failed: No result'));
@@ -55,7 +54,5 @@ export async function deleteFromCloudinary(
 ): Promise<void> {
   try {
     await cloudinary.uploader.destroy(public_id, { resource_type, invalidate: true });
-  } catch (error) {
-    console.error('Erreur lors de la suppression sur Cloudinary:', error);
-  }
+  } catch (_error) {}
 }

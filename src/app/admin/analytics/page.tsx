@@ -12,6 +12,7 @@ import {
   FiMousePointer,
   FiSmartphone,
   FiUsers,
+  FiLink,
 } from 'react-icons/fi';
 import {
   FaChrome,
@@ -200,8 +201,7 @@ const OS_MAP: Record<
   linux: {
     label: 'Linux',
     icon: FaLinux,
-    color: '#FCC624',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/archive/tux/tux.svg',
+    color: '#EAB308',
   },
 };
 
@@ -214,10 +214,13 @@ function formatLabel(
 
   // OS specific checks only if map has these keys
   if (lower.includes('windows') && map['windows']) return map['windows'];
-  if ((lower.includes('mac') || lower.includes('ios') || lower.includes('apple')) && map['macos'])
-    return map['macos'];
+  if (lower.includes('ios') && map['ios']) return map['ios'];
+  if ((lower.includes('mac') || lower.includes('apple')) && map['macos']) return map['macos'];
   if (lower.includes('android') && map['android']) return map['android'];
   if (lower.includes('linux') && map['linux']) return map['linux'];
+
+  // Browser checks for specific mobile
+  if (lower.includes('crios') && map['chrome']) return map['chrome'];
 
   const matchedKey = Object.keys(map).find((key) => lower.includes(key) || key.includes(lower));
 
@@ -788,7 +791,7 @@ export default function AnalyticsPage() {
                 )}
               </motion.div>
 
-              {/* Devices Only */}
+              {/* Devices & Referrers */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -796,34 +799,69 @@ export default function AnalyticsPage() {
                 className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-0 overflow-hidden shadow-sm flex flex-col"
               >
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white px-6 pt-6 mb-4 flex items-center gap-2">
-                  <FiSmartphone size={18} /> Appareils
+                  <FiSmartphone size={18} /> Appareils & Sources
                 </h2>
-                <div className="space-y-4 px-6 pb-6 overflow-y-auto max-h-80">
-                  <div className="space-y-2">
-                    {(data?.devices || []).map((d, i) => {
-                      const { label, icon: Icon, color } = formatLabel(d.x, DEVICE_MAP);
-                      return (
-                        <div
-                          key={i}
-                          className="flex justify-between items-center text-sm p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg"
-                        >
-                          <span className="text-neutral-700 dark:text-neutral-300 font-medium flex items-center gap-2">
-                            <Icon className="w-4 h-4" style={{ color }} />
-                            <span>{label}</span>
-                          </span>
-                          <span className="font-bold text-neutral-900 dark:text-white">
-                            {d.y.toLocaleString('fr-FR')}
-                          </span>
-                        </div>
-                      );
-                    })}
-                    {!data?.devices?.length && (
-                      <div className="flex-1 flex items-center justify-center py-8">
-                        <p className="text-neutral-400 text-sm">Aucune donnée pour le moment</p>
+                {(data?.devices?.length || 0) > 0 || (data?.referrers?.length || 0) > 0 ? (
+                  <div className="space-y-4 px-6 pb-6 overflow-y-auto max-h-88">
+                    <div>
+                      <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
+                        Appareils
+                      </h3>
+                      <div className="space-y-2">
+                        {(data?.devices || []).map((d, i) => {
+                          const { label, icon: Icon, color } = formatLabel(d.x, DEVICE_MAP);
+                          return (
+                            <div
+                              key={i}
+                              className="flex justify-between items-center text-sm p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg"
+                            >
+                              <span className="text-neutral-700 dark:text-neutral-300 font-medium flex items-center gap-2">
+                                <Icon className="w-4 h-4" style={{ color }} />
+                                <span>{label}</span>
+                              </span>
+                              <span className="font-bold text-neutral-900 dark:text-white">
+                                {d.y.toLocaleString('fr-FR')}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
-                    )}
+                    </div>
+                    <hr className="border-neutral-200 dark:border-neutral-700" />
+                    <div>
+                      <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
+                        Sources
+                      </h3>
+                      <div className="space-y-2">
+                        {(data?.referrers || [])
+                          .filter((r) => r.x)
+                          .map((r, i) => (
+                            <div
+                              key={i}
+                              className="flex justify-between items-center text-sm p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg"
+                            >
+                              <span className="text-neutral-700 dark:text-neutral-300 font-medium truncate flex-1 min-w-0 mr-4 flex items-center gap-2">
+                                <FiLink className="w-4 h-4 text-brand-500 shrink-0" />
+                                <span className="truncate">{r.x}</span>
+                              </span>
+                              <span className="font-bold text-neutral-900 dark:text-white">
+                                {r.y.toLocaleString('fr-FR')}
+                              </span>
+                            </div>
+                          ))}
+                        {!data?.referrers?.length && (
+                          <div className="text-neutral-400 text-sm py-2 text-center">
+                            Aucune source trouvée
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center py-8">
+                    <p className="text-neutral-400 text-sm">Aucune donnée pour le moment</p>
+                  </div>
+                )}
               </motion.div>
             </div>
           </>

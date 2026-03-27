@@ -42,8 +42,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ path: s
         'Cache-Control': 'private, max-age=3600',
       },
     });
-  } catch (error) {
-    console.error('Erreur lecture fichier:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }
