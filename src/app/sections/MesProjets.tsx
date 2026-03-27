@@ -34,7 +34,7 @@ export interface Project {
 const containerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.15 },
+    transition: { staggerChildren: 0.4 },
   },
 };
 
@@ -43,7 +43,7 @@ const cardVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: 'easeOut' as const },
+    transition: { duration: 2.0, ease: [0.23, 1, 0.32, 1] as const },
   },
 };
 
@@ -73,7 +73,7 @@ export default function MesProjets() {
   return (
     <section
       id="mes-projets"
-      className="relative px-6 py-24 md:py-32 bg-neutral-50 dark:bg-[#0a0f1a] text-neutral-900 dark:text-white transition-colors duration-500"
+      className="relative px-6 py-16 md:py-24 bg-neutral-50 dark:bg-[#0a0f1a] text-neutral-900 dark:text-white transition-colors duration-500"
     >
       <AnimatePresence>
         {selectedProject && (
@@ -90,8 +90,8 @@ export default function MesProjets() {
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.5 }}
+          viewport={{ once: false, amount: 0.5 }}
+          transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] as const }}
         >
           <h3 className="text-3xl md:text-4xl section-heading">Mes Projets</h3>
         </motion.div>
@@ -102,12 +102,14 @@ export default function MesProjets() {
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: false, amount: 0.5 }}
         >
           {projets.map((projet, index) => (
             <motion.div
               key={projet.id}
-              className="glass-card flex flex-col h-full overflow-hidden group cursor-pointer hover:shadow-brand-500/10 transition-shadow"
+              className="glass-card flex flex-col h-full overflow-hidden group cursor-pointer hover:shadow-brand-500/10 transition-all duration-300"
+              whileHover={{ y: -10 }}
+              style={{ willChange: 'transform' }}
               variants={cardVariants}
               onClick={() => {
                 setSelectedProject(projet);

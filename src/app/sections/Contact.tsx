@@ -46,7 +46,7 @@ export default function Contact() {
       }
       const tooBig = filesArray.filter((f) => f.size > MAX_FILE_SIZE);
       if (tooBig.length > 0) {
-        setFileError(
+        setError(
           `Fichier(s) trop volumineux (max 10 Mo) : ${tooBig.map((f) => f.name).join(', ')}`,
         );
         setFiles([]);
@@ -108,26 +108,27 @@ export default function Contact() {
   return (
     <>
       <motion.div
-        className="glass-card p-8 md:p-12 text-left h-full flex flex-col relative overflow-hidden group cursor-pointer"
-        whileHover={{ y: -5 }}
-        transition={{ duration: 0.15 }}
+        className="glass-card p-8 md:p-12 text-center h-full flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer"
+        whileHover={{ y: -8 }}
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        style={{ willChange: 'transform' }}
         onClick={() => {
           setSubmitted(false);
           setIsOpen(true);
         }}
       >
         {/* Glow effect */}
-        <div className="absolute -inset-x-0 -bottom-0 h-1/2 bg-brand-400/5 group-hover:bg-brand-400/15 blur-2xl transition-all duration-200 pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-brand-400/5 group-hover:bg-brand-400/15 blur-2xl transition-all duration-200 pointer-events-none" />
 
-        <div className="w-16 h-16 mb-6 rounded-2xl bg-brand-400/10 flex items-center justify-center text-brand-400">
+        <div className="w-16 h-16 mb-6 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-900 dark:text-white transition-colors mx-auto">
           <FiMail size={28} />
         </div>
 
-        <h4 className="text-3xl font-bold mb-3 font-[family-name:var(--font-space-grotesk)] text-neutral-900 dark:text-white">
+        <h4 className="text-3xl font-bold mb-3 font-(family-name:--font-space-grotesk) text-neutral-900 dark:text-white text-center">
           Discutons de ton projet
         </h4>
 
-        <p className="text-neutral-500 dark:text-neutral-400 mb-8 max-w-md flex-grow leading-relaxed">
+        <p className="text-neutral-500 dark:text-neutral-400 mb-8 max-w-md grow leading-relaxed mx-auto text-center">
           Tu as une idée en tête, un besoin technique spécifique ou tu cherches un développeur pour
           rejoindre ton équipe ? Je lis tous mes messages et réponds très rapidement.
         </p>
@@ -139,7 +140,7 @@ export default function Contact() {
             setIsOpen(true);
           }}
           variant="primary"
-          className="w-fit hover:scale-105 hover:-translate-y-1 hover:shadow-xl"
+          className="w-fit hover:-translate-y-1 hover:shadow-xl mx-auto"
           data-umami-event="click-contact-open"
         >
           <FiMail size={18} />
@@ -173,7 +174,7 @@ export default function Contact() {
                 <FiX size={20} />
               </button>
 
-              <h2 className="text-2xl font-bold mb-1 font-[family-name:var(--font-space-grotesk)]">
+              <h2 className="text-2xl font-bold mb-1 font-(family-name:--font-space-grotesk)">
                 <span className="gradient-text">Contacte-moi</span>
               </h2>
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">

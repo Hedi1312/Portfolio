@@ -9,8 +9,6 @@ export default function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
-    // We use setTimeout to defer the state update until after the initial paint
-    // This avoids the 'set-state-in-effect' ESLint error and cascading renders
     const timer = setTimeout(() => {
       setMounted(true);
       if (localStorage.getItem('theme') === 'light') {
@@ -20,19 +18,19 @@ export default function ThemeToggle() {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (!mounted) return;
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [theme, mounted]);
+
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => {
-      const newTheme = prev === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', newTheme);
-
-      if (newTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-
-      return newTheme;
-    });
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   }, []);
 
   return (

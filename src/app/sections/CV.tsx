@@ -47,17 +47,18 @@ export default function CV() {
     <>
       <motion.div
         className="glass-card p-8 md:p-10 flex flex-col items-center justify-center text-center h-full group relative overflow-hidden"
-        whileHover={{ y: -5 }}
-        transition={{ duration: 0.15 }}
+        whileHover={{ y: -8 }}
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        style={{ willChange: 'transform' }}
       >
         {/* Glow effect */}
         <div className="absolute inset-x-0 top-0 h-1/2 bg-neutral-400/5 group-hover:bg-brand-400/10 blur-2xl transition-all duration-200 pointer-events-none" />
 
-        <div className="w-16 h-16 mb-6 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 group-hover:text-brand-400 transition-colors">
+        <div className="w-16 h-16 mb-6 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-brand-400 transition-colors">
           <FiFileText size={28} />
         </div>
 
-        <h4 className="text-2xl font-bold mb-3 font-(family-name:--font-space-grotesk) text-neutral-900 dark:text-white">
+        <h4 className="text-3xl font-bold mb-3 font-(family-name:--font-space-grotesk) text-neutral-900 dark:text-white">
           Consulter mon profil
         </h4>
 
@@ -66,21 +67,21 @@ export default function CV() {
           complet au format PDF.
         </p>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-3 w-full">
+        <div className="flex flex-col sm:flex-row justify-center gap-6 w-full">
           <Button
             onClick={() => setIsOpen(true)}
             variant="primary"
-            className="flex-1 hover:scale-105 hover:-translate-y-1 hover:shadow-xl"
+            className="flex-1 hover:-translate-y-1 hover:shadow-xl"
             data-umami-event="click-cv-view"
           >
             <FiEye size={18} />
-            Voir le CV
+            Voir mon CV
           </Button>
 
           <Button
             onClick={handleDownload}
             variant="secondary"
-            className="flex-1 hover:scale-105 hover:-translate-y-1 hover:shadow-xl"
+            className="flex-1 hover:-translate-y-1 hover:shadow-xl"
             isLoading={isDownloading}
             loadingText="Téléchargement..."
             data-umami-event="click-cv-download"

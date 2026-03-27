@@ -3,6 +3,7 @@ import { useIsDark } from '@/hooks/useIsDark';
 import { SKILL_ICONS } from '@/lib/skill-icons';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { FiGrid, FiZap } from 'react-icons/fi';
 
 interface StatItem {
   value: string;
@@ -24,7 +25,7 @@ interface AboutData {
 const containerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.08 },
+    transition: { staggerChildren: 0.3 },
   },
 };
 
@@ -33,7 +34,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' as const },
+    transition: { duration: 1.5, ease: [0.23, 1, 0.32, 1] as const },
   },
 };
 
@@ -128,7 +129,7 @@ export default function APropos() {
   return (
     <section
       id="a-propos"
-      className="relative px-6 py-24 md:py-32 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-500 overflow-hidden"
+      className="relative px-6 py-16 md:py-24 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-500 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto">
         {/* Section heading */}
@@ -136,8 +137,8 @@ export default function APropos() {
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.5 }}
+          viewport={{ once: false, amount: 0.5 }}
+          transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] as const }}
         >
           <h3 className="text-3xl md:text-4xl section-heading">À propos</h3>
         </motion.div>
@@ -150,8 +151,8 @@ export default function APropos() {
               className="md:col-span-3"
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              viewport={{ once: false, amount: 0.5 }}
+              transition={{ duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
             >
               <div className="glass-card p-8">
                 {paragraphs.map((paragraph, idx) => (
@@ -177,7 +178,7 @@ export default function APropos() {
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true }}
+              viewport={{ once: false, amount: 0.5 }}
             >
               {data.stats.map((stat) => (
                 <motion.div
@@ -203,8 +204,8 @@ export default function APropos() {
             className="w-full relative py-12"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            viewport={{ once: false, amount: 0.4 }}
+            transition={{ duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
           >
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-10">
               <p className="text-center text-md md:text-lg uppercase tracking-widest text-neutral-900 dark:text-white font-medium m-0">
@@ -217,32 +218,12 @@ export default function APropos() {
               >
                 {isAnimated ? (
                   <span className="flex items-center gap-2">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z"
-                      />
-                    </svg>{' '}
+                    <FiGrid className="w-4 h-4" />
                     Mode grille
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>{' '}
+                    <FiZap className="w-4 h-4" />
                     Mode défilement
                   </span>
                 )}
@@ -260,7 +241,7 @@ export default function APropos() {
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true }}
+                viewport={{ once: false, amount: 0.2 }}
               >
                 {data.techs.map((tech, i) => renderTechTag(tech, i, isDark))}
               </motion.div>

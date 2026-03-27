@@ -115,13 +115,12 @@ body {
   border: 1px solid var(--glass-border);
   border-radius: 1rem;
   box-shadow: 0 4px 24px var(--glass-shadow);
-  transition:
-    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.3s ease;
+  /* Transitions are handled via Framer Motion in most components for more control */
+  transition: border-color 0.3s ease;
 }
 
-.glass-card:hover {
+/* Base hover if not handled by Framer Motion */
+.glass-card.css-hover-only:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px var(--glow-brand);
   border-color: rgba(0, 213, 190, 0.3);

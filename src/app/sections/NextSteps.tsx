@@ -6,8 +6,8 @@ import CV from './CV';
 export default function NextSteps() {
   return (
     <section
-      id="next-steps"
-      className="relative px-6 py-24 md:py-32 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-500 overflow-hidden"
+      id="contact"
+      className="relative px-6 py-16 md:py-24 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-500 overflow-hidden"
     >
       {/* Background accent */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,213,190,0.06)_0%,transparent_60%)] pointer-events-none" />
@@ -18,19 +18,24 @@ export default function NextSteps() {
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.5 }}
+          viewport={{ once: false, amount: 0.5 }}
+          transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] as const }}
         >
-          <h3 className="text-3xl md:text-4xl section-heading">Contact & CV</h3>
+          <h3 className="text-3xl md:text-4xl section-heading font-bold">
+            <span className="text-neutral-900 dark:text-white transition-colors duration-300">
+              Contact
+            </span>{' '}
+            <span className="text-brand-400 transition-colors duration-300">& CV</span>
+          </h3>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           <motion.div
             className="lg:col-span-7"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            viewport={{ once: false, amount: 0.5 }}
+            transition={{ duration: 2.0, delay: 0.1, ease: [0.23, 1, 0.32, 1] as const }}
           >
             <Contact />
           </motion.div>
@@ -39,8 +44,8 @@ export default function NextSteps() {
             className="lg:col-span-5"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            viewport={{ once: false, amount: 0.5 }}
+            transition={{ duration: 2.0, delay: 0.2, ease: [0.23, 1, 0.32, 1] as const }}
           >
             <CV />
           </motion.div>

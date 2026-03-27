@@ -11,7 +11,7 @@ export default function Footer() {
       {/* Gradient separator */}
       <div className="h-px bg-linear-to-r from-transparent via-brand-400/50 to-transparent" />
 
-      <div className="max-w-6xl mx-auto px-6 py-16 md:py-20">
+      <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
         <div className="grid grid-cols-2 md:grid-cols-12 gap-12 md:gap-8 lg:gap-12">
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-5 flex flex-col items-center md:items-start text-center md:text-left">
