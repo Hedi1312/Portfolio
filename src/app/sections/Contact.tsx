@@ -95,7 +95,7 @@ export default function Contact() {
         setTimeout(() => setIsOpen(false), 2500);
       } else {
         const data = await res.json();
-        alert(data.error || "Erreur lors de l'envoi du message.");
+        setError(data.error || "Erreur lors de l'envoi du message.");
       }
     } finally {
       setIsSubmitting(false);

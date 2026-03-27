@@ -12,8 +12,7 @@ export async function GET() {
       orderBy: { order: 'asc' },
     });
     return NextResponse.json(projects);
-  } catch (error) {
-    console.error('Erreur récupération projets:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }
@@ -54,8 +53,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(project, { status: 201 });
-  } catch (error) {
-    console.error('Erreur création projet:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

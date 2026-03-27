@@ -18,7 +18,6 @@ async function umamiGet(path: string, params?: Record<string, string>) {
     next: { revalidate: 0 },
   });
   if (!res.ok) {
-    console.error(`Umami API error ${res.status}: ${path}`, await res.text());
     return null;
   }
   return res.json();

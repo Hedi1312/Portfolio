@@ -10,7 +10,7 @@ if (fs.existsSync(envPath)) {
   oldEnv = fs.readFileSync(envPath, 'utf8');
 }
 
-console.log('🔄 Téléchargement des secrets depuis Doppler...');
+process.stdout.write('🔄 Téléchargement des secrets depuis Doppler...\n');
 
 try {
   // Exécuter doppler et récupérer la sortie standard (les nouvelles variables d'env)
@@ -51,10 +51,10 @@ try {
     }
   }
 
-  console.log(
-    `✅ Succès ! ${addedCount} ajoutée(s), ${modifiedCount} modifiée(s), ${deletedCount} supprimée(s).`,
+  process.stdout.write(
+    `✅ Succès ! ${addedCount} ajoutée(s), ${modifiedCount} modifiée(s), ${deletedCount} supprimée(s).\n`,
   );
 } catch (error) {
-  console.error('❌ Erreur lors du téléchargement des secrets:', error.message);
+  process.stderr.write(`❌ Erreur lors du téléchargement des secrets: ${error.message}\n`);
   process.exit(1);
 }

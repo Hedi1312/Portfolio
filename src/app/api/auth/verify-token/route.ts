@@ -22,8 +22,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ valid: true });
-  } catch (error) {
-    console.error('Erreur verify-token:', error);
+  } catch (_error) {
     return NextResponse.json({ valid: false }, { status: 500 });
   }
 }

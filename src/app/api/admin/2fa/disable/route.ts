@@ -55,8 +55,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('2FA Disable error:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur interne côté serveur' }, { status: 500 });
   }
 }

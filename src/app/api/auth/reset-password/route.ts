@@ -91,13 +91,10 @@ export async function POST(req: Request) {
     // Delete the used token
     await prisma.passwordReset.delete({ where: { id: resetRecord.id } });
 
-    console.log(`✅ [RESET] Mot de passe mis à jour pour : ${resetRecord.admin.email}`);
-
     return NextResponse.json({
       message: 'Mot de passe mis à jour avec succès.',
     });
-  } catch (error) {
-    console.error('Erreur reset-password:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

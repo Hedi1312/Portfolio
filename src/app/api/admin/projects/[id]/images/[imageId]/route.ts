@@ -30,8 +30,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Erreur lors de la suppression de l'image:", error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }
@@ -52,8 +51,7 @@ export async function PUT(
     });
 
     return NextResponse.json({ success: true, image });
-  } catch (error) {
-    console.error("Erreur lors de la modification de l'image:", error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

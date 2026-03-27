@@ -72,7 +72,6 @@ export default function MessagesPage() {
       const data = await res.json();
       setContacts(data.contacts || []);
     } catch {
-      console.error('Erreur chargement contacts');
     } finally {
       setLoading(false);
     }

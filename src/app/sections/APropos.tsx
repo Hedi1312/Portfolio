@@ -112,7 +112,7 @@ export default function APropos() {
           })),
         });
       })
-      .catch((err) => console.error('Erreur chargement à propos:', err));
+      .catch((_err) => {});
   }, []);
 
   if (!data) return null;

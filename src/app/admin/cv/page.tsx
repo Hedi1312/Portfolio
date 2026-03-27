@@ -35,7 +35,7 @@ export default function AdminCVPage() {
           setFileName(data.name || null);
         }
       })
-      .catch(() => console.warn('Aucun CV trouvé au chargement'));
+      .catch(() => {});
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,8 +167,7 @@ export default function AdminCVPage() {
       } else {
         showToast('error', `Erreur : ${data.error}`);
       }
-    } catch (err) {
-      console.error('Erreur upload CV:', err);
+    } catch (_err) {
       showToast('error', "Erreur lors de l'upload du CV.");
     } finally {
       setLoading(false);
@@ -189,8 +188,7 @@ export default function AdminCVPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
+    } catch (_error) {
     } finally {
       setIsDownloading(false);
     }

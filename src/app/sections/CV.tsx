@@ -18,7 +18,7 @@ export default function CV() {
           setCvUrl(`${data.url}?t=${Date.now()}`);
         }
       })
-      .catch((err) => console.error('Erreur chargement CV :', err));
+      .catch((_err) => {});
   }, []);
 
   useLockBodyScroll(isOpen);
@@ -36,8 +36,7 @@ export default function CV() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
+    } catch (_error) {
     } finally {
       setIsDownloading(false);
     }

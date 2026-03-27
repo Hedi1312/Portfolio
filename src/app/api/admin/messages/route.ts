@@ -22,8 +22,7 @@ export async function GET() {
     });
 
     return NextResponse.json({ contacts, unreadCount });
-  } catch (error) {
-    console.error('Erreur récupération messages:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

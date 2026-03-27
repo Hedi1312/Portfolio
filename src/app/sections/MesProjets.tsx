@@ -60,10 +60,9 @@ export default function MesProjets() {
         if (Array.isArray(data)) {
           setProjets(data);
         } else {
-          console.error('Erreur API:', data.error);
         }
       })
-      .catch((err) => console.error('Erreur chargement projets:', err))
+      .catch((_err) => {})
       .finally(() => setLoading(false));
   }, []);
 
