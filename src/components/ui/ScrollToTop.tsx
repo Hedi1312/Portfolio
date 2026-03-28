@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { FiArrowUp } from 'react-icons/fi';
+import { useNeonHover } from '@/hooks/useNeonHover';
 
 export default function ScrollToTop() {
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const neonHover = useNeonHover(-4);
 
   useEffect(() => {
     const onScroll = () => {
@@ -39,14 +42,17 @@ export default function ScrollToTop() {
   }, []);
 
   return (
-    <button
+    <motion.button
       onClick={scrollToTop}
-      className={`fixed bottom-10 right-10 z-50 p-3 rounded-xl glass text-brand-400 hover:text-neutral-900 dark:hover:text-white hover:bg-brand-500/15 cursor-pointer transition-all duration-300 ${
+      className={`fixed bottom-10 right-10 z-50 p-3 rounded-xl glass text-brand-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer ${
         visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
+      style={{ transition: 'opacity 0.3s ease, color 0.3s ease' }}
+      whileHover={neonHover.whileHover}
+      transition={neonHover.transition}
       aria-label="Remonter en haut"
     >
       <FiArrowUp size={20} strokeWidth={2.5} />
-    </button>
+    </motion.button>
   );
 }

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { FiExternalLink, FiGithub, FiInfo, FiPlay } from 'react-icons/fi';
 import { findSkillIcon } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
+import { useNeonHover } from '@/hooks/useNeonHover';
 import { ProjectModal } from '@/components/ProjectModal';
 
 export interface ProjectImage {
@@ -52,6 +53,7 @@ export default function MesProjets() {
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const isDark = useIsDark();
+  const neonHover = useNeonHover(-10);
 
   useEffect(() => {
     fetch('/api/projects')
@@ -106,17 +108,21 @@ export default function MesProjets() {
           {projets.map((projet, index) => (
             <motion.div
               key={projet.id}
-              className="glass-card flex flex-col h-full overflow-hidden group cursor-pointer hover:shadow-brand-500/10 transition-all duration-300"
-              whileHover={{ y: -10 }}
-              style={{ willChange: 'transform' }}
               variants={cardVariants}
-              onClick={() => {
-                setSelectedProject(projet);
-                if (typeof window !== 'undefined' && window.umami) {
-                  window.umami.track(`Projet Détails: ${projet.title}`);
-                }
-              }}
             >
+              <motion.div
+                className="glass-card flex flex-col h-full overflow-hidden group cursor-pointer relative"
+                whileHover={neonHover.whileHover}
+                transition={neonHover.transition}
+                style={{ willChange: 'transform' }}
+                onClick={() => {
+                  setSelectedProject(projet);
+                  if (typeof window !== 'undefined' && window.umami) {
+                    window.umami.track(`Projet Détails: ${projet.title}`);
+                  }
+                }}
+              >
+
               {/* Preview area */}
               <div
                 className={`h-40 relative overflow-hidden ${!projet.images || projet.images.length === 0 ? `bg-linear-to-br ${projet.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
@@ -229,6 +235,7 @@ export default function MesProjets() {
                   </button>
                 </div>
               </div>
+              </motion.div>
             </motion.div>
           ))}
         </motion.div>

@@ -116,7 +116,9 @@ body {
   border-radius: 1rem;
   box-shadow: 0 4px 24px var(--glass-shadow);
   /* Transitions are handled via Framer Motion in most components for more control */
-  transition: border-color 0.3s ease;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 /* Base hover if not handled by Framer Motion */

@@ -4,9 +4,16 @@ import { Html, Body, Head, Container, Preview, Text, Hr } from '@react-email/com
 interface AdminReplyProps {
   recipientName: string;
   replyMessage: string;
+  originalSubject?: string;
+  originalMessage?: string;
 }
 
-export const AdminReply = ({ recipientName, replyMessage }: AdminReplyProps) => (
+export const AdminReply = ({
+  recipientName,
+  replyMessage,
+  originalSubject,
+  originalMessage,
+}: AdminReplyProps) => (
   <Html>
     <Head />
     <Preview>Réponse de Hëdi OKBA à votre message</Preview>
@@ -32,8 +39,22 @@ export const AdminReply = ({ recipientName, replyMessage }: AdminReplyProps) => 
                   <Text style={greeting}>Bonjour {recipientName},</Text>
 
                   <div style={replyCard}>
-                    <Text style={replyText}>{replyMessage}</Text>
+                    <Text style={replyTextStyle}>{replyMessage}</Text>
                   </div>
+
+                  {/* Message original cité */}
+                  {originalMessage && (
+                    <div style={originalSection}>
+                      <Text style={originalLabel}>
+                        {originalSubject
+                          ? `Votre message — ${originalSubject}`
+                          : 'Votre message'}
+                      </Text>
+                      <div style={originalBox}>
+                        <Text style={originalText}>{originalMessage}</Text>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Hr style={divider} />
@@ -108,10 +129,36 @@ const replyCard = {
   borderRadius: '4px',
   marginBottom: '32px',
 };
-const replyText = {
+const replyTextStyle = {
   color: '#334155',
   fontSize: '15px',
   lineHeight: '26px',
+  margin: '0',
+  whiteSpace: 'pre-wrap' as const,
+  wordBreak: 'break-word' as const,
+};
+
+const originalSection = {
+  marginBottom: '32px',
+};
+const originalLabel = {
+  fontSize: '13px',
+  color: '#64748b',
+  fontWeight: '500' as const,
+  margin: '0 0 12px',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.5px',
+};
+const originalBox = {
+  padding: '16px 20px',
+  backgroundColor: '#f1f5f9',
+  borderRadius: '4px',
+  borderLeft: '3px solid #cbd5e1',
+};
+const originalText = {
+  color: '#64748b',
+  fontSize: '14px',
+  lineHeight: '24px',
   margin: '0',
   whiteSpace: 'pre-wrap' as const,
   wordBreak: 'break-word' as const,

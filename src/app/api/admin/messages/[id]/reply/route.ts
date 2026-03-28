@@ -90,6 +90,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       AdminReply({
         recipientName: contact.name,
         replyMessage,
+        originalSubject: lastMessage.subject || undefined,
+        originalMessage: lastMessage.message,
       }),
     );
 

@@ -37,14 +37,14 @@ export const AdminNotification = ({ name, email, subject, message }: AdminNotifi
                 </div>
 
                 <div style={metadataBox}>
+                  {subject && (
+                    <Text style={subjectTitle}>{subject}</Text>
+                  )}
                   <Text style={dataRow}>
                     <strong style={label}>De :</strong> {name}
                   </Text>
                   <Text style={dataRow}>
                     <strong style={label}>Email :</strong> {email}
-                  </Text>
-                  <Text style={dataRow}>
-                    <strong style={label}>Sujet :</strong> {subject || 'Non spécifié'}
                   </Text>
                 </div>
 
@@ -112,6 +112,13 @@ const metadataBox = {
   borderRadius: '6px',
   border: '1px solid #e2e8f0',
   marginBottom: '32px',
+};
+const subjectTitle = {
+  fontSize: '18px',
+  fontWeight: '700' as const,
+  color: '#0f172a',
+  margin: '0 0 16px',
+  lineHeight: '24px',
 };
 const dataRow = { fontSize: '14px', margin: '0 0 10px', color: '#0f172a', lineHeight: '20px' };
 const label = {

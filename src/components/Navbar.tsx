@@ -134,8 +134,8 @@ export default function Navbar() {
         setTimeout(() => {
           if (window.location.hash === hash) {
             history.replaceState(
+              null,
               '',
-              document.title,
               window.location.pathname + window.location.search,
             );
           }

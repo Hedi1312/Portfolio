@@ -395,9 +395,14 @@ export default function MessagesPage() {
                     {/* Contact header */}
                     <div className="flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-700">
                       <div>
-                        <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
+                        {selected.messages[selected.messages.length - 1]?.subject && (
+                          <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-1">
+                            {selected.messages[selected.messages.length - 1].subject}
+                          </h2>
+                        )}
+                        <h3 className="text-base font-semibold text-neutral-700 dark:text-neutral-300">
                           {selected.name}
-                        </h2>
+                        </h3>
                         <a
                           href={`mailto:${selected.email}`}
                           className="text-sm text-brand-500 hover:underline"
@@ -446,11 +451,6 @@ export default function MessagesPage() {
                                     {formatFull(msg.createdAt)}
                                   </span>
                                 </div>
-                                {msg.subject && (
-                                  <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 mb-1 px-4 pt-3">
-                                    Sujet : {msg.subject}
-                                  </p>
-                                )}
                                 <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-xl rounded-tl-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap break-words">
                                   {msg.message}
                                 </div>
