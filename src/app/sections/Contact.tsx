@@ -343,7 +343,7 @@ export default function Contact() {
                   </motion.div>
                   <p className="text-xl font-semibold mb-2">Message envoyé !</p>
                   <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                    Je te réponds très vite 
+                    Je te réponds très vite
                   </p>
                 </motion.div>
               )}

@@ -123,7 +123,7 @@ export default function CV() {
                 className="w-full h-[80vh] rounded-xl border border-neutral-200/20 dark:border-neutral-700/30 bg-white"
               />
               <p className="text-center text-neutral-500 dark:text-neutral-400 text-sm mt-4">
-                 Si l&apos;affichage n&apos;est pas optimal,{' '}
+                Si l&apos;affichage n&apos;est pas optimal,{' '}
                 <a
                   href={cvUrl}
                   target="_blank"
