@@ -52,7 +52,6 @@ export default function CV() {
         transition={neonHover.transition}
         style={{ willChange: 'transform' }}
       >
-
         <div className="w-16 h-16 mb-6 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-brand-400 transition-colors">
           <FiFileText size={28} />
         </div>

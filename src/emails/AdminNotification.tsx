@@ -37,9 +37,7 @@ export const AdminNotification = ({ name, email, subject, message }: AdminNotifi
                 </div>
 
                 <div style={metadataBox}>
-                  {subject && (
-                    <Text style={subjectTitle}>{subject}</Text>
-                  )}
+                  {subject && <Text style={subjectTitle}>{subject}</Text>}
                   <Text style={dataRow}>
                     <strong style={label}>De :</strong> {name}
                   </Text>

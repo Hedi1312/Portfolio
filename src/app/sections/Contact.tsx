@@ -119,7 +119,6 @@ export default function Contact() {
           setIsOpen(true);
         }}
       >
-
         <div className="w-16 h-16 mb-6 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-900 dark:text-white transition-colors mx-auto">
           <FiMail size={28} />
         </div>

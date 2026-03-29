@@ -46,9 +46,7 @@ export const AdminReply = ({
                   {originalMessage && (
                     <div style={originalSection}>
                       <Text style={originalLabel}>
-                        {originalSubject
-                          ? `Votre message — ${originalSubject}`
-                          : 'Votre message'}
+                        {originalSubject ? `Votre message — ${originalSubject}` : 'Votre message'}
                       </Text>
                       <div style={originalBox}>
                         <Text style={originalText}>{originalMessage}</Text>
