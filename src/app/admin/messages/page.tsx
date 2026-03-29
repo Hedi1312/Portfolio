@@ -82,7 +82,7 @@ export default function MessagesPage() {
   }, [fetchContacts]);
 
   const selectContact = async (contact: Contact) => {
-    // Garder l'état original pour le séparateur non-lu
+    // Persist original state for unread separator
     setSelected(contact);
     setReplyText('');
     setReplyFiles([]);
@@ -91,7 +91,7 @@ export default function MessagesPage() {
     const hasUnread = contact.messages.some((m) => !m.isRead);
     if (hasUnread) {
       await fetch(`/api/admin/messages/${contact.id}`, { method: 'PATCH' });
-      // Marquer comme lu dans la liste (sidebar)
+      // Mark as read in the sidebar list
       setContacts((prev) =>
         prev.map((c) =>
           c.id === contact.id
@@ -99,7 +99,7 @@ export default function MessagesPage() {
             : c,
         ),
       );
-      // Mettre à jour la cloche de la navbar
+      // Update navbar notification bell
       window.dispatchEvent(new Event('unread-updated'));
     }
   };
@@ -137,7 +137,7 @@ export default function MessagesPage() {
       if (res.ok) {
         const data = await res.json();
         const newReply: Reply = data.reply;
-        // Ajouter la réponse au dernier message du contact
+        // Append reply to the contact's last message
         setSelected((prev) => {
           if (!prev) return null;
           const msgs = [...prev.messages];
@@ -223,7 +223,7 @@ export default function MessagesPage() {
                 className="flex items-center justify-center h-32 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
               >
                 <div className="text-center">
-                  <div className="text-2xl mb-1">📄</div>
+                  <div className="text-2xl mb-1"></div>
                   <span className="text-xs text-neutral-500">Voir le PDF</span>
                 </div>
               </a>
@@ -395,9 +395,14 @@ export default function MessagesPage() {
                     {/* Contact header */}
                     <div className="flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-700">
                       <div>
-                        <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
+                        {selected.messages[selected.messages.length - 1]?.subject && (
+                          <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-1">
+                            {selected.messages[selected.messages.length - 1].subject}
+                          </h2>
+                        )}
+                        <h3 className="text-base font-semibold text-neutral-700 dark:text-neutral-300">
                           {selected.name}
-                        </h2>
+                        </h3>
                         <a
                           href={`mailto:${selected.email}`}
                           className="text-sm text-brand-500 hover:underline"
@@ -416,7 +421,7 @@ export default function MessagesPage() {
                     {/* Conversation thread */}
                     <div className="p-6 space-y-5 max-h-[60vh] overflow-y-auto">
                       {selected.messages.map((msg, msgIdx) => {
-                        // Afficher le séparateur "Messages non lus" avant le premier message non lu
+                        // Display 'Unread messages' separator before the first unread message
                         const isFirstUnread =
                           !msg.isRead && (msgIdx === 0 || selected.messages[msgIdx - 1].isRead);
 
@@ -446,12 +451,7 @@ export default function MessagesPage() {
                                     {formatFull(msg.createdAt)}
                                   </span>
                                 </div>
-                                {msg.subject && (
-                                  <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 mb-1 px-4 pt-3">
-                                    Sujet : {msg.subject}
-                                  </p>
-                                )}
-                                <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-xl rounded-tl-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap break-words">
+                                <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-xl rounded-tl-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap wrap-break-word">
                                   {msg.message}
                                 </div>
                                 {renderAttachments(msg.attachments)}
@@ -470,7 +470,7 @@ export default function MessagesPage() {
                                       Moi
                                     </span>
                                   </div>
-                                  <div className="bg-brand-500/10 dark:bg-brand-500/15 border border-brand-200 dark:border-brand-800 rounded-xl rounded-tr-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap break-words">
+                                  <div className="bg-brand-500/10 dark:bg-brand-500/15 border border-brand-200 dark:border-brand-800 rounded-xl rounded-tr-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap wrap-break-word">
                                     {reply.message}
                                   </div>
                                   {renderAttachments(reply.attachments)}

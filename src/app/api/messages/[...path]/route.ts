@@ -17,14 +17,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ path: s
     const { path: segments } = await params;
     const filename = segments.join('/');
 
-    // Sécurité : empêcher traversal
+    // Prevent path traversal
     if (filename.includes('..') || filename.includes('~')) {
       return NextResponse.json({ error: 'Chemin invalide.' }, { status: 400 });
     }
 
     const filePath = path.join(process.cwd(), 'storage', 'messages', filename);
 
-    // Vérifier que le fichier existe
+    // Verify file exists
     try {
       await stat(filePath);
     } catch {

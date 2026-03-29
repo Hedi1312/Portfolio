@@ -19,7 +19,7 @@ interface RateLimitEntry {
 export function rateLimit({ interval, limit }: RateLimitOptions) {
   const tokenCache = new Map<string, RateLimitEntry>();
 
-  // Nettoyage périodique des entrées expirées (toutes les 60s)
+  // Periodic cleanup of expired entries
   setInterval(() => {
     const now = Date.now();
     for (const [key, entry] of tokenCache.entries()) {

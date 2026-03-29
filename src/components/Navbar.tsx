@@ -2,6 +2,7 @@
 
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import { smoothScrollTo } from '@/lib/utils/scroll';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -17,7 +18,6 @@ import {
   FaUser,
 } from 'react-icons/fa';
 import { FiMenu, FiX } from 'react-icons/fi';
-import { smoothScrollTo } from '@/lib/utils/scroll';
 
 const navLinks = [
   { href: '/', icon: FaHome, label: 'Accueil', section: 'home' },
@@ -30,6 +30,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { status } = useSession();
   const [unreadCount, setUnreadCount] = useState(0);
   const pathname = usePathname();
@@ -133,11 +134,7 @@ export default function Navbar() {
         // Clear hash from URL after scroll finishes for consistency
         setTimeout(() => {
           if (window.location.hash === hash) {
-            history.replaceState(
-              '',
-              document.title,
-              window.location.pathname + window.location.search,
-            );
+            history.replaceState(null, '', window.location.pathname + window.location.search);
           }
         }, 2600);
       }, 500);
@@ -148,20 +145,32 @@ export default function Navbar() {
   // Detect scroll for navbar background
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
+    handleScroll();
+
+    const timer = setTimeout(() => setIsMounted(true), 50);
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timer);
+    };
   }, []);
 
   const handleLinkClick = () => setIsOpen(false);
 
   return (
     <header
-      className={`fixed w-full z-50 transition-all duration-500 ${
-        scrolled ? 'glass bg-white! dark:bg-[#0a0f1a]! shadow-lg py-4' : 'bg-transparent py-6'
-      }`}
-      style={{ padding: scrolled ? '1rem 1.5rem' : '1.5rem' }}
+      className={`fixed top-0 left-0 w-full z-50 px-6 ${
+        isMounted ? 'transition-[padding] duration-500' : ''
+      } ${scrolled ? 'py-4' : 'py-6'}`}
     >
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-2">
+      <div
+        className={`absolute inset-0 bg-white/95 dark:bg-[#0a0f1a]/95 backdrop-blur-md border-b border-neutral-200/50 dark:border-neutral-800/50 shadow-lg pointer-events-none ${
+          isMounted ? 'transition-opacity duration-500' : ''
+        } ${scrolled ? 'opacity-100' : 'opacity-0'}`}
+      />
+
+      <div className="relative z-10 max-w-7xl mx-auto flex justify-between items-center px-2">
         {/* Logo */}
         <Link
           href="/"
@@ -395,21 +404,6 @@ export default function Navbar() {
                   );
                 })}
 
-                <motion.div
-                  initial={{ x: 40, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: navLinks.length * 0.05 }}
-                >
-                  <Link
-                    href={status === 'authenticated' ? '/admin/dashboard' : '/admin-login'}
-                    onClick={handleLinkClick}
-                    className="flex items-center gap-4 px-4 py-3 rounded-xl text-danger-500 hover:bg-danger-500/10 transition-all duration-200"
-                  >
-                    {status === 'authenticated' ? <FaUnlockAlt size={22} /> : <FaLock size={22} />}
-                    <span className="font-medium">Admin</span>
-                  </Link>
-                </motion.div>
-
                 {status === 'authenticated' && (
                   <>
                     <motion.div
@@ -435,6 +429,21 @@ export default function Navbar() {
                     </motion.div>
                   </>
                 )}
+
+                <motion.div
+                  initial={{ x: 40, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: navLinks.length * 0.05 }}
+                >
+                  <Link
+                    href={status === 'authenticated' ? '/admin/dashboard' : '/admin-login'}
+                    onClick={handleLinkClick}
+                    className="flex items-center gap-4 px-4 py-3 rounded-xl text-danger-500 hover:bg-danger-500/10 transition-all duration-200"
+                  >
+                    {status === 'authenticated' ? <FaUnlockAlt size={22} /> : <FaLock size={22} />}
+                    <span className="font-medium">Admin</span>
+                  </Link>
+                </motion.div>
               </nav>
 
               <div className="mt-auto pt-6 border-t border-neutral-300/20 dark:border-neutral-600/20 flex justify-center">

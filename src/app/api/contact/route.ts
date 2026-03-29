@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
     }
 
-    // Gérer les pièces jointes (multiple)
+    // Handle multiple attachments
     const files = formData.getAll('files') as File[];
     const emailAttachments = [];
     const dbAttachments: { filename: string; path: string; public_id?: string }[] = [];
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
 
-          // Upload vers Cloudinary
+          // Upload to Cloudinary
           const uploaded = await uploadToCloudinary(buffer, file.name, 'emails');
 
           emailAttachments.push({
@@ -70,14 +70,14 @@ export async function POST(req: Request) {
       }
     }
 
-    // Upsert du contact (crée ou met à jour le nom)
+    // Upsert contact
     const contact = await prisma.contact.upsert({
       where: { email },
       update: { name, updatedAt: new Date() },
       create: { email, name },
     });
 
-    // Sauvegarder le message
+    // Save message
     await prisma.contactMessage.create({
       data: {
         email,
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
       },
     });
 
-    // Envoyer les emails
+    // Send emails to admin and user
     const destinataire = process.env.ADMIN_MAIL as string;
     let prefixe = '';
 

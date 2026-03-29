@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FiEye, FiDownload, FiX, FiFileText } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';
+import { useNeonHover } from '@/hooks/useNeonHover';
 
 export default function CV() {
   const [cvUrl, setCvUrl] = useState('/cv/CV_OKBA_Hedi.pdf');
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const neonHover = useNeonHover(-8);
 
   useEffect(() => {
     fetch('/api/admin/cv')
@@ -46,13 +48,10 @@ export default function CV() {
     <>
       <motion.div
         className="glass-card p-8 md:p-10 flex flex-col items-center justify-center text-center h-full group relative overflow-hidden"
-        whileHover={{ y: -8 }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        whileHover={neonHover.whileHover}
+        transition={neonHover.transition}
         style={{ willChange: 'transform' }}
       >
-        {/* Glow effect */}
-        <div className="absolute inset-x-0 top-0 h-1/2 bg-neutral-400/5 group-hover:bg-brand-400/10 blur-2xl transition-all duration-200 pointer-events-none" />
-
         <div className="w-16 h-16 mb-6 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-brand-400 transition-colors">
           <FiFileText size={28} />
         </div>
@@ -124,7 +123,7 @@ export default function CV() {
                 className="w-full h-[80vh] rounded-xl border border-neutral-200/20 dark:border-neutral-700/30 bg-white"
               />
               <p className="text-center text-neutral-500 dark:text-neutral-400 text-sm mt-4">
-                📱 Si l&apos;affichage n&apos;est pas optimal,{' '}
+                Si l&apos;affichage n&apos;est pas optimal,{' '}
                 <a
                   href={cvUrl}
                   target="_blank"

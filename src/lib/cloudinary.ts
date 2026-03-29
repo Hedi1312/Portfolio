@@ -1,8 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
 import path from 'path';
 
-// Configuration automatique depuis process.env.CLOUDINARY_URL
-// Assure-toi que la variable CLOUDINARY_URL est bien présente dans le .env
+// Auto-configured via process.env.CLOUDINARY_URL
+// Ensure CLOUDINARY_URL is present in .env
 cloudinary.config({
   secure: true,
 });
@@ -18,7 +18,7 @@ export async function uploadToCloudinary(
     const baseFolder = process.env.CLOUDINARY_FOLDER || 'development';
     const folder = subfolder ? `${baseFolder}/${subfolder}` : baseFolder;
 
-    // On repasse en mode image pour que Cloudinary génère une vraie preview et conserve la nature PDF
+    // Force image mode to generate preview and retain PDF format
     const isPdf = filename.toLowerCase().endsWith('.pdf');
     const resource_type = isPdf ? 'image' : 'auto';
 
@@ -27,7 +27,7 @@ export async function uploadToCloudinary(
         {
           folder,
           resource_type: resource_type,
-          // Optionnel : on peut forcer le nom pour bien avoir le .pdf affiché dans Cloudinary
+          // Optional: force name for .pdf in Cloudinary
           public_id: isPdf ? path.parse(filename).name : undefined,
           invalidate: true,
         },

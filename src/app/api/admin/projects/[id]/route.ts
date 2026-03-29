@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
 
-// PUT → Modifier un projet
+// PUT -> Update project
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await req.json();
     const { title, description, gradient, link, github, visible, order, skills } = body;
 
-    // Supprimer les anciennes skills et les recréer
+    // Recreate old skills
     await prisma.projectSkill.deleteMany({ where: { projectId: id } });
 
     const project = await prisma.project.update({
@@ -40,12 +40,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 }
 
-// DELETE → Supprimer un projet (cascade les skills et supprime de Cloudinary)
+// DELETE -> Remove project
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
-    // Récupérer le projet avec ses images pour nettoyer Cloudinary
+    // Get project with images
     const project = await prisma.project.findUnique({
       where: { id },
       include: { images: true },

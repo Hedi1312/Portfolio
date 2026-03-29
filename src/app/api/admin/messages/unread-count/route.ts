@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// GET → Compteur de messages non lus (pour le badge de la cloche)
+// GET -> Unread messages counter
 export async function GET() {
   try {
     const count = await prisma.contactMessage.count({

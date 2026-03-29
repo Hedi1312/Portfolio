@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { FiMail, FiX, FiSend, FiCheckCircle, FiPaperclip } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';
+import { useNeonHover } from '@/hooks/useNeonHover';
 
 export default function Contact() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +15,7 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const neonHover = useNeonHover(-8);
 
   useLockBodyScroll(isOpen);
 
@@ -109,17 +111,14 @@ export default function Contact() {
     <>
       <motion.div
         className="glass-card p-8 md:p-12 text-center h-full flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer"
-        whileHover={{ y: -8 }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        whileHover={neonHover.whileHover}
+        transition={neonHover.transition}
         style={{ willChange: 'transform' }}
         onClick={() => {
           setSubmitted(false);
           setIsOpen(true);
         }}
       >
-        {/* Glow effect */}
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-brand-400/5 group-hover:bg-brand-400/15 blur-2xl transition-all duration-200 pointer-events-none" />
-
         <div className="w-16 h-16 mb-6 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-900 dark:text-white transition-colors mx-auto">
           <FiMail size={28} />
         </div>
@@ -344,7 +343,7 @@ export default function Contact() {
                   </motion.div>
                   <p className="text-xl font-semibold mb-2">Message envoyé !</p>
                   <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                    Je te réponds très vite 🚀
+                    Je te réponds très vite
                   </p>
                 </motion.div>
               )}

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
 
-// GET → renvoie l'URL publique du CV depuis la DB
+// GET -> Returns public CV URL
 export async function GET() {
   try {
     const cv = await prisma.cv.findFirst({
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Gestion de l'ancien CV (suppression avec le bon resource_type)
+    // Handle old CV deletion
     const oldCvs = await prisma.cv.findMany();
     for (const old of oldCvs) {
       if (old.public_id !== public_id) {
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     // On vide la table pour n'avoir qu'un seul CV
     await prisma.cv.deleteMany();
 
-    // Sauvegarder en DB avec le resource_type et size
+    // Save to DB
     const newCv = await prisma.cv.create({
       data: {
         url,

@@ -448,12 +448,12 @@ export default function AdminProjectsPage() {
     setSkillInput(value);
     const search = value.toLowerCase().trim();
     if (search.length > 0) {
-      // Filtrer les clés qui matchent sur la clé OU sur le label
+      // Filter keys matching either the key or the label
       const matchingKeys = Object.entries(SKILL_ICONS)
         .filter(([k, v]) => k.includes(search) || v.label.toLowerCase().includes(search))
         .map(([k]) => k);
 
-      // Dédoublonner par `label` pour ne pas avoir "next.js" et "nextjs"
+      // Deduplicate by label to prevent identical entries
       const uniqueLabels = new Set<string>();
       const deduplicatedKeys = matchingKeys.filter((k) => {
         const label = SKILL_ICONS[k].label;
@@ -747,14 +747,14 @@ export default function AdminProjectsPage() {
 
           try {
             const options = {
-              maxSizeMB: 1, // On limite fortement le poids maximum
+              maxSizeMB: 1, // Heavily restrict maximum file size
               maxWidthOrHeight: 1920, // Résolution Full HD max
               useWebWorker: true,
               fileType: file.type,
             };
             const compressedBlob = await imageCompression(file, options);
 
-            // Créer un vrai objet File à partir du Blob pour formData
+            // Create a valid File object from Blob for FormData
             return new File([compressedBlob], file.name, {
               type: compressedBlob.type || file.type,
               lastModified: Date.now(),
@@ -765,12 +765,12 @@ export default function AdminProjectsPage() {
         }),
       );
 
-      // Direct Upload vers Cloudinary pour chaque fichier
+      // Direct upload to Cloudinary for each file
       const uploadedImages = await Promise.all(
         compressedFiles.map((file) => directUploadToCloudinary(file, { subfolder: 'projets' })),
       );
 
-      // Envoyer les métadonnées au backend pour sauvegarde en BDD
+      // Send metadata to backend to save in database
       const res = await fetch(`/api/admin/projects/${editingId}/images`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -780,7 +780,7 @@ export default function AdminProjectsPage() {
       if (res.ok && data.success) {
         setExistingImages((prev) => [...prev, ...data.images]);
         showToast('success', 'Média(s) ajouté(s) !');
-        fetchProjects(); // Rafraîchir la liste globale
+        fetchProjects(); // Refresh the global project list
       } else {
         showToast('error', data.error || 'Erreur lors du telechargement.');
       }
@@ -801,7 +801,7 @@ export default function AdminProjectsPage() {
       if (res.ok) {
         setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
         showToast('success', 'Image supprimée.');
-        fetchProjects(); // Rafraîchir la liste globale
+        fetchProjects(); // Refresh the global project list
       } else {
         showToast('error', 'Erreur lors de la suppression.');
       }

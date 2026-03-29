@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// GET → Projets visibles (route publique pour le portfolio)
+// GET -> Visible projects
 export async function GET() {
   try {
     const projects = await prisma.project.findMany({

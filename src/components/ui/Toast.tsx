@@ -42,7 +42,7 @@ function ToastItem({ type, message, onClose, duration = 4000 }: ToastProps) {
   );
 }
 
-// Hook réutilisable
+// Reusable hook
 export function useToast() {
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
@@ -57,7 +57,6 @@ export function useToast() {
   return { toast, showToast, hideToast };
 }
 
-// Composant à placer dans le layout
 export function ToastContainer({
   toast,
   onClose,

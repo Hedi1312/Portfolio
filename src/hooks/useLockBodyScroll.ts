@@ -1,9 +1,9 @@
 'use client';
 import { useEffect } from 'react';
 
-// Compteur global pour gérer les modales imbriquées
+// Global counter for nested modals
 let lockCount = 0;
-// Stockage du style initial
+// Store initial style
 let originalStyle: {
   position: string;
   top: string;

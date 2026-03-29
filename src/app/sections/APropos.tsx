@@ -1,5 +1,7 @@
 'use client';
 import { useIsDark } from '@/hooks/useIsDark';
+import { useNeonHover, buildNeonHover } from '@/hooks/useNeonHover';
+import type { NeonHoverConfig } from '@/hooks/useNeonHover';
 import { SKILL_ICONS } from '@/lib/skill-icons';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -38,13 +40,15 @@ const itemVariants = {
   },
 };
 
-const renderTechTag = (tech: TechItem, index: number, isDark: boolean) => {
+const renderTechTag = (tech: TechItem, index: number, isDark: boolean, neon: NeonHoverConfig) => {
   const match = tech.icon ? SKILL_ICONS[tech.icon] : null;
   const Icon = match?.icon;
   return (
-    <div
+    <motion.div
       key={`${tech.name}-${index}`}
-      className="glass-card flex items-center justify-center gap-2.5 px-5 py-3 cursor-default hover:-translate-y-1 transition-transform"
+      className="glass-card flex items-center justify-center gap-2.5 px-5 py-3 cursor-default"
+      whileHover={neon.whileHover}
+      transition={neon.transition}
     >
       {Icon && (
         <Icon
@@ -57,7 +61,7 @@ const renderTechTag = (tech: TechItem, index: number, isDark: boolean) => {
       <span className="text-[15px] font-medium text-neutral-700 dark:text-neutral-200 whitespace-nowrap">
         {tech.name}
       </span>
-    </div>
+    </motion.div>
   );
 };
 
@@ -70,14 +74,14 @@ const TechMarquee = ({
   reverse?: boolean;
   isDark: boolean;
 }) => {
-  // En créant 2 moitiés strictement identiques et en ne déplaçant que le parent de exactement -50%,
-  // le navigateur n'a plus qu'une seule couche graphique à calculer (au lieu de 6).
+  const neonTag = buildNeonHover(-4, isDark);
+  // Optimized marquee: translating the parent avoids multiple GPU layer repaints.
   // L'animation devient instantanément parfaitement fluide à 60 FPS.
   const multipliedItems = [...items, ...items, ...items, ...items];
 
   const halfBlock = (
     <div className="flex gap-6 pr-6 items-center shrink-0">
-      {multipliedItems.map((tech, i) => renderTechTag(tech, i, isDark))}
+      {multipliedItems.map((tech, i) => renderTechTag(tech, i, isDark, neonTag))}
     </div>
   );
 
@@ -95,6 +99,9 @@ const TechMarquee = ({
 
 export default function APropos() {
   const isDark = useIsDark();
+  const neonBio = useNeonHover(-8);
+  const neonStat = useNeonHover(-6);
+  const neonTag = buildNeonHover(-4, isDark);
   const [data, setData] = useState<AboutData | null>(null);
   const [isAnimated, setIsAnimated] = useState(true);
 
@@ -118,7 +125,7 @@ export default function APropos() {
   if (!data) return null;
   if (!data.bio && data.stats.length === 0 && data.techs.length === 0) return null;
 
-  // Séparer le bio en paragraphes
+  // Split bio into paragraphs
   const paragraphs = data.bio.split('\n\n').filter((p) => p.trim());
 
   // Split technos into two rows for marquee
@@ -154,7 +161,11 @@ export default function APropos() {
               viewport={{ once: false, amount: 0.5 }}
               transition={{ duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
             >
-              <div className="glass-card p-8">
+              <motion.div
+                className="glass-card p-8"
+                whileHover={neonBio.whileHover}
+                transition={neonBio.transition}
+              >
                 {paragraphs.map((paragraph, idx) => (
                   <p
                     key={idx}
@@ -167,7 +178,7 @@ export default function APropos() {
                     {paragraph}
                   </p>
                 ))}
-              </div>
+              </motion.div>
             </motion.div>
           )}
 
@@ -185,6 +196,8 @@ export default function APropos() {
                   key={stat.label}
                   className="glass-card p-6 text-center"
                   variants={itemVariants}
+                  whileHover={neonStat.whileHover}
+                  transition={neonStat.transition}
                 >
                   <p className="text-3xl font-bold gradient-text font-(family-name:--font-space-grotesk)">
                     {stat.value}
@@ -243,7 +256,7 @@ export default function APropos() {
                 whileInView="visible"
                 viewport={{ once: false, amount: 0.2 }}
               >
-                {data.techs.map((tech, i) => renderTechTag(tech, i, isDark))}
+                {data.techs.map((tech, i) => renderTechTag(tech, i, isDark, neonTag))}
               </motion.div>
             )}
           </motion.div>
