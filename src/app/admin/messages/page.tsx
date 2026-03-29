@@ -451,7 +451,7 @@ export default function MessagesPage() {
                                     {formatFull(msg.createdAt)}
                                   </span>
                                 </div>
-                                <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-xl rounded-tl-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap break-words">
+                                <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-xl rounded-tl-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap wrap-break-word">
                                   {msg.message}
                                 </div>
                                 {renderAttachments(msg.attachments)}
@@ -470,7 +470,7 @@ export default function MessagesPage() {
                                       Moi
                                     </span>
                                   </div>
-                                  <div className="bg-brand-500/10 dark:bg-brand-500/15 border border-brand-200 dark:border-brand-800 rounded-xl rounded-tr-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap break-words">
+                                  <div className="bg-brand-500/10 dark:bg-brand-500/15 border border-brand-200 dark:border-brand-800 rounded-xl rounded-tr-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap wrap-break-word">
                                     {reply.message}
                                   </div>
                                   {renderAttachments(reply.attachments)}

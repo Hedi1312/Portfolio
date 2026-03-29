@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { FiArrowUp } from 'react-icons/fi';
 import { useNeonHover } from '@/hooks/useNeonHover';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { FiArrowUp } from 'react-icons/fi';
 
 export default function ScrollToTop() {
   const [visible, setVisible] = useState(false);
@@ -42,17 +42,21 @@ export default function ScrollToTop() {
   }, []);
 
   return (
-    <motion.button
-      onClick={scrollToTop}
-      className={`fixed bottom-10 right-10 z-50 p-3 rounded-xl glass text-brand-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer ${
-        visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      }`}
-      style={{ transition: 'opacity 0.3s ease, color 0.3s ease' }}
-      whileHover={neonHover.whileHover}
-      transition={neonHover.transition}
-      aria-label="Remonter en haut"
-    >
-      <FiArrowUp size={20} strokeWidth={2.5} />
-    </motion.button>
+    <AnimatePresence>
+      {visible && (
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          transition={{ duration: 0.3 }}
+          onClick={scrollToTop}
+          className="fixed bottom-10 right-4 z-50 p-3 rounded-xl bg-white dark:bg-neutral-900 border-2 border-brand-400/40 shadow-lg text-brand-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
+          whileHover={neonHover.whileHover}
+          aria-label="Remonter en haut"
+        >
+          <FiArrowUp size={20} strokeWidth={2.5} />
+        </motion.button>
+      )}
+    </AnimatePresence>
   );
 }
