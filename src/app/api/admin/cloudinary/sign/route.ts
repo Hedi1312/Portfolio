@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import { cloudinary } from '@/lib/cloudinary';
 import { rateLimit } from '@/lib/rate-limit';
 
-// Rate limit : 10 requêtes par minute par IP
+// Rate limit: 10 requests/min per IP
 const limiter = rateLimit({ interval: 60_000, limit: 10 });
 
 export async function POST(req: Request) {
   try {
-    // Rate limiting par IP
+    // IP Rate limiting
     const forwarded = req.headers.get('x-forwarded-for');
     const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
     const { success, retryAfter } = limiter.check(ip);
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Le paramètre "subfolder" est requis.' }, { status: 400 });
     }
 
-    // Construire le chemin complet côté serveur (pas besoin de NEXT_PUBLIC_)
+    // Build full path on server
     const baseFolder = process.env.CLOUDINARY_FOLDER || 'development';
     const folder = `${baseFolder}/${subfolder}`;
 

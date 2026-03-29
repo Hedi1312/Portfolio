@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// GET → Retourne le singleton « À propos »
+// GET -> Returns 'About' singleton
 export async function GET() {
   try {
     let aboutMe = await prisma.aboutMe.findFirst({
       include: { techs: { orderBy: { order: 'asc' } } },
     });
 
-    // Si aucun enregistrement n'existe, en créer un vide
+    // Create empty record if none exists
     if (!aboutMe) {
       aboutMe = await prisma.aboutMe.create({
         data: { bio: '', stats: [] },
@@ -37,7 +37,7 @@ export async function PUT(req: Request) {
       });
     }
 
-    // Supprimer les anciennes techs et les recréer
+    // Recreate old techs
     await prisma.aboutMeTech.deleteMany({ where: { aboutMeId: aboutMe.id } });
 
     const updated = await prisma.aboutMe.update({

@@ -4,11 +4,11 @@ import { rateLimit } from '@/lib/rate-limit';
 const { generateSecret, generateURI } = require('otplib');
 import { NextResponse } from 'next/server';
 
-// Rate limit : 5 requêtes par minute par IP
+// Rate limit: 5 requests/min per IP
 const limiter = rateLimit({ interval: 60_000, limit: 5 });
 
 export async function POST(req: Request) {
-  // Rate limiting par IP
+  // IP Rate limiting
   const forwarded = req.headers.get('x-forwarded-for');
   const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
   const { success, retryAfter } = limiter.check(ip);

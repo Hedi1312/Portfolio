@@ -11,7 +11,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   try {
     const { id } = await params;
 
-    // Vérifier l'existence du projet
+    // Verify project exists
     const project = await prisma.project.findUnique({ where: { id } });
     if (!project) return NextResponse.json({ error: 'Projet introuvable' }, { status: 404 });
 
@@ -22,7 +22,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'Aucune image fournie' }, { status: 400 });
     }
 
-    // Vérifier que chaque image a les champs requis
+    // Verify each image has required fields
     for (const img of images) {
       if (!img.url || !img.public_id) {
         return NextResponse.json(
@@ -34,7 +34,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const uploadedImages = [];
 
-    // Déterminer l'ordre (le max actuel + 1)
+    // Determine order
     const maxOrderRes = await prisma.projectImage.aggregate({
       where: { projectId: id },
       _max: { order: true },

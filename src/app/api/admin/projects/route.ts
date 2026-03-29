@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Titre et description requis.' }, { status: 400 });
     }
 
-    // Récupérer le plus grand order actuel
+    // Get current highest order
     const maxOrder = await prisma.project.aggregate({ _max: { order: true } });
     const nextOrder = (maxOrder._max.order ?? -1) + 1;
 

@@ -17,14 +17,14 @@ export async function DELETE(
       return NextResponse.json({ error: 'Image introuvable' }, { status: 404 });
     }
 
-    // Déterminer le type (image ou vidéo) pour Cloudinary à partir de l'extension de l'URL
+    // Determine media type for Cloudinary
     const isVideo = image.url.match(/\.(mp4|webm|mov|avi|mkv)$/i);
     const resourceType = isVideo ? 'video' : 'image';
 
-    // Retirer de Cloudinary
+    // Remove from Cloudinary
     await deleteFromCloudinary(image.public_id, resourceType);
 
-    // Retirer de la DB
+    // Remove from DB
     await prisma.projectImage.delete({
       where: { id: imageId },
     });

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
 
-// PATCH → Marquer tous les messages d'un contact comme lus
+// PATCH -> Mark all contact messages as read
 export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -16,12 +16,12 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
   }
 }
 
-// DELETE → Supprimer un contact et tous ses messages
+// DELETE -> Remove contact and their messages
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
-    // Récupérer le contact avec tous les messages et réponses pour trouver les pièces jointes
+    // Get contact with messages and replies
     const contact = await prisma.contact.findUnique({
       where: { id },
       include: {
@@ -65,13 +65,13 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
         },
       );
 
-      // Supprimer les fichiers de Cloudinary en parallèle
+      // Delete Cloudinary files
       await Promise.allSettled(
         publicIdsToDelete.map((public_id) => deleteFromCloudinary(public_id)),
       );
     }
 
-    // Supprimer la conversation de la base (Cascade supprimera messages et réponses)
+    // Remove conversation from DB
     await prisma.contact.delete({ where: { id } });
 
     return NextResponse.json({ success: true });

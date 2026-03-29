@@ -5,7 +5,7 @@ const { verifySync } = require('otplib');
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// Rate limit : 5 tentatives par minute par IP (anti brute-force OTP)
+// Rate limit: 5 attempts/min per IP
 const limiter = rateLimit({ interval: 60_000, limit: 5 });
 
 // @api-security-best-practices: Input Validation Schema
@@ -15,7 +15,7 @@ const verifySchema = z.object({
 });
 
 export async function POST(req: Request) {
-  // Rate limiting par IP
+  // IP Rate limiting
   const forwarded = req.headers.get('x-forwarded-for');
   const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
   const { success, retryAfter } = limiter.check(ip);

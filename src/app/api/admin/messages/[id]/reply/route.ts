@@ -15,12 +15,12 @@ const transporter = nodemailer.createTransport({
 });
 
 // POST → Envoyer une réponse personnalisée au contact
-// id = contactId (on répond à un contact, la réponse est liée au dernier message)
+// id = contactId
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
-    // Récupérer le contact et son dernier message
+    // Get contact and last message
     const contact = await prisma.contact.findUnique({
       where: { id },
       include: {
@@ -41,7 +41,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'Le message est requis.' }, { status: 400 });
     }
 
-    // Sauvegarder les pièces jointes sur Cloudinary
+    // Save attachments to Cloudinary
     const emailAttachments = [];
     const dbAttachments: { filename: string; path: string; public_id?: string }[] = [];
     const files = formData.getAll('files') as File[];
@@ -60,7 +60,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
 
-          // Upload vers Cloudinary
+          // Upload to Cloudinary
           const uploaded = await uploadToCloudinary(buffer, file.name, 'emails');
 
           emailAttachments.push({
@@ -77,7 +77,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       }
     }
 
-    // Préfixe environnement
+    // Environment prefix
     let prefixe = '';
     if (process.env.VERCEL_ENV === 'preview') {
       prefixe = '[PREVIEW] ';
@@ -95,7 +95,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       }),
     );
 
-    // Sauvegarder la réponse en BDD avec pièces jointes
+    // Save reply to DB
     const savedReply = await prisma.messageReply.create({
       data: {
         message: replyMessage,
@@ -113,13 +113,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       attachments: emailAttachments,
     });
 
-    // Marquer tous les messages comme lus
+    // Mark all messages as read
     await prisma.contactMessage.updateMany({
       where: { contactId: id, isRead: false },
       data: { isRead: true },
     });
 
-    // Mettre à jour le timestamp du contact
+    // Update contact timestamp
     await prisma.contact.update({
       where: { id },
       data: { updatedAt: new Date() },

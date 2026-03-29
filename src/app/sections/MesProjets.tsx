@@ -172,7 +172,7 @@ export default function MesProjets() {
                         const match = findSkillIcon(skill.icon || skill.name);
                         const Icon = match?.icon;
 
-                        // Fallback pour la couleur si skill.color n'existe pas ou match.color est différent
+                        // Fallback color if skill.color is missing or mismatches
                         const color = isDark
                           ? match?.color || skill.color || '#00D5BE'
                           : match?.colorLight || match?.color || skill.color || '#00D5BE';

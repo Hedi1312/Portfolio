@@ -24,7 +24,7 @@ export default function AdminCVPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { toast, showToast, hideToast } = useToast();
 
-  // Charger le CV existant
+  // Load existing CV
   useEffect(() => {
     fetch('/api/admin/cv')
       .then((res) => res.json())
@@ -119,7 +119,7 @@ export default function AdminCVPage() {
     setLoading(true);
 
     try {
-      // 1. Modifier les métadonnées PDF côté client
+      // 1. Modify PDF metadata on client side
       const bytes = await file.arrayBuffer();
       const pdfDoc = await PDFDocument.load(bytes);
       pdfDoc.setTitle('CV_OKBA_Hedi');
@@ -144,7 +144,7 @@ export default function AdminCVPage() {
         public_id: 'CV_OKBA_Hedi',
       });
 
-      // 3. Envoyer les métadonnées au backend
+      // 3. Send metadata to backend
       const res = await fetch('/api/admin/cv', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

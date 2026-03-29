@@ -145,9 +145,8 @@ export default function Navbar() {
   // Detect scroll for navbar background
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
-    handleScroll(); // Initialize instantly
+    handleScroll();
 
-    // Enable transitions shortly after mount to prevent F5 flashes
     const timer = setTimeout(() => setIsMounted(true), 50);
 
     window.addEventListener('scroll', handleScroll, { passive: true });
