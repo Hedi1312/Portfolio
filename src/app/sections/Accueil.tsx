@@ -55,7 +55,7 @@ export default function Accueil() {
         </m.div>
 
         {/* Title */}
-        <m.h2
+        <m.h1
           className="text-5xl md:text-7xl font-extrabold mb-12 font-(family-name:--font-space-grotesk) tracking-tight"
           initial={{ opacity: 0, y: -30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -78,7 +78,7 @@ export default function Accueil() {
               </m.span>
             ))}
           </span>
-        </m.h2>
+        </m.h1>
 
         {/* Subtitle */}
         <m.p

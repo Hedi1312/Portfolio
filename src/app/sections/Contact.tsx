@@ -82,12 +82,11 @@ export default function Contact() {
     files.forEach((f) => formData.append('files', f));
 
     try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        body: formData,
-      });
+      // Appel direct à la Server Action
+      const { submitContact } = await import('@/actions/contact.action');
+      const result = await submitContact({}, formData);
 
-      if (res.ok) {
+      if (result.success) {
         setSubmitted(true);
         setForm({ name: '', email: '', subject: '', message: '' });
         setHoneypot('');
@@ -96,9 +95,11 @@ export default function Contact() {
           window.umami.track('contact-form-submit');
         setTimeout(() => setIsOpen(false), 2500);
       } else {
-        const data = await res.json();
-        setError(data.error || "Erreur lors de l'envoi du message.");
+        setError(result.error || "Erreur lors de l'envoi du message.");
       }
+    } catch (err) {
+      console.error(err);
+      setError("Erreur inattendue lors de l'envoi du message.");
     } finally {
       setIsSubmitting(false);
     }

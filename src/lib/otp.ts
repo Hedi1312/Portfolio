@@ -1,15 +1,27 @@
-/**
- * Centralized OTP utilities.
- *
- * otplib is imported via require() due to known ESM/async compatibility issues
- * with the library in Next.js server-side contexts. This module centralizes
- * the workaround to a single location instead of scattering require() calls
- * across 5 different files.
- */
+import { generateSecret, generateURI, verifySync } from 'otplib';
 
-// otplib must be imported via require() due to ESM/async compatibility issues
-// in Next.js server-side contexts. This is the only file that contains this workaround.
-const otplib = globalThis.require('otplib');
+/**
+ * Mise en place d'un objet authenticator local pour correspondre à l'usage
+ * attendu par l'application tout en utilisant les exports fonctionnels
+ * de otplib v13 (compatibles ESM/Turbopack).
+ */
+const authenticator = {
+  verify: (params: { token: string; secret: string; window?: number }) => {
+    return verifySync({
+      token: params.token,
+      secret: params.secret,
+      epochTolerance: params.window || 0,
+    });
+  },
+  generateSecret: () => generateSecret(),
+  keyuri: (label: string, issuer: string, secret: string) => {
+    return generateURI({
+      label,
+      issuer,
+      secret,
+    });
+  },
+};
 
 /**
  * Synchronously verify a TOTP token against a secret.
@@ -18,19 +30,24 @@ const otplib = globalThis.require('otplib');
 export function verifyOTP(params: { token: string; secret: string; window?: number }): {
   valid: boolean;
 } {
-  return otplib.verifySync(params);
+  try {
+    const result = authenticator.verify(params);
+    return { valid: result.valid };
+  } catch (_err) {
+    return { valid: false };
+  }
 }
 
 /**
  * Generate a new TOTP secret.
  */
 export function generateOTPSecret(): string {
-  return otplib.generateSecret();
+  return authenticator.generateSecret();
 }
 
 /**
  * Generate the otpauth:// URI for QR code generation.
  */
 export function generateOTPUri(params: { label: string; issuer: string; secret: string }): string {
-  return otplib.generateURI(params);
+  return authenticator.keyuri(params.label, params.issuer, params.secret);
 }

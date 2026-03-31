@@ -7,15 +7,18 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Contact from '@/app/sections/Contact';
 
-// Mock Fetch API
-global.fetch = jest.fn();
-
 // Mock next/navigation if needed
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
   })),
 }));
+
+// Mock Server Action
+jest.mock('@/actions/contact.action', () => ({
+  submitContact: jest.fn(),
+}));
+import { submitContact } from '@/actions/contact.action';
 
 jest.mock('framer-motion', () => {
   const React = require('react') as typeof import('react');
@@ -59,10 +62,7 @@ beforeAll(() => {
 describe('Contact Component Frontend Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    });
+    (submitContact as jest.Mock).mockResolvedValue({ success: true });
   });
 
   it('1. Renders the contact closed card initially', () => {
@@ -118,8 +118,8 @@ describe('Contact Component Frontend Tests', () => {
       expect(screen.getByText(/Le nom est requis/i)).toBeInTheDocument();
     });
 
-    // Fetch should never be called
-    expect(global.fetch).not.toHaveBeenCalled();
+    // Action should never be called
+    expect(submitContact).not.toHaveBeenCalled();
   });
 
   it('5. Successfully submits form', async () => {
@@ -137,20 +137,17 @@ describe('Contact Component Frontend Tests', () => {
     expect(screen.getByPlaceholderText('Prénom NOM')).toHaveValue('Test User');
 
     // Mettre submit au bout de la promesse
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ success: true }),
-    });
+    (submitContact as jest.Mock).mockResolvedValueOnce({ success: true });
 
     const submitBtn = screen.getByRole('button', { name: 'Envoyer' });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(submitContact).toHaveBeenCalledTimes(1);
     });
 
-    // Check payload details
-    const formDataArg = (global.fetch as jest.Mock).mock.calls[0][1].body;
+    // Check payload details (it gets called with FormData object directly)
+    const formDataArg = (submitContact as jest.Mock).mock.calls[0][1];
     expect(formDataArg.get('name')).toBe('Test User');
     expect(formDataArg.get('email')).toBe('test@example.com');
     expect(formDataArg.get('subject')).toBe('Sujet test');
@@ -173,9 +170,9 @@ describe('Contact Component Frontend Tests', () => {
     await user.type(screen.getByPlaceholderText('Ton message...'), 'Ceci est un message de test.');
 
     // Mock API error
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({ error: 'Erreur fictive serveur' }),
+    (submitContact as jest.Mock).mockResolvedValueOnce({
+      success: false,
+      error: 'Erreur fictive serveur',
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Envoyer' }));

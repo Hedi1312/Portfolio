@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server';
+'use server';
+
 import { render } from '@react-email/components';
+import { headers } from 'next/headers';
 
 import { AdminNotification } from '@/emails/AdminNotification';
 import { UserConfirmation } from '@/emails/UserConfirmation';
@@ -11,33 +13,37 @@ import { transporter, getEmailSubjectPrefix } from '@/lib/mailer';
 // Rate limit: 5 contact submissions per minute per IP
 const limiter = rateLimit({ limit: 5, window: '1 m', prefix: 'rl:contact' });
 
-export async function POST(req: Request) {
-  // IP Rate limiting
-  const forwarded = req.headers.get('x-forwarded-for');
-  const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-  const { success, retryAfter } = await limiter.check(ip);
+export type ContactState = {
+  success?: boolean;
+  error?: string;
+};
 
-  if (!success) {
-    return NextResponse.json(
-      { error: `Trop de tentatives. Réessayez dans ${retryAfter}s.` },
-      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
-    );
+export async function submitContact(
+  _prevState: ContactState,
+  formData: FormData,
+): Promise<ContactState> {
+  // IP Rate limiting
+  const headersList = await headers();
+  const forwarded = headersList.get('x-forwarded-for');
+  const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
+  const { success: rateLimitSuccess, retryAfter } = await limiter.check(ip);
+
+  if (!rateLimitSuccess) {
+    return { error: `Trop de tentatives. Réessayez dans ${retryAfter}s.` };
   }
 
   try {
-    const formData = await req.formData();
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const subject = formData.get('subject') as string;
     const message = formData.get('message') as string;
     const honeypot = formData.get('company') as string;
 
-    if (honeypot) return NextResponse.json({ success: true });
+    if (honeypot) return { success: true };
 
-    // Validation Zod
     const validation = contactSchema.safeParse({ name, email, subject, message });
     if (!validation.success) {
-      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
+      return { error: validation.error.issues[0].message };
     }
 
     // Handle multiple attachments - SECURITY FIX: Limit to 5 max
@@ -60,21 +66,29 @@ export async function POST(req: Request) {
             'application/pdf',
           ];
           if (!allowedTypes.includes(file.type)) {
-            return NextResponse.json(
-              { error: `Le type du fichier "${file.name}" n'est pas autorisé.` },
-              { status: 400 },
-            );
+            return { error: `Le type du fichier "${file.name}" n'est pas autorisé.` };
           }
 
           // SECURITY FIX: Limit file size
           if (file.size > 10 * 1024 * 1024) {
-            return NextResponse.json(
-              { error: `Le fichier "${file.name}" dépasse la limite de 10 Mo.` },
-              { status: 400 },
-            );
+            return { error: `Le fichier "${file.name}" dépasse la limite de 10 Mo.` };
           }
+
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
+
+          // SECURITY FIX: Magic Bytes Validation (A05: Injection mitigation)
+          const header = buffer.toString('hex', 0, 4).toUpperCase();
+          const isJpeg = header.startsWith('FFD8FF');
+          const isPng = header === '89504E47';
+          const isGif = header.startsWith('47494638'); // GIF8
+          const isPdf = header === '25504446'; // %PDF
+          const isWebp =
+            header === '52494646' && buffer.toString('hex', 8, 12).toUpperCase() === '57454250';
+
+          if (!isJpeg && !isPng && !isGif && !isPdf && !isWebp) {
+            return { error: `Le contenu du fichier "${file.name}" est corrompu ou illicite.` };
+          }
 
           // Upload to Cloudinary
           const uploaded = await uploadToCloudinary(buffer, file.name, 'emails');
@@ -136,9 +150,9 @@ export async function POST(req: Request) {
       html: userHtml,
     });
 
-    return NextResponse.json({ success: true });
+    return { success: true };
   } catch (error) {
-    console.error('[api/contact]', error);
-    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
+    console.error('[actions/contact]', error);
+    return { error: 'Erreur serveur.' };
   }
 }
