@@ -5,12 +5,12 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 
 import { prisma } from '@/lib/prisma';
-import { rateLimit } from '@/lib/rate-limit';
+import { authRateLimit } from '@/lib/rate-limit';
 import { newPasswordSchema } from '@/lib/schemas/auth';
 import { verifyOTP } from '@/lib/otp';
 
 // Rate limit: 5 attempts/min per IP
-const limiter = rateLimit({ limit: 5, window: '1 m', prefix: 'rl:reset-pw' });
+const limiter = authRateLimit({ limit: 5, window: '1 m', prefix: 'rl:reset-pw' });
 
 export async function POST(req: Request) {
   // IP Rate limiting
@@ -87,7 +87,8 @@ export async function POST(req: Request) {
     return NextResponse.json({
       message: 'Mot de passe mis à jour avec succès.',
     });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/auth/reset-password]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

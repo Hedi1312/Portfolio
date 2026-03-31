@@ -1,11 +1,11 @@
 import { prisma } from '@/lib/prisma';
-import { rateLimit } from '@/lib/rate-limit';
+import { authRateLimit } from '@/lib/rate-limit';
 import { requireAdmin } from '@/lib/auth-guard';
 import { NextResponse } from 'next/server';
 import { verifyOTP } from '@/lib/otp';
 
 // Rate limit: 5 attempts/min per IP
-const limiter = rateLimit({ limit: 5, window: '1 m', prefix: 'rl:2fa-disable' });
+const limiter = authRateLimit({ limit: 5, window: '1 m', prefix: 'rl:2fa-disable' });
 
 export async function POST(req: Request) {
   // IP Rate limiting
@@ -23,6 +23,9 @@ export async function POST(req: Request) {
     const { session, unauthorized } = await requireAdmin();
     if (unauthorized) return unauthorized;
 
+    const email = session?.user?.email;
+    if (!email) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+
     const body = await req.json();
     const code = body?.code;
 
@@ -32,7 +35,7 @@ export async function POST(req: Request) {
 
     // Retrieve the current secret to verify the code
     const admin = await prisma.admin.findUnique({
-      where: { email: session!.user!.email! },
+      where: { email },
       select: { otpSecret: true },
     });
 
@@ -48,12 +51,13 @@ export async function POST(req: Request) {
 
     // Code is valid — disable 2FA
     await prisma.admin.update({
-      where: { email: session!.user!.email! },
+      where: { email },
       data: { otpSecret: null },
     });
 
     return NextResponse.json({ success: true });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/2fa/disable]', error);
     return NextResponse.json({ error: 'Erreur interne côté serveur' }, { status: 500 });
   }
 }

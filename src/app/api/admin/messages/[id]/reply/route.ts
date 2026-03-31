@@ -141,7 +141,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     });
 
     return NextResponse.json({ success: true, reply: savedReply });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/messages/[id]/reply]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

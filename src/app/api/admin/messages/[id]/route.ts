@@ -23,7 +23,8 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
       data: { isRead: true },
     });
     return NextResponse.json({ success: true });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/messages/[id]:PATCH]', error);
     return NextResponse.json({ error: 'Contact introuvable.' }, { status: 404 });
   }
 }
@@ -94,7 +95,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     await prisma.contact.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/messages/[id]:DELETE]', error);
     return NextResponse.json({ error: 'Erreur lors de la suppression.' }, { status: 500 });
   }
 }

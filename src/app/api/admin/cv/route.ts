@@ -23,7 +23,8 @@ export async function GET() {
       size: cv.size || 'Document PDF',
       name: 'CV_OKBA_Hedi.pdf',
     });
-  } catch (_err) {
+  } catch (error) {
+    console.error('[api/admin/cv:GET]', error);
     return NextResponse.json({ url: null, size: null, name: null });
   }
 }
@@ -70,7 +71,8 @@ export async function POST(req: Request) {
       name: 'CV_OKBA_Hedi.pdf',
       message: 'CV mis à jour sur Cloudinary avec succès.',
     });
-  } catch (_err) {
+  } catch (error) {
+    console.error('[api/admin/cv:POST]', error);
     return NextResponse.json(
       { error: "Erreur lors de l'enregistrement du fichier." },
       { status: 500 },
@@ -95,7 +97,8 @@ export async function DELETE() {
       success: true,
       message: 'CV supprimé avec succès.',
     });
-  } catch (_err) {
+  } catch (error) {
+    console.error('[api/admin/cv:DELETE]', error);
     return NextResponse.json({ error: 'Erreur lors de la suppression.' }, { status: 500 });
   }
 }

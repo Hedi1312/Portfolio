@@ -65,7 +65,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ path: s
         'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox",
       },
     });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/messages/[...path]]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

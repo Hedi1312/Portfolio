@@ -8,11 +8,11 @@ import { render } from '@react-email/components';
 import { prisma } from '@/lib/prisma';
 import { resetSchema } from '@/lib/schemas/auth';
 import { PasswordReset } from '@/emails/PasswordReset';
-import { rateLimit } from '@/lib/rate-limit';
+import { authRateLimit } from '@/lib/rate-limit';
 import { transporter, getEmailSubjectPrefix } from '@/lib/mailer';
 
 // Rate limit: 5 attempts per 15 minutes per IP
-const limiter = rateLimit({ limit: 5, window: '15 m', prefix: 'rl:forgot-pw' });
+const limiter = authRateLimit({ limit: 5, window: '15 m', prefix: 'rl:forgot-pw' });
 
 const SUCCESS_MESSAGE =
   'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.';
@@ -73,7 +73,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ message: SUCCESS_MESSAGE });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/auth/forgot-password]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

@@ -12,7 +12,8 @@ export async function GET() {
       where: { isRead: false },
     });
     return NextResponse.json({ count });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/messages/unread-count]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

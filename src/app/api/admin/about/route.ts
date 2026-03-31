@@ -23,7 +23,8 @@ export async function GET() {
     }
 
     return NextResponse.json(aboutMe);
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/about:GET]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }
@@ -52,29 +53,32 @@ export async function PUT(req: Request) {
       });
     }
 
-    // Recreate old techs
-    await prisma.aboutMeTech.deleteMany({ where: { aboutMeId: aboutMe.id } });
+    // Atomic: delete old techs + recreate in a single transaction
+    const updated = await prisma.$transaction(async (tx) => {
+      await tx.aboutMeTech.deleteMany({ where: { aboutMeId: aboutMe.id } });
 
-    const updated = await prisma.aboutMe.update({
-      where: { id: aboutMe.id },
-      data: {
-        bio: bio ?? aboutMe.bio,
-        stats: (stats as Prisma.InputJsonValue) ?? aboutMe.stats,
-        techs: {
-          create:
-            techs?.map((tech, index: number) => ({
-              name: tech.name,
-              icon: tech.icon || null,
-              color: tech.color || '#00D5BE',
-              order: index,
-            })) ?? [],
+      return tx.aboutMe.update({
+        where: { id: aboutMe.id },
+        data: {
+          bio: bio ?? aboutMe.bio,
+          stats: (stats as Prisma.InputJsonValue) ?? aboutMe.stats,
+          techs: {
+            create:
+              techs?.map((tech, index: number) => ({
+                name: tech.name,
+                icon: tech.icon || null,
+                color: tech.color || '#00D5BE',
+                order: index,
+              })) ?? [],
+          },
         },
-      },
-      include: { techs: { orderBy: { order: 'asc' } } },
+        include: { techs: { orderBy: { order: 'asc' } } },
+      });
     });
 
     return NextResponse.json(updated);
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/about:PUT]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

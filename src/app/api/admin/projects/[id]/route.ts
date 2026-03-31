@@ -20,33 +20,36 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     const { title, description, gradient, link, github, visible, order, skills } = validation.data;
 
-    // Recreate old skills
-    await prisma.projectSkill.deleteMany({ where: { projectId: id } });
+    // Atomic: delete old skills + recreate in a single transaction
+    const project = await prisma.$transaction(async (tx) => {
+      await tx.projectSkill.deleteMany({ where: { projectId: id } });
 
-    const project = await prisma.project.update({
-      where: { id },
-      data: {
-        title,
-        description,
-        gradient: gradient || undefined,
-        link: link || null,
-        github: github || null,
-        visible: visible ?? true,
-        order: order ?? undefined,
-        skills: {
-          create:
-            skills?.map((s) => ({
-              name: s.name,
-              icon: s.icon || null,
-              color: s.color || '#00D5BE',
-            })) ?? [],
+      return tx.project.update({
+        where: { id },
+        data: {
+          title,
+          description,
+          gradient: gradient || undefined,
+          link: link || null,
+          github: github || null,
+          visible: visible ?? true,
+          order: order ?? undefined,
+          skills: {
+            create:
+              skills?.map((s) => ({
+                name: s.name,
+                icon: s.icon || null,
+                color: s.color || '#00D5BE',
+              })) ?? [],
+          },
         },
-      },
-      include: { skills: true, images: { orderBy: { order: 'asc' } } },
+        include: { skills: true, images: { orderBy: { order: 'asc' } } },
+      });
     });
 
     return NextResponse.json(project);
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/projects/[id]:PUT]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }
@@ -80,7 +83,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
     await prisma.project.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/projects/[id]:DELETE]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

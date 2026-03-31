@@ -17,7 +17,8 @@ export async function GET() {
       orderBy: { order: 'asc' },
     });
     return NextResponse.json(projects);
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/projects:GET]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }
@@ -63,7 +64,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(project, { status: 201 });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/projects:POST]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

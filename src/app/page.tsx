@@ -4,6 +4,9 @@ import MesProjets from './sections/MesProjets';
 import NextSteps from './sections/NextSteps';
 import { prisma } from '@/lib/prisma';
 
+// Revalidate every hour — portfolio content changes infrequently
+export const revalidate = 3600;
+
 /**
  * Server Component — fetches all public data at the page level,
  * eliminating client-side fetch waterfalls and ensuring content is

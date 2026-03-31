@@ -61,7 +61,8 @@ export async function POST(req: Request) {
       apiKey: cloudinary.config().api_key,
       folder,
     });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/cloudinary/sign]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

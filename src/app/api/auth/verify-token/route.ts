@@ -3,10 +3,10 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { rateLimit } from '@/lib/rate-limit';
+import { authRateLimit } from '@/lib/rate-limit';
 
 // Rate limit: 10 requests/min per IP (prevents brute-force of reset tokens)
-const limiter = rateLimit({ limit: 10, window: '1 m', prefix: 'rl:verify-token' });
+const limiter = authRateLimit({ limit: 10, window: '1 m', prefix: 'rl:verify-token' });
 
 export async function GET(req: Request) {
   try {
@@ -35,7 +35,8 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ valid: true });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/auth/verify-token]', error);
     return NextResponse.json({ valid: false }, { status: 500 });
   }
 }

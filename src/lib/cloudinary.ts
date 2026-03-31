@@ -54,5 +54,7 @@ export async function deleteFromCloudinary(
 ): Promise<void> {
   try {
     await cloudinary.uploader.destroy(public_id, { resource_type, invalidate: true });
-  } catch (_error) {}
+  } catch (error) {
+    console.error('[cloudinary:delete]', public_id, error);
+  }
 }

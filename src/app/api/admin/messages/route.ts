@@ -26,7 +26,8 @@ export async function GET() {
     });
 
     return NextResponse.json({ contacts, unreadCount });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/messages:GET]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

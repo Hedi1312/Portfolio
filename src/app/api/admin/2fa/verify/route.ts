@@ -1,12 +1,12 @@
 import { prisma } from '@/lib/prisma';
-import { rateLimit } from '@/lib/rate-limit';
+import { authRateLimit } from '@/lib/rate-limit';
 import { verifyOTP } from '@/lib/otp';
 import { requireAdmin } from '@/lib/auth-guard';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 // Rate limit: 5 attempts/min per IP
-const limiter = rateLimit({ limit: 5, window: '1 m', prefix: 'rl:2fa-verify' });
+const limiter = authRateLimit({ limit: 5, window: '1 m', prefix: 'rl:2fa-verify' });
 
 // Input Validation Schema — only the code now, secret stays server-side
 const verifySchema = z.object({
@@ -29,6 +29,9 @@ export async function POST(req: Request) {
     const { session, unauthorized } = await requireAdmin();
     if (unauthorized) return unauthorized;
 
+    const email = session?.user?.email;
+    if (!email) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+
     const body = await req.json();
 
     // Validate input against schema
@@ -47,7 +50,7 @@ export async function POST(req: Request) {
 
     // Retrieve the pending secret from the database (never from client)
     const admin = await prisma.admin.findUnique({
-      where: { email: session!.user!.email! },
+      where: { email },
       select: { pendingOtpSecret: true },
     });
 
@@ -70,7 +73,7 @@ export async function POST(req: Request) {
 
     // Promote pending secret to active and clear pending
     await prisma.admin.update({
-      where: { email: session!.user!.email! },
+      where: { email },
       data: {
         otpSecret: admin.pendingOtpSecret,
         pendingOtpSecret: null,
@@ -78,7 +81,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/2fa/verify]', error);
     return NextResponse.json({ error: 'An error occurred during verification' }, { status: 500 });
   }
 }

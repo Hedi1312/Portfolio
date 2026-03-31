@@ -46,9 +46,9 @@ function parseDurationMs(window: Duration): number {
   return value * (multipliers[match[2]] ?? 60_000);
 }
 
-// ── Public factory ────────────────────────────────────────────────
+// ── Internal factory ──────────────────────────────────────────────
 
-export function rateLimit(config: RateLimitConfig): RateLimiter {
+function createLimiter(config: RateLimitConfig, failClosed: boolean): RateLimiter {
   const windowMs = parseDurationMs(config.window);
   const prefix = config.prefix || 'rl';
 
@@ -86,12 +86,33 @@ export function rateLimit(config: RateLimitConfig): RateLimiter {
 
         return { success: true };
       } catch {
-        // DESIGN CHOICE: Fail-open when the database is unreachable.
-        // For a portfolio, a false 429 during a transient DB hiccup is worse
-        // than briefly allowing extra requests. For auth-critical apps,
-        // consider fail-closed: return { success: false, retryAfter: 60 };
+        if (failClosed) {
+          // Auth-critical: deny access when the DB is unreachable
+          // to preserve brute-force protection at all times.
+          return { success: false, retryAfter: 60 };
+        }
+        // Non-critical: fail-open to avoid false 429s during transient DB hiccups.
         return { success: true };
       }
     },
   };
+}
+
+// ── Public factories ──────────────────────────────────────────────
+
+/**
+ * Standard rate limiter — fails **open** on DB errors.
+ * Use for non-critical endpoints (contact form, public pages).
+ */
+export function rateLimit(config: RateLimitConfig): RateLimiter {
+  return createLimiter(config, false);
+}
+
+/**
+ * Auth-critical rate limiter — fails **closed** on DB errors.
+ * Use for login, 2FA, password-reset, and token-verification endpoints
+ * to guarantee brute-force protection even during database outages.
+ */
+export function authRateLimit(config: RateLimitConfig): RateLimiter {
+  return createLimiter(config, true);
 }

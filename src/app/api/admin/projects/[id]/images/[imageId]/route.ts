@@ -35,7 +35,8 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/projects/[id]/images/[imageId]:DELETE]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }
@@ -64,7 +65,8 @@ export async function PUT(
     });
 
     return NextResponse.json({ success: true, image });
-  } catch (_error) {
+  } catch (error) {
+    console.error('[api/admin/projects/[id]/images/[imageId]:PUT]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }
