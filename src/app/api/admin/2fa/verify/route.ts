@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { authRateLimit } from '@/lib/rate-limit';
 import { verifyOTP } from '@/lib/otp';
+import { decrypt } from '@/lib/crypto';
 import { requireAdmin } from '@/lib/auth-guard';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -61,8 +62,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // Verify code with 1 step window tolerance
-    const result = verifyOTP({ token: code, secret: admin.pendingOtpSecret, window: 1 });
+    // Decrypt and verify code with 1 step window tolerance
+    const decryptedSecret = decrypt(admin.pendingOtpSecret);
+    const result = verifyOTP({ token: code, secret: decryptedSecret, window: 1 });
 
     if (!result.valid) {
       return NextResponse.json(
@@ -71,7 +73,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Promote pending secret to active and clear pending
+    // Promote pending secret to active (already encrypted) and clear pending
     await prisma.admin.update({
       where: { email },
       data: {

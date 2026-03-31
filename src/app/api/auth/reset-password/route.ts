@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { authRateLimit } from '@/lib/rate-limit';
 import { newPasswordSchema } from '@/lib/schemas/auth';
 import { verifyOTP } from '@/lib/otp';
+import { decrypt } from '@/lib/crypto';
 
 // Rate limit: 5 attempts/min per IP
 const limiter = authRateLimit({ limit: 5, window: '1 m', prefix: 'rl:reset-pw' });
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
       if (!otpCode || typeof otpCode !== 'string') {
         return NextResponse.json({ error: 'Le code OTP est requis.' }, { status: 400 });
       }
-      const result = verifyOTP({ token: otpCode, secret: admin.otpSecret, window: 1 });
+      const result = verifyOTP({ token: otpCode, secret: decrypt(admin.otpSecret), window: 1 });
       if (!result.valid) {
         return NextResponse.json({ error: 'Code OTP invalide ou expiré.' }, { status: 400 });
       }

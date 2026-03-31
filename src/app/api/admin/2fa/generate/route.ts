@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { authRateLimit } from '@/lib/rate-limit';
 import { generateOTPSecret, generateOTPUri } from '@/lib/otp';
+import { encrypt } from '@/lib/crypto';
 import { requireAdmin } from '@/lib/auth-guard';
 import { NextResponse } from 'next/server';
 
@@ -34,15 +35,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
     }
 
-    // Generate secret and store it server-side (never sent to client)
+    // Generate secret and store it encrypted server-side
     const secret = generateOTPSecret();
 
     await prisma.admin.update({
       where: { id: admin.id },
-      data: { pendingOtpSecret: secret },
+      data: { pendingOtpSecret: encrypt(secret) },
     });
 
-    // Create otpauth URL for the QR code (contains secret but is only used for scanning)
+    // Create otpauth URL for the QR code (plaintext secret needed for TOTP app scanning)
     const otpauthUrl = generateOTPUri({
       label: admin.email,
       issuer: 'Portfolio Admin',

@@ -3,6 +3,7 @@ import { authRateLimit } from '@/lib/rate-limit';
 import { requireAdmin } from '@/lib/auth-guard';
 import { NextResponse } from 'next/server';
 import { verifyOTP } from '@/lib/otp';
+import { decrypt } from '@/lib/crypto';
 
 // Rate limit: 5 attempts/min per IP
 const limiter = authRateLimit({ limit: 5, window: '1 m', prefix: 'rl:2fa-disable' });
@@ -43,8 +44,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Le 2FA n\u2019est pas activé.' }, { status: 400 });
     }
 
-    // Verify the provided code against the stored secret
-    const result = verifyOTP({ token: code, secret: admin.otpSecret, window: 1 });
+    // Verify the provided code against the decrypted stored secret
+    const result = verifyOTP({ token: code, secret: decrypt(admin.otpSecret), window: 1 });
     if (!result.valid) {
       return NextResponse.json({ error: 'Code invalide ou expiré.' }, { status: 400 });
     }

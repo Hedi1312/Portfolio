@@ -2,6 +2,7 @@ import { authConfig } from '@/lib/auth.config';
 import { prisma } from '@/lib/prisma';
 import { loginSchema } from '@/lib/schemas/auth';
 import { verifyOTP } from '@/lib/otp';
+import { decrypt } from '@/lib/crypto';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import bcrypt from 'bcrypt';
 import NextAuth from 'next-auth';
@@ -28,7 +29,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (!otpCode) return null;
             const result = verifyOTP({
               token: String(otpCode),
-              secret: admin.otpSecret,
+              secret: decrypt(admin.otpSecret),
               window: 1,
             });
             if (!result.valid) return null;
