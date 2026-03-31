@@ -42,7 +42,6 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
     "browser-image-compression": "^2.0.2",
     "cloudinary": "^2.9.0",
     "dotenv": "^17.3.1",

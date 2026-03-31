@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/auth-guard';
 
-// GET → Tous les contacts avec leurs messages et réponses
+// GET → All contacts with their messages and replies
 export async function GET() {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const contacts = await prisma.contact.findMany({
       orderBy: { updatedAt: 'desc' },
@@ -16,7 +20,7 @@ export async function GET() {
       },
     });
 
-    // Compter les messages non lus
+    // Count unread messages
     const unreadCount = await prisma.contactMessage.count({
       where: { isRead: false },
     });

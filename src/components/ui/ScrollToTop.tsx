@@ -1,7 +1,7 @@
 'use client';
 
 import { useNeonHover } from '@/hooks/useNeonHover';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FiArrowUp } from 'react-icons/fi';
 
@@ -44,7 +44,7 @@ export default function ScrollToTop() {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.button
+        <m.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
@@ -55,7 +55,7 @@ export default function ScrollToTop() {
           aria-label="Remonter en haut"
         >
           <FiArrowUp size={20} strokeWidth={2.5} />
-        </motion.button>
+        </m.button>
       )}
     </AnimatePresence>
   );

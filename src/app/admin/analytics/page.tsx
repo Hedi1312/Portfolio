@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -464,7 +464,7 @@ export default function AnalyticsPage() {
               {kpis.map((kpi, i) => {
                 const Icon = kpi.icon;
                 return (
-                  <motion.div
+                  <m.div
                     key={kpi.label}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -488,13 +488,13 @@ export default function AnalyticsPage() {
                     <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                       {kpi.label}
                     </p>
-                  </motion.div>
+                  </m.div>
                 );
               })}
             </div>
 
             {/* Pageviews Chart */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
@@ -563,12 +563,12 @@ export default function AnalyticsPage() {
                   </div>
                 )}
               </div>
-            </motion.div>
+            </m.div>
 
             {/* Two-column grid */}
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               {/* Top Pages */}
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -614,10 +614,10 @@ export default function AnalyticsPage() {
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </m.div>
 
               {/* Events */}
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35 }}
@@ -656,13 +656,13 @@ export default function AnalyticsPage() {
                     <p className="text-neutral-400 text-sm">Aucune donnée pour le moment</p>
                   </div>
                 )}
-              </motion.div>
+              </m.div>
             </div>
 
             {/* Three-column grid: Countries / Browsers+OS / Devices+Referrers */}
             <div className="grid md:grid-cols-3 gap-8 mb-8">
               {/* Countries List */}
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
@@ -712,10 +712,10 @@ export default function AnalyticsPage() {
                     <p className="text-neutral-400 text-sm">Aucune donnée pour le moment</p>
                   </div>
                 )}
-              </motion.div>
+              </m.div>
 
               {/* Browser & OS */}
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45 }}
@@ -789,10 +789,10 @@ export default function AnalyticsPage() {
                     <p className="text-neutral-400 text-sm">Aucune donnée pour le moment</p>
                   </div>
                 )}
-              </motion.div>
+              </m.div>
 
               {/* Devices & Referrers */}
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
@@ -862,7 +862,7 @@ export default function AnalyticsPage() {
                     <p className="text-neutral-400 text-sm">Aucune donnée pour le moment</p>
                   </div>
                 )}
-              </motion.div>
+              </m.div>
             </div>
           </>
         )}

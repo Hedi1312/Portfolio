@@ -4,7 +4,7 @@ import { PDFDocument } from 'pdf-lib';
 import { directUploadToCloudinary } from '@/lib/cloudinary-client';
 import { GrDocumentPdf } from 'react-icons/gr';
 import { FiEye, FiDownload, FiX, FiArrowLeft, FiTrash2 } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { useToast, ToastContainer } from '@/components/ui/Toast';
@@ -346,7 +346,7 @@ export default function AdminCVPage() {
                     </div>
 
                     {showPreview ? (
-                      <motion.div
+                      <m.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         className="flex-1"
@@ -356,7 +356,7 @@ export default function AdminCVPage() {
                           className="w-full h-[60vh] border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-inner bg-neutral-100 dark:bg-neutral-950"
                           allow="fullscreen"
                         />
-                      </motion.div>
+                      </m.div>
                     ) : (
                       <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-xl bg-neutral-50/50 dark:bg-neutral-800/30 p-12">
                         <FiEye className="text-neutral-300 dark:text-neutral-600 text-5xl mb-4" />

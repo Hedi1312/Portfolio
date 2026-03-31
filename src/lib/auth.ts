@@ -1,11 +1,11 @@
 import { authConfig } from '@/lib/auth.config';
 import { prisma } from '@/lib/prisma';
 import { loginSchema } from '@/lib/schemas/auth';
+import { verifyOTP } from '@/lib/otp';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import bcrypt from 'bcrypt';
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-const { verifySync } = require('otplib');
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -23,19 +23,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const isPasswordValid = await bcrypt.compare(password, admin.passwordHash);
           if (!isPasswordValid) return null;
 
-          // A2F TOTP Verification
-          if (!otpCode) return null;
+          // TOTP verification (only when 2FA is active)
           if (admin.otpSecret) {
-            // A2F active: verify real TOTP code
-            const result = verifySync({
+            if (!otpCode) return null;
+            const result = verifyOTP({
               token: String(otpCode),
               secret: admin.otpSecret,
               window: 1,
             });
             if (!result.valid) return null;
-          } else {
-            // A2F inactive: only accept '000000'
-            if (String(otpCode) !== '000000') return null;
           }
 
           return { id: admin.id, email: admin.email };

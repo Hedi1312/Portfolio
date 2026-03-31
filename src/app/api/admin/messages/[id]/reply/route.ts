@@ -1,22 +1,29 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import nodemailer from 'nodemailer';
 import { render } from '@react-email/components';
 import { AdminReply } from '@/emails/AdminReply';
+import { requireAdmin } from '@/lib/auth-guard';
+import { transporter, getEmailSubjectPrefix } from '@/lib/mailer';
+import { replyMessageSchema } from '@/lib/schemas/admin';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// Allowed MIME types for attachments
+const ALLOWED_FILE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'application/pdf',
+];
 
-// POST → Envoyer une réponse personnalisée au contact
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILES = 5;
+
+// POST → Send a custom reply to a contact
 // id = contactId
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
 
@@ -33,30 +40,43 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const lastMessage = contact.messages[0];
 
-    // Extraire les données du formulaire (message + pièces jointes)
+    // Extract form data (message + attachments)
     const formData = await req.formData();
-    const replyMessage = formData.get('message') as string;
+    const replyMessage = formData.get('message');
 
-    if (!replyMessage?.trim()) {
-      return NextResponse.json({ error: 'Le message est requis.' }, { status: 400 });
+    // Validate message via Zod schema
+    const validation = replyMessageSchema.safeParse({ message: replyMessage });
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
     }
 
     // Save attachments to Cloudinary
     const emailAttachments = [];
     const dbAttachments: { filename: string; path: string; public_id?: string }[] = [];
-    const files = formData.getAll('files') as File[];
+    const allFiles = formData.getAll('files') as File[];
+    const files = allFiles.slice(0, MAX_FILES);
 
     if (files.length > 0) {
       const { uploadToCloudinary } = await import('@/lib/cloudinary');
 
       for (const file of files) {
         if (file && file.size > 0) {
-          if (file.size > 10 * 1024 * 1024) {
+          // Validate file type
+          if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+            return NextResponse.json(
+              { error: `Le type du fichier "${file.name}" n'est pas autorisé.` },
+              { status: 400 },
+            );
+          }
+
+          // Validate file size
+          if (file.size > MAX_FILE_SIZE) {
             return NextResponse.json(
               { error: `Le fichier "${file.name}" dépasse la limite de 10 Mo.` },
               { status: 400 },
             );
           }
+
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
 
@@ -78,18 +98,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
 
     // Environment prefix
-    let prefixe = '';
-    if (process.env.VERCEL_ENV === 'preview') {
-      prefixe = '[PREVIEW] ';
-    } else if (!process.env.VERCEL_ENV) {
-      prefixe = '[LOCAL] ';
-    }
+    const prefixe = getEmailSubjectPrefix();
 
-    // Rendre le template email
+    // Render email template
     const html = await render(
       AdminReply({
         recipientName: contact.name,
-        replyMessage,
+        replyMessage: validation.data.message,
         originalSubject: lastMessage.subject || undefined,
         originalMessage: lastMessage.message,
       }),
@@ -98,13 +113,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // Save reply to DB
     const savedReply = await prisma.messageReply.create({
       data: {
-        message: replyMessage,
+        message: validation.data.message,
         attachments: dbAttachments,
         contactMessageId: lastMessage.id,
       },
     });
 
-    // Envoyer l'email
+    // Send the email
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: contact.email,

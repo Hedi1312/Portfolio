@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readFile, stat } from 'fs/promises';
 import path from 'path';
+import { requireAdmin } from '@/lib/auth-guard';
 
 const MIME_TYPES: Record<string, string> = {
   '.png': 'image/png',
@@ -12,21 +13,41 @@ const MIME_TYPES: Record<string, string> = {
   '.pdf': 'application/pdf',
 };
 
+// Base directory for message attachments
+const BASE_DIR = path.resolve(process.cwd(), 'storage', 'messages');
+
 export async function GET(_req: Request, { params }: { params: Promise<{ path: string[] }> }) {
+  // Only authenticated admin can access message attachments
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { path: segments } = await params;
     const filename = segments.join('/');
 
-    // Prevent path traversal
-    if (filename.includes('..') || filename.includes('~')) {
+    // Defense-in-depth: reject traversal patterns before resolution
+    if (filename.includes('..') || filename.includes('\0')) {
       return NextResponse.json({ error: 'Chemin invalide.' }, { status: 400 });
     }
 
-    const filePath = path.join(process.cwd(), 'storage', 'messages', filename);
+    // Build resolved path and verify it stays within BASE_DIR
+    const filePath = path.resolve(BASE_DIR, filename);
+
+    if (!filePath.startsWith(BASE_DIR + path.sep) && filePath !== BASE_DIR) {
+      return NextResponse.json({ error: 'Chemin invalide.' }, { status: 400 });
+    }
+
+    // Reject forbidden characters and patterns
+    if (/[<>:"|?*\x00-\x1f]/.test(filename)) {
+      return NextResponse.json({ error: 'Chemin invalide.' }, { status: 400 });
+    }
 
     // Verify file exists
     try {
-      await stat(filePath);
+      const statResult = await stat(filePath);
+      if (!statResult.isFile()) {
+        return NextResponse.json({ error: 'Fichier introuvable.' }, { status: 404 });
+      }
     } catch {
       return NextResponse.json({ error: 'Fichier introuvable.' }, { status: 404 });
     }
@@ -40,6 +61,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ path: s
         'Content-Type': contentType,
         'Content-Disposition': `inline; filename="${path.basename(filename)}"`,
         'Cache-Control': 'private, max-age=3600',
+        'X-Content-Type-Options': 'nosniff',
+        'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox",
       },
     });
   } catch (_error) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { FiChevronDown } from 'react-icons/fi';
 import { smoothScrollTo } from '@/lib/utils/scroll';
 
@@ -44,7 +44,7 @@ export default function Accueil() {
       {/* Content */}
       <div className="relative z-10 max-w-3xl">
         {/* Badge */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -52,10 +52,10 @@ export default function Accueil() {
         >
           <span className="w-2 h-2 bg-success-400 rounded-full animate-pulse" />À l&apos;écoute
           d&apos;opportunités
-        </motion.div>
+        </m.div>
 
         {/* Title */}
-        <motion.h2
+        <m.h2
           className="text-5xl md:text-7xl font-extrabold mb-12 font-(family-name:--font-space-grotesk) tracking-tight"
           initial={{ opacity: 0, y: -30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -65,7 +65,7 @@ export default function Accueil() {
           Salut, moi c&apos;est{' '}
           <span className="inline-flex">
             {name.split('').map((char, i) => (
-              <motion.span
+              <m.span
                 key={i}
                 custom={i}
                 variants={letterVariants}
@@ -75,13 +75,13 @@ export default function Accueil() {
                 className={`${char === ' ' ? 'w-3 md:w-4' : 'inline-block gradient-text-animated'}`}
               >
                 {char === ' ' ? '\u00A0' : char}
-              </motion.span>
+              </m.span>
             ))}
           </span>
-        </motion.h2>
+        </m.h2>
 
         {/* Subtitle */}
-        <motion.p
+        <m.p
           className="text-lg md:text-xl text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto mb-12 leading-relaxed"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -90,10 +90,10 @@ export default function Accueil() {
         >
           Développeur passionné par la création d&apos;expériences web modernes, performantes et
           élégantes.
-        </motion.p>
+        </m.p>
 
         {/* CTA Button */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.5 }}
@@ -116,12 +116,12 @@ export default function Accueil() {
               />
             </div>
           </button>
-        </motion.div>
+        </m.div>
       </div>
 
       {/* Mouse Scroll Indicator (Independent) */}
       {mounted && (
-        <motion.div
+        <m.div
           className="hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 hover:opacity-100 transition-opacity duration-300 cursor-pointer"
           onClick={() => {
             smoothScrollTo('a-propos', 2500);
@@ -131,7 +131,7 @@ export default function Accueil() {
           transition={{ delay: 2.2, duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
         >
           <div className="w-5 h-9 border-2 border-neutral-500 dark:border-neutral-400 rounded-full flex justify-center p-1">
-            <motion.div
+            <m.div
               className="w-1 h-2 bg-brand-400 rounded-full"
               animate={{ y: [0, 12, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -140,24 +140,24 @@ export default function Accueil() {
           <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-neutral-500 dark:text-neutral-400">
             Scroll
           </span>
-        </motion.div>
+        </m.div>
       )}
 
       {/* Scroll indicator (Mobile only) */}
       {mounted && (
-        <motion.div
+        <m.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2 text-neutral-400 dark:text-neutral-500 md:hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2.5, duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
         >
-          <motion.div
+          <m.div
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           >
             <FiChevronDown size={28} />
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </section>
   );

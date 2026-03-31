@@ -1,24 +1,23 @@
-import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { rateLimit } from '@/lib/rate-limit';
-const { verifySync } = require('otplib');
+import { verifyOTP } from '@/lib/otp';
+import { requireAdmin } from '@/lib/auth-guard';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 // Rate limit: 5 attempts/min per IP
-const limiter = rateLimit({ interval: 60_000, limit: 5 });
+const limiter = rateLimit({ limit: 5, window: '1 m', prefix: 'rl:2fa-verify' });
 
-// @api-security-best-practices: Input Validation Schema
+// Input Validation Schema — only the code now, secret stays server-side
 const verifySchema = z.object({
   code: z.string().length(6, 'Le code doit contenir 6 chiffres').regex(/^\d+$/, 'Format invalide'),
-  secret: z.string().min(16, 'Secret invalide'),
 });
 
 export async function POST(req: Request) {
   // IP Rate limiting
   const forwarded = req.headers.get('x-forwarded-for');
   const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-  const { success, retryAfter } = limiter.check(ip);
+  const { success, retryAfter } = await limiter.check(ip);
 
   if (!success) {
     return NextResponse.json(
@@ -27,11 +26,8 @@ export async function POST(req: Request) {
     );
   }
   try {
-    const session = await auth();
-    // @api-security-best-practices: Authorization check
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { session, unauthorized } = await requireAdmin();
+    if (unauthorized) return unauthorized;
 
     const body = await req.json();
 
@@ -47,23 +43,38 @@ export async function POST(req: Request) {
       );
     }
 
-    const { code, secret } = validation.data;
+    const { code } = validation.data;
+
+    // Retrieve the pending secret from the database (never from client)
+    const admin = await prisma.admin.findUnique({
+      where: { email: session!.user!.email! },
+      select: { pendingOtpSecret: true },
+    });
+
+    if (!admin?.pendingOtpSecret) {
+      return NextResponse.json(
+        { error: 'Aucune configuration 2FA en attente. Relancez la génération.' },
+        { status: 400 },
+      );
+    }
 
     // Verify code with 1 step window tolerance
-    const result = verifySync({ token: code, secret, window: 1 });
+    const result = verifyOTP({ token: code, secret: admin.pendingOtpSecret, window: 1 });
 
     if (!result.valid) {
-      // @api-security-best-practices: Generic error message to prevent brute forcing context
       return NextResponse.json(
         { error: 'Le code fourni est invalide ou a expiré.' },
         { status: 400 },
       );
     }
 
-    // Save secret to database
+    // Promote pending secret to active and clear pending
     await prisma.admin.update({
-      where: { email: session.user.email },
-      data: { otpSecret: secret },
+      where: { email: session!.user!.email! },
+      data: {
+        otpSecret: admin.pendingOtpSecret,
+        pendingOtpSecret: null,
+      },
     });
 
     return NextResponse.json({ success: true });

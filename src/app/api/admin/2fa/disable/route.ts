@@ -1,17 +1,17 @@
-import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { rateLimit } from '@/lib/rate-limit';
+import { requireAdmin } from '@/lib/auth-guard';
 import { NextResponse } from 'next/server';
-const { verifySync } = require('otplib');
+import { verifyOTP } from '@/lib/otp';
 
 // Rate limit: 5 attempts/min per IP
-const limiter = rateLimit({ interval: 60_000, limit: 5 });
+const limiter = rateLimit({ limit: 5, window: '1 m', prefix: 'rl:2fa-disable' });
 
 export async function POST(req: Request) {
   // IP Rate limiting
   const forwarded = req.headers.get('x-forwarded-for');
   const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-  const { success, retryAfter } = limiter.check(ip);
+  const { success, retryAfter } = await limiter.check(ip);
 
   if (!success) {
     return NextResponse.json(
@@ -20,10 +20,8 @@ export async function POST(req: Request) {
     );
   }
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { session, unauthorized } = await requireAdmin();
+    if (unauthorized) return unauthorized;
 
     const body = await req.json();
     const code = body?.code;
@@ -34,7 +32,7 @@ export async function POST(req: Request) {
 
     // Retrieve the current secret to verify the code
     const admin = await prisma.admin.findUnique({
-      where: { email: session.user.email },
+      where: { email: session!.user!.email! },
       select: { otpSecret: true },
     });
 
@@ -43,14 +41,14 @@ export async function POST(req: Request) {
     }
 
     // Verify the provided code against the stored secret
-    const result = verifySync({ token: code, secret: admin.otpSecret, window: 1 });
+    const result = verifyOTP({ token: code, secret: admin.otpSecret, window: 1 });
     if (!result.valid) {
       return NextResponse.json({ error: 'Code invalide ou expiré.' }, { status: 400 });
     }
 
     // Code is valid — disable 2FA
     await prisma.admin.update({
-      where: { email: session.user.email },
+      where: { email: session!.user!.email! },
       data: { otpSecret: null },
     });
 

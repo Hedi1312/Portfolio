@@ -3,7 +3,7 @@
 import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
   LogOut,
   Mail,
@@ -166,7 +166,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
     <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
       <div className="mx-auto max-w-7xl w-full">
         {/* Header */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -187,14 +187,14 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
             <LogOut className="h-4 w-4" />
             Déconnexion
           </button>
-        </motion.div>
+        </m.div>
 
         {/* KPI Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {kpis.map((item, i) => {
             const Icon = item.icon;
             return (
-              <motion.div
+              <m.div
                 key={item.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -218,23 +218,23 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
                 <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                   {item.label} &middot; {item.subtitle}
                 </p>
-              </motion.div>
+              </m.div>
             );
           })}
         </div>
 
         {/* Quick Actions */}
-        <motion.h2
+        <m.h2
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
           className="text-lg font-bold text-neutral-900 dark:text-white mb-4"
         >
           Accès rapide
-        </motion.h2>
+        </m.h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {actions.map((action, index) => (
-            <motion.div
+            <m.div
               key={action.title}
               onClick={() => router.push(action.href)}
               className="group cursor-pointer rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-5 shadow-sm transition-all hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-700 relative overflow-hidden"
@@ -265,7 +265,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
                 </div>
                 <ArrowRight className="h-5 w-5 text-neutral-300 dark:text-neutral-600 group-hover:text-neutral-500 dark:group-hover:text-neutral-400 group-hover:translate-x-1 transition-all mt-1 shrink-0" />
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

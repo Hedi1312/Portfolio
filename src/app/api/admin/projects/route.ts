@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/auth-guard';
+import { createProjectSchema } from '@/lib/schemas/admin';
 
-// GET → Récupérer tous les projets (avec skills), ordonnés
+// GET → All projects (with skills), ordered
 export async function GET() {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const projects = await prisma.project.findMany({
       include: {
@@ -17,15 +22,20 @@ export async function GET() {
   }
 }
 
-// POST → Créer un projet
+// POST → Create a project
 export async function POST(req: Request) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await req.json();
-    const { title, description, gradient, link, github, visible, skills } = body;
 
-    if (!title || !description) {
-      return NextResponse.json({ error: 'Titre et description requis.' }, { status: 400 });
+    const validation = createProjectSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
     }
+
+    const { title, description, gradient, link, github, visible, skills } = validation.data;
 
     // Get current highest order
     const maxOrder = await prisma.project.aggregate({ _max: { order: true } });
@@ -42,7 +52,7 @@ export async function POST(req: Request) {
         order: nextOrder,
         skills: {
           create:
-            skills?.map((s: { name: string; icon?: string; color?: string }) => ({
+            skills?.map((s) => ({
               name: s.name,
               icon: s.icon || null,
               color: s.color || '#00D5BE',

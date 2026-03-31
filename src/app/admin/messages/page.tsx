@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
@@ -295,7 +295,7 @@ export default function MessagesPage() {
                 const unread = getContactUnread(contact);
                 const lastMsg = contact.messages[contact.messages.length - 1];
                 return (
-                  <motion.div
+                  <m.div
                     key={contact.id}
                     onClick={() => selectContact(contact)}
                     className={`relative cursor-pointer rounded-xl p-4 transition-all border ${
@@ -376,7 +376,7 @@ export default function MessagesPage() {
                         <FiTrash2 size={16} />
                       </button>
                     </div>
-                  </motion.div>
+                  </m.div>
                 );
               })}
             </div>
@@ -385,7 +385,7 @@ export default function MessagesPage() {
             <div className="w-full lg:w-3/5">
               <AnimatePresence mode="wait">
                 {selected ? (
-                  <motion.div
+                  <m.div
                     key={selected.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -571,9 +571,9 @@ export default function MessagesPage() {
                         </Button>
                       </div>
                     </div>
-                  </motion.div>
+                  </m.div>
                 ) : (
-                  <motion.div
+                  <m.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="hidden lg:flex items-center justify-center h-96 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl"
@@ -582,7 +582,7 @@ export default function MessagesPage() {
                       <FiMail size={40} className="mx-auto mb-3 opacity-50" />
                       <p>Sélectionne une conversation</p>
                     </div>
-                  </motion.div>
+                  </m.div>
                 )}
               </AnimatePresence>
             </div>

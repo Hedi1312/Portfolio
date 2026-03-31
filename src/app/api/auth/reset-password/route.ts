@@ -7,16 +7,16 @@ import bcrypt from 'bcrypt';
 import { prisma } from '@/lib/prisma';
 import { rateLimit } from '@/lib/rate-limit';
 import { newPasswordSchema } from '@/lib/schemas/auth';
-const { verifySync } = require('otplib');
+import { verifyOTP } from '@/lib/otp';
 
 // Rate limit: 5 attempts/min per IP
-const limiter = rateLimit({ interval: 60_000, limit: 5 });
+const limiter = rateLimit({ limit: 5, window: '1 m', prefix: 'rl:reset-pw' });
 
 export async function POST(req: Request) {
   // IP Rate limiting
   const forwarded = req.headers.get('x-forwarded-for');
   const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-  const { success, retryAfter } = limiter.check(ip);
+  const { success, retryAfter } = await limiter.check(ip);
 
   if (!success) {
     return NextResponse.json(
@@ -58,27 +58,20 @@ export async function POST(req: Request) {
       );
     }
 
-    // A2F Verification
-    if (!otpCode || typeof otpCode !== 'string') {
-      return NextResponse.json({ error: 'Le code OTP est requis.' }, { status: 400 });
-    }
-
+    // TOTP verification (only when 2FA is active)
     const admin = resetRecord.admin;
     if (admin.otpSecret) {
-      // A2F active: verify real TOTP code
-      const result = verifySync({ token: otpCode, secret: admin.otpSecret, window: 1 });
+      if (!otpCode || typeof otpCode !== 'string') {
+        return NextResponse.json({ error: 'Le code OTP est requis.' }, { status: 400 });
+      }
+      const result = verifyOTP({ token: otpCode, secret: admin.otpSecret, window: 1 });
       if (!result.valid) {
         return NextResponse.json({ error: 'Code OTP invalide ou expiré.' }, { status: 400 });
-      }
-    } else {
-      // A2F inactive: only accept '000000'
-      if (otpCode !== '000000') {
-        return NextResponse.json({ error: 'Code OTP invalide.' }, { status: 400 });
       }
     }
 
     // Hash the new password and update the admin
-    const passwordHash = await bcrypt.hash(validation.data.password, 10);
+    const passwordHash = await bcrypt.hash(validation.data.password, 12);
 
     await prisma.admin.update({
       where: { id: resetRecord.adminId },

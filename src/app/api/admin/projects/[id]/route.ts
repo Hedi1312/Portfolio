@@ -1,13 +1,24 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
+import { requireAdmin } from '@/lib/auth-guard';
+import { updateProjectSchema } from '@/lib/schemas/admin';
 
 // PUT -> Update project
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
     const body = await req.json();
-    const { title, description, gradient, link, github, visible, order, skills } = body;
+
+    const validation = updateProjectSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
+    }
+
+    const { title, description, gradient, link, github, visible, order, skills } = validation.data;
 
     // Recreate old skills
     await prisma.projectSkill.deleteMany({ where: { projectId: id } });
@@ -24,7 +35,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         order: order ?? undefined,
         skills: {
           create:
-            skills?.map((s: { name: string; icon?: string; color?: string }) => ({
+            skills?.map((s) => ({
               name: s.name,
               icon: s.icon || null,
               color: s.color || '#00D5BE',
@@ -42,6 +53,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
 // DELETE -> Remove project
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
 

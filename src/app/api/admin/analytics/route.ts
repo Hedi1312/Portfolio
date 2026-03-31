@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth-guard';
+import { z } from 'zod';
+
+const periodSchema = z.enum(['24h', '7d', '30d', '90d']).catch('7d');
 
 const UMAMI_API_URL = process.env.UMAMI_API_URL;
 const UMAMI_API_KEY = process.env.UMAMI_API_KEY;
@@ -46,17 +49,15 @@ function getUnit(period: string) {
 }
 
 export async function GET(req: Request) {
-  const session = await auth();
-  if (!session) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-  }
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
 
   if (!UMAMI_API_URL || !UMAMI_API_KEY || !WEBSITE_ID) {
     return NextResponse.json({ error: 'Variables Umami non configurées' }, { status: 500 });
   }
 
   const { searchParams } = new URL(req.url);
-  const period = searchParams.get('period') || '7d';
+  const period = periodSchema.parse(searchParams.get('period'));
   const { startAt, endAt } = getPeriodRange(period);
   const unit = getUnit(period);
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;

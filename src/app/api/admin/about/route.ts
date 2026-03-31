@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/auth-guard';
+import { updateAboutSchema } from '@/lib/schemas/admin';
+import type { Prisma } from '@prisma/client';
 
 // GET -> Returns 'About' singleton
 export async function GET() {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     let aboutMe = await prisma.aboutMe.findFirst({
       include: { techs: { orderBy: { order: 'asc' } } },
@@ -22,13 +28,22 @@ export async function GET() {
   }
 }
 
-// PUT → Met à jour le singleton « À propos »
+// PUT → Update the 'About' singleton
 export async function PUT(req: Request) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await req.json();
-    const { bio, stats, techs } = body;
 
-    // Trouver le singleton existant
+    const validation = updateAboutSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
+    }
+
+    const { bio, stats, techs } = validation.data;
+
+    // Find existing singleton
     let aboutMe = await prisma.aboutMe.findFirst();
 
     if (!aboutMe) {
@@ -44,10 +59,10 @@ export async function PUT(req: Request) {
       where: { id: aboutMe.id },
       data: {
         bio: bio ?? aboutMe.bio,
-        stats: stats ?? aboutMe.stats,
+        stats: (stats as Prisma.InputJsonValue) ?? aboutMe.stats,
         techs: {
           create:
-            techs?.map((tech: { name: string; icon?: string; color?: string }, index: number) => ({
+            techs?.map((tech, index: number) => ({
               name: tech.name,
               icon: tech.icon || null,
               color: tech.color || '#00D5BE',

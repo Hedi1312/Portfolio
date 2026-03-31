@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { FiArrowLeft, FiPlus, FiX, FiTrash2, FiArrowUp, FiArrowDown, FiMenu } from 'react-icons/fi';
 import { UserCircle, GripVertical } from 'lucide-react';
@@ -198,14 +198,14 @@ function ReorderModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
           onClick={onClose}
         >
-          <motion.div
+          <m.div
             ref={modalRef}
             initial={{ scale: 0.9, opacity: 0, y: 10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -271,7 +271,7 @@ function ReorderModal({
               </button>
               <Button onClick={() => onSave(localTechs)}>Enregistrer l&apos;ordre</Button>
             </div>
-          </motion.div>
+          </m.div>
           {/* Internal Confirmation Modal */}
           <ConfirmModal
             isOpen={deleteConfirmIndex !== null}
@@ -289,7 +289,7 @@ function ReorderModal({
             }}
             onCancel={() => setDeleteConfirmIndex(null)}
           />
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );
@@ -499,7 +499,7 @@ export default function AdminAboutPage() {
       />
 
       <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -732,7 +732,7 @@ export default function AdminAboutPage() {
               </Button>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       </section>
     </>
   );

@@ -1,7 +1,7 @@
 'use client';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { contactSchema } from '@/lib/schemas/contact';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useState } from 'react';
 import { FiMail, FiX, FiSend, FiCheckCircle, FiPaperclip } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';
@@ -109,7 +109,7 @@ export default function Contact() {
 
   return (
     <>
-      <motion.div
+      <m.div
         className="glass-card p-8 md:p-12 text-center h-full flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer"
         whileHover={neonHover.whileHover}
         transition={neonHover.transition}
@@ -145,12 +145,12 @@ export default function Contact() {
           <FiMail size={18} />
           M&apos;envoyer un message
         </Button>
-      </motion.div>
+      </m.div>
 
       {/* Modal */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -158,7 +158,7 @@ export default function Contact() {
             className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4"
             onClick={handleClose}
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -329,26 +329,26 @@ export default function Contact() {
                   </Button>
                 </form>
               ) : (
-                <motion.div
+                <m.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center py-12"
                 >
-                  <motion.div
+                  <m.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', damping: 15, stiffness: 200, delay: 0.1 }}
                   >
                     <FiCheckCircle size={56} className="text-success-400 mx-auto mb-4" />
-                  </motion.div>
+                  </m.div>
                   <p className="text-xl font-semibold mb-2">Message envoyé !</p>
                   <p className="text-sm text-neutral-500 dark:text-neutral-400">
                     Je te réponds très vite
                   </p>
-                </motion.div>
+                </m.div>
               )}
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

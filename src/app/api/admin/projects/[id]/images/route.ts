@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-
-interface UploadedImage {
-  url: string;
-  public_id: string;
-  resource_type: string;
-}
+import { requireAdmin } from '@/lib/auth-guard';
+import { addProjectImagesSchema } from '@/lib/schemas/admin';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
 
@@ -16,21 +15,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!project) return NextResponse.json({ error: 'Projet introuvable' }, { status: 404 });
 
     const body = await req.json();
-    const images: UploadedImage[] = body.images;
 
-    if (!images || images.length === 0) {
-      return NextResponse.json({ error: 'Aucune image fournie' }, { status: 400 });
+    const validation = addProjectImagesSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
     }
 
-    // Verify each image has required fields
-    for (const img of images) {
-      if (!img.url || !img.public_id) {
-        return NextResponse.json(
-          { error: 'Chaque image doit avoir un url et un public_id.' },
-          { status: 400 },
-        );
-      }
-    }
+    const { images } = validation.data;
 
     const uploadedImages = [];
 

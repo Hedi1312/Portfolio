@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
+import { requireAdmin } from '@/lib/auth-guard';
+import { createCvSchema } from '@/lib/schemas/admin';
 
 // GET -> Returns public CV URL
 export async function GET() {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const cv = await prisma.cv.findFirst({
       orderBy: { createdAt: 'desc' },
@@ -23,18 +28,20 @@ export async function GET() {
   }
 }
 
-// POST → enregistre les métadonnées du CV uploadé directement vers Cloudinary
+// POST → Save CV metadata after direct Cloudinary upload
 export async function POST(req: Request) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await req.json();
-    const { url, public_id, resource_type, size } = body;
 
-    if (!url || !public_id) {
-      return NextResponse.json(
-        { error: 'Les champs url et public_id sont requis.' },
-        { status: 400 },
-      );
+    const validation = createCvSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
     }
+
+    const { url, public_id, resource_type, size } = validation.data;
 
     // Handle old CV deletion
     const oldCvs = await prisma.cv.findMany();
@@ -44,7 +51,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // On vide la table pour n'avoir qu'un seul CV
+    // Keep only one CV record
     await prisma.cv.deleteMany();
 
     // Save to DB
@@ -71,8 +78,11 @@ export async function POST(req: Request) {
   }
 }
 
-// DELETE → supprime complètement le CV
+// DELETE → Remove the CV entirely
 export async function DELETE() {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const oldCvs = await prisma.cv.findMany();
     for (const old of oldCvs) {

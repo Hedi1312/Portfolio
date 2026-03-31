@@ -1,11 +1,23 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
+import { requireAdmin } from '@/lib/auth-guard';
+import { z } from 'zod';
+
+const idSchema = z.string().cuid('Invalid ID format');
 
 // PATCH -> Mark all contact messages as read
 export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
+    const validation = idSchema.safeParse(id);
+    if (!validation.success) {
+      return NextResponse.json({ error: 'ID invalide.' }, { status: 400 });
+    }
+
     await prisma.contactMessage.updateMany({
       where: { contactId: id, isRead: false },
       data: { isRead: true },
@@ -18,8 +30,15 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
 
 // DELETE -> Remove contact and their messages
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
+    const validation = idSchema.safeParse(id);
+    if (!validation.success) {
+      return NextResponse.json({ error: 'ID invalide.' }, { status: 400 });
+    }
 
     // Get contact with messages and replies
     const contact = await prisma.contact.findUnique({
@@ -32,12 +51,12 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     });
 
     if (contact) {
-      // Collecter tous les public_id Cloudinary à supprimer
+      // Collect all Cloudinary public_ids to delete
       const publicIdsToDelete: string[] = [];
 
       contact.messages.forEach(
         (msg: { attachments: unknown; replies: { attachments: unknown }[] }) => {
-          // Obtenir pièces jointes du message de base
+          // Get base message attachments
           if (msg.attachments && typeof msg.attachments === 'object') {
             const baseAttachments = msg.attachments as { public_id?: string }[];
             if (Array.isArray(baseAttachments)) {
@@ -49,7 +68,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
             }
           }
 
-          // Obtenir pièces jointes des réponses admin
+          // Get reply attachments
           msg.replies.forEach((rep: { attachments: unknown }) => {
             if (rep.attachments && typeof rep.attachments === 'object') {
               const replyAttachments = rep.attachments as { public_id?: string }[];

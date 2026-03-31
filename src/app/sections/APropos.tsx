@@ -3,8 +3,8 @@ import { useIsDark } from '@/hooks/useIsDark';
 import { useNeonHover, buildNeonHover } from '@/hooks/useNeonHover';
 import type { NeonHoverConfig } from '@/hooks/useNeonHover';
 import { SKILL_ICONS } from '@/lib/skill-icons';
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { m } from 'framer-motion';
+import { useState } from 'react';
 import { FiGrid, FiZap } from 'react-icons/fi';
 
 interface StatItem {
@@ -18,10 +18,14 @@ interface TechItem {
   color: string;
 }
 
-interface AboutData {
+export interface AboutData {
   bio: string;
   stats: StatItem[];
   techs: TechItem[];
+}
+
+interface AProposProps {
+  data: AboutData | null;
 }
 
 const containerVariants = {
@@ -44,7 +48,7 @@ const renderTechTag = (tech: TechItem, index: number, isDark: boolean, neon: Neo
   const match = tech.icon ? SKILL_ICONS[tech.icon] : null;
   const Icon = match?.icon;
   return (
-    <motion.div
+    <m.div
       key={`${tech.name}-${index}`}
       className="glass-card flex items-center justify-center gap-2.5 px-5 py-3 cursor-default"
       whileHover={neon.whileHover}
@@ -61,7 +65,7 @@ const renderTechTag = (tech: TechItem, index: number, isDark: boolean, neon: Neo
       <span className="text-[15px] font-medium text-neutral-700 dark:text-neutral-200 whitespace-nowrap">
         {tech.name}
       </span>
-    </motion.div>
+    </m.div>
   );
 };
 
@@ -75,9 +79,8 @@ const TechMarquee = ({
   isDark: boolean;
 }) => {
   const neonTag = buildNeonHover(-4, isDark);
-  // Optimized marquee: translating the parent avoids multiple GPU layer repaints.
-  // L'animation devient instantanément parfaitement fluide à 60 FPS.
-  const multipliedItems = [...items, ...items, ...items, ...items];
+  // Duplicated to fill the viewport for seamless infinite scroll (2x is sufficient)
+  const multipliedItems = [...items, ...items];
 
   const halfBlock = (
     <div className="flex gap-6 pr-6 items-center shrink-0">
@@ -97,30 +100,12 @@ const TechMarquee = ({
   );
 };
 
-export default function APropos() {
+export default function APropos({ data }: AProposProps) {
   const isDark = useIsDark();
   const neonBio = useNeonHover(-8);
   const neonStat = useNeonHover(-6);
   const neonTag = buildNeonHover(-4, isDark);
-  const [data, setData] = useState<AboutData | null>(null);
   const [isAnimated, setIsAnimated] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/admin/about')
-      .then((res) => res.json())
-      .then((d) => {
-        setData({
-          bio: d.bio || '',
-          stats: Array.isArray(d.stats) ? d.stats : [],
-          techs: (d.techs || []).map((t: TechItem) => ({
-            name: t.name,
-            icon: t.icon,
-            color: t.color,
-          })),
-        });
-      })
-      .catch((_err) => {});
-  }, []);
 
   if (!data) return null;
   if (!data.bio && data.stats.length === 0 && data.techs.length === 0) return null;
@@ -140,7 +125,7 @@ export default function APropos() {
     >
       <div className="max-w-6xl mx-auto">
         {/* Section heading */}
-        <motion.div
+        <m.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -148,20 +133,20 @@ export default function APropos() {
           transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] as const }}
         >
           <h3 className="text-3xl md:text-4xl section-heading">À propos</h3>
-        </motion.div>
+        </m.div>
 
         {/* Content grid */}
         <div className="grid md:grid-cols-5 gap-12 items-start mb-24 max-w-5xl mx-auto">
           {/* Text column */}
           {paragraphs.length > 0 && (
-            <motion.div
+            <m.div
               className="md:col-span-3"
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: false, amount: 0.5 }}
               transition={{ duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
             >
-              <motion.div
+              <m.div
                 className="glass-card p-8"
                 whileHover={neonBio.whileHover}
                 transition={neonBio.transition}
@@ -178,13 +163,13 @@ export default function APropos() {
                     {paragraph}
                   </p>
                 ))}
-              </motion.div>
-            </motion.div>
+              </m.div>
+            </m.div>
           )}
 
           {/* Stats column */}
           {data.stats.length > 0 && (
-            <motion.div
+            <m.div
               className="md:col-span-2 flex flex-col gap-4"
               variants={containerVariants}
               initial="hidden"
@@ -192,7 +177,7 @@ export default function APropos() {
               viewport={{ once: false, amount: 0.5 }}
             >
               {data.stats.map((stat) => (
-                <motion.div
+                <m.div
                   key={stat.label}
                   className="glass-card p-6 text-center"
                   variants={itemVariants}
@@ -205,15 +190,15 @@ export default function APropos() {
                   <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                     {stat.label}
                   </p>
-                </motion.div>
+                </m.div>
               ))}
-            </motion.div>
+            </m.div>
           )}
         </div>
 
         {/* Infinite Tech stack Marquee */}
         {data.techs.length > 0 && (
-          <motion.div
+          <m.div
             className="w-full relative py-12"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -249,7 +234,7 @@ export default function APropos() {
                 <TechMarquee items={row2} reverse={true} isDark={isDark} />
               </div>
             ) : (
-              <motion.div
+              <m.div
                 className="flex flex-wrap justify-center gap-3"
                 variants={containerVariants}
                 initial="hidden"
@@ -257,9 +242,9 @@ export default function APropos() {
                 viewport={{ once: false, amount: 0.2 }}
               >
                 {data.techs.map((tech, i) => renderTechTag(tech, i, isDark, neonTag))}
-              </motion.div>
+              </m.div>
             )}
-          </motion.div>
+          </m.div>
         )}
       </div>
     </section>

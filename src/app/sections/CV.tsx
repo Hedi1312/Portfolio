@@ -1,27 +1,20 @@
 'use client';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
-import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
+import { AnimatePresence, m } from 'framer-motion';
 import { FiEye, FiDownload, FiX, FiFileText } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';
 import { useNeonHover } from '@/hooks/useNeonHover';
 
-export default function CV() {
-  const [cvUrl, setCvUrl] = useState('/cv/CV_OKBA_Hedi.pdf');
+interface CVProps {
+  initialUrl: string | null;
+}
+
+export default function CV({ initialUrl }: CVProps) {
+  const cvUrl = initialUrl || '/cv/CV_OKBA_Hedi.pdf';
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const neonHover = useNeonHover(-8);
-
-  useEffect(() => {
-    fetch('/api/admin/cv')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.url) {
-          setCvUrl(`${data.url}?t=${Date.now()}`);
-        }
-      })
-      .catch((_err) => {});
-  }, []);
 
   useLockBodyScroll(isOpen);
 
@@ -46,7 +39,7 @@ export default function CV() {
 
   return (
     <>
-      <motion.div
+      <m.div
         className="glass-card p-8 md:p-10 flex flex-col items-center justify-center text-center h-full group relative overflow-hidden"
         whileHover={neonHover.whileHover}
         transition={neonHover.transition}
@@ -88,12 +81,12 @@ export default function CV() {
             Télécharger
           </Button>
         </div>
-      </motion.div>
+      </m.div>
 
       {/* Modal */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -101,7 +94,7 @@ export default function CV() {
             className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4"
             onClick={() => setIsOpen(false)}
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -134,8 +127,8 @@ export default function CV() {
                 </a>
                 .
               </p>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

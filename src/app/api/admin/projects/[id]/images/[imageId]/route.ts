@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
+import { requireAdmin } from '@/lib/auth-guard';
+import { updateImageOrderSchema } from '@/lib/schemas/admin';
 
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string; imageId: string }> },
 ) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id, imageId } = await params;
 
@@ -39,14 +44,22 @@ export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string; imageId: string }> },
 ) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id, imageId } = await params;
     const body = await req.json();
 
+    const validation = updateImageOrderSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
+    }
+
     const image = await prisma.projectImage.update({
       where: { id: imageId, projectId: id },
       data: {
-        order: body.order,
+        order: validation.data.order,
       },
     });
 

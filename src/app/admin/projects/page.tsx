@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -869,7 +869,7 @@ export default function AdminProjectsPage() {
 
   return (
     <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -937,19 +937,19 @@ export default function AdminProjectsPage() {
             </div>
           </DndContext>
         )}
-      </motion.div>
+      </m.div>
 
       {/* ─── Form Modal ───────────────────────────── */}
       <AnimatePresence>
         {formOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setFormOpen(false)}
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -1264,8 +1264,8 @@ export default function AdminProjectsPage() {
                   {editingId ? 'Enregistrer les modifications' : 'Créer le projet'}
                 </Button>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -1289,7 +1289,7 @@ export default function AdminProjectsPage() {
       {/* Media Preview Lightbox */}
       <AnimatePresence>
         {previewMedia && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -1327,7 +1327,7 @@ export default function AdminProjectsPage() {
                 </div>
               )}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
