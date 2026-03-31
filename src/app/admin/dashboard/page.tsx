@@ -4,13 +4,13 @@ import { redirect } from 'next/navigation';
 import DashboardClient from './DashboardClient';
 
 export default async function DashboardPage() {
-  // 1. Vérification session (côté serveur, instantané via JWT/Cookie)
+  // 1. Session verification
   const session = await auth();
   if (!session) {
     redirect('/admin-login');
   }
 
-  // 2. Requêtes Base de Données ultra rapides (< 10ms) executées en parallèle
+  // 2. Parallel database queries
   const [unreadCount, projectsCount] = await Promise.all([
     prisma.contactMessage.count({
       where: { isRead: false },
@@ -20,6 +20,5 @@ export default async function DashboardPage() {
     }),
   ]);
 
-  // 3. Injection dans le Client Component
   return <DashboardClient unreadCount={unreadCount} projectsCount={projectsCount} />;
 }

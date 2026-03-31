@@ -39,7 +39,7 @@ import {
 import { AlertCircle, Monitor, Laptop, Smartphone, Tablet, BarChart3 } from 'lucide-react';
 import Image from 'next/image';
 
-// ─── Types ────────────────────────────────────────────
+// Types
 export interface AnalyticsData {
   active: { visitors: number } | null;
   stats: {
@@ -81,7 +81,7 @@ const EVENT_LABELS: Record<string, string> = {
   'contact-form-submit': 'Envoi formulaire',
 };
 
-// ─── Formatters ─────────────────────────────────────────
+// Formatters
 function formatDate(dateStr: string, period: string) {
   const d = new Date(dateStr);
   if (period === '24h') {
@@ -98,7 +98,7 @@ function formatDuration(ms: number) {
   return `${minutes}m ${secs}s`;
 }
 
-// ─── Helpers ──────────────────────────────────────────
+// Helpers
 function getCountryFlagUrl(countryCode: string) {
   if (!countryCode) return null;
   return `https://flagcdn.com/${countryCode.toLowerCase()}.svg`;
@@ -233,7 +233,7 @@ function formatLabel(
   );
 }
 
-// ─── Logo Component with Fallback ────────────────────────
+// Logo Component
 function BrandLogo({
   logoUrl,
   label: _label,
@@ -263,7 +263,7 @@ function BrandLogo({
   return <Icon className="w-4 h-4" style={{ color }} />;
 }
 
-// ─── Custom Tooltip ─────────────────────────────────────
+// Tooltip Component
 interface PayloadEntry {
   name?: string;
   value?: number | string;
@@ -312,7 +312,7 @@ function ChartTooltip({
   );
 }
 
-// ─── Component ──────────────────────────────────────────
+// Main Analytics Page Component
 export default function AnalyticsClient({
   initialData,
   initialPeriod = '7d',
@@ -320,6 +320,11 @@ export default function AnalyticsClient({
   initialData: AnalyticsData | null;
   initialPeriod?: string;
 }) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const [data, setData] = useState<AnalyticsData | null>(initialData);
   const [period, setPeriod] = useState(initialPeriod);
   const [loading, setLoading] = useState(!initialData);
@@ -327,7 +332,7 @@ export default function AnalyticsClient({
 
   const fetchData = useCallback(
     async (p: string, isInitialLoad = false) => {
-      // Si on vient de monter le composant et qu'on a déjà l'initialData pour cette période, on skip
+      // Skip if data already exists on mount
       if (isInitialLoad && initialData && p === initialPeriod) return;
 
       setLoading(true);
@@ -421,6 +426,8 @@ export default function AnalyticsClient({
       bg: 'bg-teal-500/10',
     },
   ];
+
+  if (!isMounted) return null;
 
   return (
     <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">

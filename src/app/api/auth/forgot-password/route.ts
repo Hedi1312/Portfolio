@@ -41,34 +41,30 @@ export async function POST(req: Request) {
     const { email } = validation.data;
     const admin = await prisma.admin.findUnique({ where: { email } });
 
-    // Always return success to avoid email enumeration
+    // Prevent email enumeration by always returning success
     if (!admin) {
       return NextResponse.json({ message: SUCCESS_MESSAGE });
     }
 
-    // Generate a secure token with 10-minute expiry
     const token = randomUUID();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Upsert: replace any existing token for this admin
     await prisma.passwordReset.upsert({
       where: { adminId: admin.id },
       update: { token, expiresAt },
       create: { token, expiresAt, adminId: admin.id },
     });
 
-    // Build the reset link
     const baseUrl = process.env.AUTH_URL || 'http://localhost:3000';
     const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
-    // Send the email
     const prefixe = getEmailSubjectPrefix();
     const html = await render(PasswordReset({ resetLink }));
 
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: admin.email,
-      subject: `${prefixe}Réinitialisation de ton mot de passe`,
+      subject: `${prefixe}Password Reset Request`,
       html,
     });
 

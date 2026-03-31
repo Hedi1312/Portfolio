@@ -1,9 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-guard';
 import { redirect } from 'next/navigation';
-import dynamic from 'next/dynamic';
-
-const ProjectsClient = dynamic(() => import('./ProjectsClient'), { ssr: false });
+import ProjectsClient from './ProjectsClient';
 
 export default async function AdminProjectsPage() {
   const { unauthorized } = await requireAdmin();

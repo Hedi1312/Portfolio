@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { m } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { FiPlus, FiX, FiTrash2, FiMenu } from 'react-icons/fi';
@@ -11,7 +11,7 @@ import { SKILL_ICONS } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
 import type { TechItem } from './SortableTechItem';
 
-// Lazy-load the ReorderModal
+// Lazy-load ReorderModal
 const ReorderModal = dynamic(() => import('./ReorderModal'), { ssr: false });
 
 interface StatItem {
@@ -26,6 +26,11 @@ export interface InitialAboutData {
 }
 
 export default function AboutForm({ initialData }: { initialData: InitialAboutData }) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const [bio, setBio] = useState(initialData.bio || '');
   const [stats, setStats] = useState<StatItem[]>(
     Array.isArray(initialData.stats) ? initialData.stats : [],
@@ -41,17 +46,17 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
   const { toast, showToast, hideToast } = useToast();
   const isDark = useIsDark();
 
-  // ─── Modals ──────────────────────────────────────
+  // Modals state
   const [showReorderModal, setShowReorderModal] = useState(false);
   const [deleteStatIndex, setDeleteStatIndex] = useState<number | null>(null);
   const [deleteTechIndex, setDeleteTechIndex] = useState<number | null>(null);
 
-  // ─── Skill autocomplete ──────────────────────────
+  // Skill autocomplete state
   const [skillInput, setSkillInput] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
-  // ─── Skill autocomplete logic ────────────────────
+  // Skill autocomplete logic
   const handleSkillInputChange = (value: string) => {
     setSkillInput(value);
     const search = value.toLowerCase().trim();
@@ -106,7 +111,7 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
     setSelectedIndex(-1);
   };
 
-  // ─── Stats management ───────────────────────────
+  // Stats management
   const addStat = () => {
     setStats((prev) => [...prev, { value: '', label: '' }]);
     showToast('success', 'Nouvelle statistique ajoutée.');
@@ -116,7 +121,7 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
     setStats((prev) => prev.map((s, i) => (i === index ? { ...s, [field]: val } : s)));
   };
 
-  // ─── Save ────────────────────────────────────────
+  // Persistence logic
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -138,11 +143,12 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
   const inputClasses =
     'w-full rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 px-4 py-2.5 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors';
 
+  if (!isMounted) return null;
+
   return (
     <>
       <ToastContainer toast={toast} onClose={hideToast} />
 
-      {/* ─── Delete Stat Confirmation ──────────────── */}
       <ConfirmModal
         isOpen={deleteStatIndex !== null}
         title="Supprimer la statistique"
@@ -163,7 +169,6 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
         onCancel={() => setDeleteStatIndex(null)}
       />
 
-      {/* ─── Delete Tech Confirmation ─────────────── */}
       <ConfirmModal
         isOpen={deleteTechIndex !== null}
         title="Supprimer la technologie"
@@ -183,7 +188,6 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
         onCancel={() => setDeleteTechIndex(null)}
       />
 
-      {/* ─── Reorder Modal ────────────────────────── */}
       <ReorderModal
         isOpen={showReorderModal}
         techs={techs}
@@ -203,7 +207,6 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
         className="mx-auto max-w-7xl w-full"
       >
         <div className="space-y-6">
-          {/* ─── Bio ──────────────────────────────── */}
           <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 md:p-8 shadow-sm">
             <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-4">
               Présentation
@@ -221,7 +224,6 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
             />
           </div>
 
-          {/* ─── Stats ────────────────────────────── */}
           <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 md:p-8 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Statistiques</h2>
@@ -276,7 +278,6 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
             )}
           </div>
 
-          {/* ─── Technologies ──────────────────────── */}
           <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 md:p-8 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Technologies</h2>
@@ -294,7 +295,6 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
               )}
             </div>
 
-            {/* Autocomplete input */}
             <div className="relative mb-4">
               <input
                 type="text"
@@ -358,7 +358,6 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
               </p>
             </div>
 
-            {/* Techs display */}
             {techs.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {techs.map((tech, i) => {
@@ -400,7 +399,6 @@ export default function AboutForm({ initialData }: { initialData: InitialAboutDa
             )}
           </div>
 
-          {/* ─── Save button ──────────────────────── */}
           <div className="flex justify-end">
             <Button onClick={handleSave} isLoading={saving} loadingText="Enregistrement...">
               Enregistrer les modifications

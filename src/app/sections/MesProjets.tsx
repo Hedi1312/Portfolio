@@ -70,11 +70,10 @@ export default function MesProjets({ projects }: MesProjetsProps) {
         )}
       </AnimatePresence>
 
-      {/* Subtle background gradient */}
+      {/* Background gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,213,190,0.05)_0%,transparent_50%)]" />
 
       <div className="relative max-w-6xl mx-auto">
-        {/* Section heading */}
         <m.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
@@ -85,7 +84,6 @@ export default function MesProjets({ projects }: MesProjetsProps) {
           <h3 className="text-3xl md:text-4xl section-heading">Mes Projets</h3>
         </m.div>
 
-        {/* Cards grid */}
         <m.div
           className="grid md:grid-cols-3 gap-6"
           variants={containerVariants}
@@ -139,12 +137,7 @@ export default function MesProjets({ projects }: MesProjetsProps) {
                       />
                     ))}
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.4)_0%,transparent_60%)] dark:bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1)_0%,transparent_60%)] z-10" />
-                  {/* Decorative elements */}
-                  <div className="absolute top-4 right-4 w-12 h-12 rounded-full border border-black/10 dark:border-white/20 group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute bottom-4 left-4 w-8 h-8 rounded-lg border border-black/10 dark:border-white/15 rotate-45 group-hover:rotate-90 transition-transform duration-700" />
                 </div>
-
-                {/* Card content */}
                 <div className="p-6 flex flex-col grow">
                   <h4 className="text-xl font-bold mb-3 font-(family-name:--font-space-grotesk) group-hover:text-brand-400 transition-colors duration-300 wrap-break-word line-clamp-2">
                     {project.title}
@@ -153,7 +146,7 @@ export default function MesProjets({ projects }: MesProjetsProps) {
                     {project.description}
                   </p>
 
-                  {/* Skills with icons */}
+                  {/* Tech stack */}
                   {project.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-5">
                       {project.skills.map((skill: Skill, skillIndex: number) => {

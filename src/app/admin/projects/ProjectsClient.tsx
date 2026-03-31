@@ -49,7 +49,7 @@ import { directUploadToCloudinary } from '@/lib/cloudinary-client';
 import type { Modifier } from '@dnd-kit/core';
 import { FolderKanban } from 'lucide-react';
 
-// Custom modifiers (inline to avoid @dnd-kit/modifiers Docker resolution issues)
+// Custom modifiers for dnd-kit
 const restrictToVerticalAxis: Modifier = ({ transform }) => ({
   ...transform,
   x: 0,
@@ -72,7 +72,7 @@ const restrictToParentElement: Modifier = ({ containerNodeRect, draggingNodeRect
   };
 };
 
-// ─── Zod Schema ──────────────────────────────────────
+// Validation Schema
 const projectSchema = z.object({
   title: z.string().min(1, 'Le titre est requis'),
   description: z.string().min(1, 'La description est requise'),
@@ -83,7 +83,7 @@ const projectSchema = z.object({
   skills: z.array(z.any()),
 });
 
-// ─── Types ───────────────────────────────────────────
+// Types
 interface ProjectImage {
   id: string;
   url: string;
@@ -112,7 +112,7 @@ interface Project {
   createdAt: string;
 }
 
-// ─── Sortable Item Component ──────────────────────────
+// Sortable Project Item
 function SortableProjectItem({
   project,
   idx,
@@ -152,7 +152,7 @@ function SortableProjectItem({
       } ${isDragging ? 'shadow-2xl ring-2 ring-brand-500/50 z-50 relative' : ''}`}
     >
       <div className="flex items-start justify-between gap-4">
-        {/* Visual Drag Handle */}
+        {/* Drag Handle */}
         <div className="mt-1 text-neutral-400 hover:text-brand-500 p-1 shrink-0 opacity-50 hover:opacity-100 transition-opacity">
           <FiMenu size={20} />
         </div>
@@ -170,7 +170,7 @@ function SortableProjectItem({
             {project.description}
           </p>
 
-          {/* Skills tags */}
+          {/* Tech list */}
           {project.skills.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-3">
               {project.skills.map((skill) => {
@@ -265,7 +265,7 @@ function SortableProjectItem({
   );
 }
 
-// ─── Image Sortable Component ──────────────────────────
+// Sortable Image Item
 function SortableImageItem({
   img,
   idx,
@@ -374,7 +374,7 @@ function SortableImageItem({
   );
 }
 
-// ─── Gradient presets ────────────────────────────────
+// UI Presets
 const GRADIENTS = [
   { label: 'Brand', value: 'from-brand-400/20 to-brand-600/20' },
   { label: 'Violet', value: 'from-purple-400/20 to-pink-600/20' },
@@ -385,7 +385,7 @@ const GRADIENTS = [
   { label: 'Indigo', value: 'from-indigo-400/20 to-violet-600/20' },
 ];
 
-// ─── Default form ────────────────────────────────────
+// Form defaults
 const defaultForm = {
   title: '',
   description: '',
@@ -397,6 +397,11 @@ const defaultForm = {
 };
 
 export default function ProjectsClient({ initialProjects }: { initialProjects: Project[] }) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [formOpen, setFormOpen] = useState(false);
@@ -428,7 +433,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
     setProjects(initialProjects);
   }, [initialProjects]);
 
-  // ─── Skill autocomplete ──────────────────────────
+  // Autocomplete logic
   const handleSkillInputChange = (value: string) => {
     setSkillInput(value);
     const search = value.toLowerCase().trim();
@@ -493,7 +498,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
     showToast('success', `"${removedName}" retiré.`);
   };
 
-  // ─── Open edit form ──────────────────────────────
+  // Form handlers
   const openEdit = (project: Project) => {
     setFormErrors({});
     setEditingId(project.id);
@@ -584,7 +589,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
     }
   };
 
-  // ─── Reorder ─────────────────────────────────────
+  // Order management
   const moveProject = async (id: string, direction: 'up' | 'down') => {
     const idx = projects.findIndex((p) => p.id === id);
     if ((direction === 'up' && idx === 0) || (direction === 'down' && idx === projects.length - 1))
@@ -603,7 +608,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
     ]);
   };
 
-  // ─── Drag and Drop ───────────────────────────────
+  // Drag & Drop handlers─
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -673,7 +678,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
     await updateProjectAction(project.id, { ...project, visible: !project.visible });
   };
 
-  // ─── Image Management ─────────────────────────────
+  // Media management
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !editingId) return;
 
@@ -815,6 +820,8 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
   // ─── Render ──────────────────────────────────────
   const inputClasses =
     'w-full rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 px-4 py-2.5 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors';
+
+  if (!isMounted) return null;
 
   return (
     <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">

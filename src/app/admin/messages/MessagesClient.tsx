@@ -272,7 +272,7 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Liste des contacts */}
+            {/* Contact list */}
             <div className="w-full lg:w-2/5 space-y-3">
               {contacts.map((contact) => {
                 const unread = getContactUnread(contact);
@@ -364,7 +364,7 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
               })}
             </div>
 
-            {/* Détail de la conversation */}
+            {/* Conversation detail */}
             <div className="w-full lg:w-3/5">
               <AnimatePresence mode="wait">
                 {selected ? (
@@ -420,7 +420,7 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
                               </div>
                             )}
 
-                            {/* Message entrant */}
+                            {/* Incoming message */}
                             <div className="flex gap-3">
                               <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center text-xs font-bold text-neutral-600 dark:text-neutral-300 shrink-0 mt-0.5">
                                 {selected.name.charAt(0).toUpperCase()}
@@ -441,7 +441,7 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
                               </div>
                             </div>
 
-                            {/* Réponses */}
+                            {/* Replies */}
                             {msg.replies.map((reply) => (
                               <div key={reply.id} className="flex gap-3 mt-4 justify-end">
                                 <div className="flex-1 min-w-0 max-w-[85%]">
@@ -468,7 +468,7 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
                       })}
                     </div>
 
-                    {/* Formulaire de réponse */}
+                    {/* Reply form */}
                     <div className="border-t border-neutral-200 dark:border-neutral-700 p-6">
                       <textarea
                         value={replyText}

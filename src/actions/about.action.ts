@@ -11,11 +11,10 @@ export type AboutState = {
   error?: string;
 };
 
-// formData is used if we passed actual FormData, but since we are handling a custom array of objects (techs, stats),
-// we will receive a direct payload from the client action.
+// Direct payload from client action
 export async function updateAboutAction(payload: Record<string, unknown>): Promise<AboutState> {
   const { unauthorized } = await requireAdmin();
-  if (unauthorized) return { error: 'Non autorisé' };
+  if (unauthorized) return { error: 'Unauthorized' };
 
   try {
     const validation = updateAboutSchema.safeParse(payload);
@@ -33,7 +32,7 @@ export async function updateAboutAction(payload: Record<string, unknown>): Promi
       });
     }
 
-    // Atomic: delete old techs + recreate in a single transaction
+    // Atomic tech replacement
     await prisma.$transaction(async (tx) => {
       await tx.aboutMeTech.deleteMany({ where: { aboutMeId: aboutMe!.id } });
 
@@ -55,13 +54,12 @@ export async function updateAboutAction(payload: Record<string, unknown>): Promi
       });
     });
 
-    // Revalidate the about page so that the next request gets fresh data
     revalidatePath('/admin/about');
-    revalidatePath('/'); // Revalidate public home page since it uses About info too
+    revalidatePath('/');
 
     return { success: true };
   } catch (error) {
     console.error('[actions/about]', error);
-    return { error: 'Erreur serveur lors de la sauvegarde.' };
+    return { error: 'Server error during save.' };
   }
 }

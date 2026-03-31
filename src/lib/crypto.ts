@@ -1,11 +1,6 @@
 /**
- * AES-256-GCM encryption for sensitive data at rest (OTP secrets).
- *
- * Each encryption produces a unique IV, making identical plaintexts
- * yield different ciphertexts. The output format is:
- *   iv:authTag:ciphertext  (all hex-encoded)
- *
- * Requires OTP_ENCRYPTION_KEY env var (64-char hex = 256-bit key).
+ * AES-256-GCM encryption for OTP secrets.
+ * Uses unique IV per encryption. Format: iv:authTag:ciphertext (hex).
  */
 
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';

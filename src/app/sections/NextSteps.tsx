@@ -17,7 +17,6 @@ export default function NextSteps({ cvUrl }: NextStepsProps) {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,213,190,0.06)_0%,transparent_60%)] pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto">
-        {/* Section heading — same pattern as APropos & MesProjets */}
         <m.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}

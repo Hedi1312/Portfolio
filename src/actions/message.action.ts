@@ -11,7 +11,6 @@ import { revalidatePath } from 'next/cache';
 
 const idSchema = z.string().cuid('Invalid ID format');
 
-// Allowed MIME types for attachments
 const ALLOWED_FILE_TYPES = [
   'image/jpeg',
   'image/png',
@@ -96,14 +95,13 @@ export async function deleteContactAction(contactId: string): Promise<ActionResu
         });
       });
 
-      // Delete Cloudinary files
+      // Cleanup Cloudinary assets
       await Promise.allSettled(
         publicIdsToDelete.map((public_id) => deleteFromCloudinary(public_id)),
       );
     }
 
-    // Remove from DB cascade
-    await prisma.contact.delete({ where: { id: contactId } });
+    // Cascade delete handles message/reply removal in DB
 
     revalidatePath('/admin/messages');
     return { success: true };
@@ -142,7 +140,7 @@ export async function sendReplyAction(
       return { error: 'Le message est vide.' };
     }
 
-    // Save attachments to Cloudinary
+    // Cloudinary upload handling
     const emailAttachments = [];
     const dbAttachments: { filename: string; path: string; public_id?: string }[] = [];
     const allFiles = formData.getAll('files') as File[];
@@ -164,7 +162,7 @@ export async function sendReplyAction(
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
 
-          // Magic Bytes Validation
+          // Magic Bytes Validation for A05: Injection mitigation
           const header = buffer.toString('hex', 0, 4).toUpperCase();
           const isJpeg = header.startsWith('FFD8FF');
           const isPng = header === '89504E47';
@@ -234,6 +232,6 @@ export async function sendReplyAction(
     return { success: true, data: savedReply };
   } catch (error) {
     console.error('[actions/message:sendReply]', error);
-    return { error: "Erreur serveur lors de l'envoi." };
+    return { error: 'Server error during submission.' };
   }
 }

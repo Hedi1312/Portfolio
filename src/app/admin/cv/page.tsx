@@ -1,9 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-guard';
 import { redirect } from 'next/navigation';
-import dynamic from 'next/dynamic';
-
-const CvClient = dynamic(() => import('./CvClient'), { ssr: false });
+import CvClient from './CvClient';
 
 export default async function AdminCVPage() {
   const { unauthorized } = await requireAdmin();

@@ -14,6 +14,11 @@ export default function CvClient({
 }: {
   initialCv: { url: string; size: string; name: string } | null;
 }) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [fileSize, setFileSize] = useState<string | null>(null);
@@ -136,7 +141,7 @@ export default function CvClient({
       });
       const sizeStr = (modifiedPdfBytes.length / 1024).toFixed(1) + ' Ko';
 
-      // 2. Direct Upload vers Cloudinary
+      // 2. Direct Upload to Cloudinary
       const uploaded = await directUploadToCloudinary(modifiedFile, {
         subfolder: 'cv',
         resource_type: 'image',
@@ -190,6 +195,8 @@ export default function CvClient({
     }
   };
 
+  if (!isMounted) return null;
+
   return (
     <>
       <ToastContainer toast={toast} onClose={hideToast} />
@@ -218,7 +225,7 @@ export default function CvClient({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full relative z-10">
-            {/* Colonne de gauche : Upload */}
+            {/* Upload section */}
             <div className="lg:col-span-5 flex flex-col gap-6">
               <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow">
                 <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6">
@@ -278,7 +285,7 @@ export default function CvClient({
               </div>
             </div>
 
-            {/* Colonne de droite : Aperçu actuel */}
+            {/* Preview section */}
             <div className="lg:col-span-7 flex flex-col gap-6">
               <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
                 <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6">

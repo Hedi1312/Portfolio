@@ -1,9 +1,8 @@
 import { generateSecret, generateURI, verifySync } from 'otplib';
 
 /**
- * Mise en place d'un objet authenticator local pour correspondre à l'usage
- * attendu par l'application tout en utilisant les exports fonctionnels
- * de otplib v13 (compatibles ESM/Turbopack).
+ * Locally mapped authenticator to preserve legacy signatures
+ * while using ESM-compatible functional exports from otplib v13.
  */
 const authenticator = {
   verify: (params: { token: string; secret: string; window?: number }) => {

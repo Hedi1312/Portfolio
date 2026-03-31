@@ -17,11 +17,11 @@ export type ActionResult = {
   data?: unknown;
 };
 
-// ─── Projects CRUD ──────────────────────────────────────────
+// Projects CRUD
 
 export async function createProjectAction(payload: Record<string, unknown>): Promise<ActionResult> {
   const { unauthorized } = await requireAdmin();
-  if (unauthorized) return { error: 'Non autorisé' };
+  if (unauthorized) return { error: 'Unauthorized' };
 
   try {
     const validation = createProjectSchema.safeParse(payload);
@@ -59,7 +59,7 @@ export async function createProjectAction(payload: Record<string, unknown>): Pro
     return { success: true, data: project };
   } catch (error) {
     console.error('[actions/project:create]', error);
-    return { error: 'Erreur serveur.' };
+    return { error: 'Server error.' };
   }
 }
 
@@ -68,7 +68,7 @@ export async function updateProjectAction(
   payload: Record<string, unknown>,
 ): Promise<ActionResult> {
   const { unauthorized } = await requireAdmin();
-  if (unauthorized) return { error: 'Non autorisé' };
+  if (unauthorized) return { error: 'Unauthorized' };
 
   try {
     const validation = updateProjectSchema.safeParse(payload);
@@ -78,7 +78,7 @@ export async function updateProjectAction(
 
     const { title, description, gradient, link, github, visible, order, skills } = validation.data;
 
-    // Atomic: delete old skills + recreate in a single transaction
+    // Atomic skill replacement
     const project = await prisma.$transaction(async (tx) => {
       await tx.projectSkill.deleteMany({ where: { projectId: id } });
 
@@ -109,13 +109,13 @@ export async function updateProjectAction(
     return { success: true, data: project };
   } catch (error) {
     console.error('[actions/project:update]', error);
-    return { error: 'Erreur serveur.' };
+    return { error: 'Server error.' };
   }
 }
 
 export async function deleteProjectAction(id: string): Promise<ActionResult> {
   const { unauthorized } = await requireAdmin();
-  if (unauthorized) return { error: 'Non autorisé' };
+  if (unauthorized) return { error: 'Unauthorized' };
 
   try {
     const project = await prisma.project.findUnique({
@@ -123,7 +123,7 @@ export async function deleteProjectAction(id: string): Promise<ActionResult> {
       include: { images: true },
     });
 
-    if (!project) return { error: 'Projet introuvable.' };
+    if (!project) return { error: 'Project not found.' };
 
     if (project.images.length > 0) {
       await Promise.all(
@@ -140,22 +140,22 @@ export async function deleteProjectAction(id: string): Promise<ActionResult> {
     return { success: true };
   } catch (error) {
     console.error('[actions/project:delete]', error);
-    return { error: 'Erreur lors de la suppression.' };
+    return { error: 'Server error.' };
   }
 }
 
-// ─── Project Images ────────────────────────────────────────
+// Project Images
 
 export async function addProjectImagesAction(
   projectId: string,
   payload: Record<string, unknown>,
 ): Promise<ActionResult> {
   const { unauthorized } = await requireAdmin();
-  if (unauthorized) return { error: 'Non autorisé' };
+  if (unauthorized) return { error: 'Unauthorized' };
 
   try {
     const project = await prisma.project.findUnique({ where: { id: projectId } });
-    if (!project) return { error: 'Projet introuvable' };
+    if (!project) return { error: 'Project not found' };
 
     const validation = addProjectImagesSchema.safeParse(payload);
     if (!validation.success) {
@@ -187,7 +187,7 @@ export async function addProjectImagesAction(
     return { success: true, data: uploadedImages };
   } catch (error) {
     console.error('[actions/project:addImages]', error);
-    return { error: 'Erreur serveur.' };
+    return { error: 'Server error.' };
   }
 }
 
@@ -196,14 +196,14 @@ export async function deleteProjectImageAction(
   imageId: string,
 ): Promise<ActionResult> {
   const { unauthorized } = await requireAdmin();
-  if (unauthorized) return { error: 'Non autorisé' };
+  if (unauthorized) return { error: 'Unauthorized' };
 
   try {
     const image = await prisma.projectImage.findUnique({
       where: { id: imageId, projectId },
     });
 
-    if (!image) return { error: 'Image introuvable' };
+    if (!image) return { error: 'Image not found' };
 
     const isVideo = image.url.match(/\.(mp4|webm|mov|avi|mkv)$/i);
     const resourceType = isVideo ? 'video' : 'image';
@@ -218,7 +218,7 @@ export async function deleteProjectImageAction(
     return { success: true };
   } catch (error) {
     console.error('[actions/project:deleteImage]', error);
-    return { error: 'Erreur serveur.' };
+    return { error: 'Server error.' };
   }
 }
 
@@ -228,7 +228,7 @@ export async function updateProjectImageOrderAction(
   order: number,
 ): Promise<ActionResult> {
   const { unauthorized } = await requireAdmin();
-  if (unauthorized) return { error: 'Non autorisé' };
+  if (unauthorized) return { error: 'Unauthorized' };
 
   try {
     const validation = updateImageOrderSchema.safeParse({ order });
@@ -239,11 +239,10 @@ export async function updateProjectImageOrderAction(
       data: { order: validation.data.order },
     });
 
-    // We do not strictly revalidatePath here because bulk dragging is optimistic and would spam revalidations.
-    // Revalidation can be done by the client calling fetchProjects or router.refresh.
+    // Skip revalidatePath to avoid spamming during bulk optimistic updates
     return { success: true, data: image };
   } catch (error) {
     console.error('[actions/project:updateImageOrder]', error);
-    return { error: 'Erreur serveur.' };
+    return { error: 'Server error.' };
   }
 }

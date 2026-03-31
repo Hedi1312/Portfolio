@@ -35,15 +35,13 @@ export default function Accueil() {
       id="home"
       className="relative flex flex-col items-center justify-center text-center min-h-screen px-6 overflow-hidden bg-neutral-50 dark:bg-[#0a0f1a] text-neutral-900 dark:text-white transition-colors duration-500"
     >
-      {/* Animated grid background */}
+      {/* Grid background */}
       <div className="hero-grid opacity-50 dark:opacity-30" />
 
-      {/* Radial gradient overlay */}
+      {/* Gradient overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,213,190,0.15)_0%,transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(0,213,190,0.12)_0%,transparent_70%)]" />
 
-      {/* Content */}
       <div className="relative z-10 max-w-3xl">
-        {/* Badge */}
         <m.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -54,7 +52,6 @@ export default function Accueil() {
           d&apos;opportunités
         </m.div>
 
-        {/* Title */}
         <m.h1
           className="text-5xl md:text-7xl font-extrabold mb-12 font-(family-name:--font-space-grotesk) tracking-tight"
           initial={{ opacity: 0, y: -30 }}
@@ -80,7 +77,6 @@ export default function Accueil() {
           </span>
         </m.h1>
 
-        {/* Subtitle */}
         <m.p
           className="text-lg md:text-xl text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto mb-12 leading-relaxed"
           initial={{ opacity: 0, y: 20 }}
@@ -92,7 +88,6 @@ export default function Accueil() {
           élégantes.
         </m.p>
 
-        {/* CTA Button */}
         <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -119,7 +114,7 @@ export default function Accueil() {
         </m.div>
       </div>
 
-      {/* Mouse Scroll Indicator (Independent) */}
+      {/* Scroll indicator */}
       {mounted && (
         <m.div
           className="hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 hover:opacity-100 transition-opacity duration-300 cursor-pointer"
@@ -143,7 +138,6 @@ export default function Accueil() {
         </m.div>
       )}
 
-      {/* Scroll indicator (Mobile only) */}
       {mounted && (
         <m.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2 text-neutral-400 dark:text-neutral-500 md:hidden"

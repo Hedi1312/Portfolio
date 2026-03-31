@@ -82,7 +82,7 @@ export default function Contact() {
     files.forEach((f) => formData.append('files', f));
 
     try {
-      // Appel direct à la Server Action
+      // Dynamic import of Server Action
       const { submitContact } = await import('@/actions/contact.action');
       const result = await submitContact({}, formData);
 
@@ -260,7 +260,7 @@ export default function Contact() {
                     ></textarea>
                   </div>
 
-                  {/* Upload Fichiers Multiples UI */}
+                  {/* Multi-file upload UI */}
                   <div>
                     <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
                       Pièces jointes (optionnel - max 10 Mo)
@@ -286,7 +286,7 @@ export default function Contact() {
                         </div>
                       </div>
                     </div>
-                    {/* Liste des fichiers sélectionnés */}
+                    {/* Selected files list */}
                     {files.length > 0 && (
                       <div className="flex items-center gap-1.5 flex-wrap mt-2">
                         {files.map((f, i) => (

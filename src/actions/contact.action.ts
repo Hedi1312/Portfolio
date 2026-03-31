@@ -10,7 +10,7 @@ import { contactSchema } from '@/lib/schemas/contact';
 import { rateLimit } from '@/lib/rate-limit';
 import { transporter, getEmailSubjectPrefix } from '@/lib/mailer';
 
-// Rate limit: 5 contact submissions per minute per IP
+// IP rate limit: 5 submissions/min
 const limiter = rateLimit({ limit: 5, window: '1 m', prefix: 'rl:contact' });
 
 export type ContactState = {
@@ -29,7 +29,7 @@ export async function submitContact(
   const { success: rateLimitSuccess, retryAfter } = await limiter.check(ip);
 
   if (!rateLimitSuccess) {
-    return { error: `Trop de tentatives. Réessayez dans ${retryAfter}s.` };
+    return { error: `Too many attempts. Try again in ${retryAfter}s.` };
   }
 
   try {
@@ -39,14 +39,14 @@ export async function submitContact(
     const message = formData.get('message') as string;
     const honeypot = formData.get('company') as string;
 
-    if (honeypot) return { success: true };
+    if (honeypot) return { success: true }; // Silent bypass for bots
 
     const validation = contactSchema.safeParse({ name, email, subject, message });
     if (!validation.success) {
       return { error: validation.error.issues[0].message };
     }
 
-    // Handle multiple attachments - SECURITY FIX: Limit to 5 max
+    // Attachment handling with 5-file security cap
     const allFiles = formData.getAll('files') as File[];
     const files = allFiles.slice(0, 5);
     const emailAttachments = [];
@@ -77,7 +77,7 @@ export async function submitContact(
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
 
-          // SECURITY FIX: Magic Bytes Validation (A05: Injection mitigation)
+          // Magic Bytes Validation (A05: Injection mitigation)
           const header = buffer.toString('hex', 0, 4).toUpperCase();
           const isJpeg = header.startsWith('FFD8FF');
           const isPng = header === '89504E47';
@@ -87,7 +87,7 @@ export async function submitContact(
             header === '52494646' && buffer.toString('hex', 8, 12).toUpperCase() === '57454250';
 
           if (!isJpeg && !isPng && !isGif && !isPdf && !isWebp) {
-            return { error: `Le contenu du fichier "${file.name}" est corrompu ou illicite.` };
+            return { error: `File content for "${file.name}" is corrupt or illegal.` };
           }
 
           // Upload to Cloudinary
@@ -107,14 +107,12 @@ export async function submitContact(
       }
     }
 
-    // Upsert contact
     const contact = await prisma.contact.upsert({
       where: { email },
       update: { name, updatedAt: new Date() },
       create: { email, name },
     });
 
-    // Save message
     await prisma.contactMessage.create({
       data: {
         email,

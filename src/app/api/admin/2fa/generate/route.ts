@@ -35,7 +35,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
     }
 
-    // Generate secret and store it encrypted server-side
     const secret = generateOTPSecret();
 
     await prisma.admin.update({
@@ -43,7 +42,6 @@ export async function POST(req: Request) {
       data: { pendingOtpSecret: encrypt(secret) },
     });
 
-    // Create otpauth URL for the QR code (plaintext secret needed for TOTP app scanning)
     const otpauthUrl = generateOTPUri({
       label: admin.email,
       issuer: 'Portfolio Admin',

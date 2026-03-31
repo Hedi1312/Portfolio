@@ -1,9 +1,6 @@
 import { requireAdmin } from '@/lib/auth-guard';
 import { redirect } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import type { AnalyticsData } from './AnalyticsClient';
-
-const AnalyticsClient = dynamic(() => import('./AnalyticsClient'), { ssr: false });
+import AnalyticsClient, { type AnalyticsData } from './AnalyticsClient';
 import { getUmamiStatsAction } from '@/actions/analytics.action';
 
 export default async function AdminAnalyticsPage() {

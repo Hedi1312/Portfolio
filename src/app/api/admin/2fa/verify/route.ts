@@ -49,7 +49,6 @@ export async function POST(req: Request) {
 
     const { code } = validation.data;
 
-    // Retrieve the pending secret from the database (never from client)
     const admin = await prisma.admin.findUnique({
       where: { email },
       select: { pendingOtpSecret: true },
@@ -57,23 +56,20 @@ export async function POST(req: Request) {
 
     if (!admin?.pendingOtpSecret) {
       return NextResponse.json(
-        { error: 'Aucune configuration 2FA en attente. Relancez la génération.' },
+        { error: 'No pending 2FA setup found. Restart generation.' },
         { status: 400 },
       );
     }
 
-    // Decrypt and verify code with 1 step window tolerance
+    // Verify with 1-step window tolerance
     const decryptedSecret = decrypt(admin.pendingOtpSecret);
     const result = verifyOTP({ token: code, secret: decryptedSecret, window: 1 });
 
     if (!result.valid) {
-      return NextResponse.json(
-        { error: 'Le code fourni est invalide ou a expiré.' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Invalid or expired code.' }, { status: 400 });
     }
 
-    // Promote pending secret to active (already encrypted) and clear pending
+    // Activate secret
     await prisma.admin.update({
       where: { email },
       data: {

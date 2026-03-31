@@ -32,7 +32,7 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ unreadCount, projectsCount }: DashboardClientProps) {
   const router = useRouter();
-  // On hydrate directement avec les données du Server Component (0ms de lag)
+  // Hydrate from Server Component data
   const [kpi, setKpi] = useState<KpiData>({
     visitors: null,
     pageviews: null,
@@ -40,13 +40,13 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
     projects: projectsCount,
   });
 
-  // Le loader n'affecte plus que les Visitors/Pageviews
+  // Analytics-only loading state
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
 
   const fetchAnalytics = useCallback(async () => {
     setLoadingAnalytics(true);
     try {
-      // On requête JUSTE l'analytics lourd en tâche de fond
+      // Background fetch for heavy analytics data
       const analyticsRes = await fetch('/api/admin/analytics?period=7d');
 
       let visitors: number | null = null;
@@ -100,7 +100,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       icon: Mail,
       color: kpi.unread > 0 ? 'text-danger-500' : 'text-emerald-500',
       bg: kpi.unread > 0 ? 'bg-danger-500/10' : 'bg-emerald-500/10',
-      isLoading: false, // Donnée 100% back-end (Server Component)
+      isLoading: false, // Server-side data
     },
     {
       label: 'Projets',
@@ -109,7 +109,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       icon: FileText,
       color: 'text-amber-500',
       bg: 'bg-amber-500/10',
-      isLoading: false, // Donnée 100% back-end (Server Component)
+      isLoading: false, // Server-side data
     },
   ];
 
@@ -165,7 +165,6 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
   return (
     <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
       <div className="mx-auto max-w-7xl w-full">
-        {/* Header */}
         <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -189,7 +188,6 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
           </button>
         </m.div>
 
-        {/* KPI Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {kpis.map((item, i) => {
             const Icon = item.icon;
@@ -223,7 +221,6 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
           })}
         </div>
 
-        {/* Quick Actions */}
         <m.h2
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

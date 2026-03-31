@@ -79,7 +79,7 @@ const TechMarquee = ({
   isDark: boolean;
 }) => {
   const neonTag = buildNeonHover(-4, isDark);
-  // Duplicated to fill the viewport for seamless infinite scroll (2x is sufficient)
+  // Duplicate items for seamless infinite scroll
   const multipliedItems = [...items, ...items];
 
   const halfBlock = (
@@ -113,7 +113,7 @@ export default function APropos({ data }: AProposProps) {
   // Split bio into paragraphs
   const paragraphs = data.bio.split('\n\n').filter((p) => p.trim());
 
-  // Split technos into two rows for marquee
+  // Split techs into two rows for marquee
   const halfLength = Math.ceil(data.techs.length / 2);
   const row1 = data.techs.slice(0, halfLength);
   const row2 = data.techs.slice(halfLength);
@@ -124,7 +124,6 @@ export default function APropos({ data }: AProposProps) {
       className="relative px-6 py-16 md:py-24 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-500 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto">
-        {/* Section heading */}
         <m.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
@@ -135,9 +134,7 @@ export default function APropos({ data }: AProposProps) {
           <h3 className="text-3xl md:text-4xl section-heading">À propos</h3>
         </m.div>
 
-        {/* Content grid */}
         <div className="grid md:grid-cols-5 gap-12 items-start mb-24 max-w-5xl mx-auto">
-          {/* Text column */}
           {paragraphs.length > 0 && (
             <m.div
               className="md:col-span-3"
@@ -167,7 +164,6 @@ export default function APropos({ data }: AProposProps) {
             </m.div>
           )}
 
-          {/* Stats column */}
           {data.stats.length > 0 && (
             <m.div
               className="md:col-span-2 flex flex-col gap-4"
@@ -196,7 +192,6 @@ export default function APropos({ data }: AProposProps) {
           )}
         </div>
 
-        {/* Infinite Tech stack Marquee */}
         {data.techs.length > 0 && (
           <m.div
             className="w-full relative py-12"

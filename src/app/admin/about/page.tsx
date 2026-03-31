@@ -1,8 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth-guard';
 import { redirect } from 'next/navigation';
-import dynamic from 'next/dynamic';
-const AboutForm = dynamic(() => import('./AboutForm'), { ssr: false });
+import AboutForm from './AboutForm';
 import Link from 'next/link';
 import { FiArrowLeft } from 'react-icons/fi';
 import { UserCircle } from 'lucide-react';

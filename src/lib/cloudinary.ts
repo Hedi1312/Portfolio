@@ -18,7 +18,7 @@ export async function uploadToCloudinary(
     const baseFolder = process.env.CLOUDINARY_FOLDER || 'development';
     const folder = subfolder ? `${baseFolder}/${subfolder}` : baseFolder;
 
-    // Force image mode to generate preview and retain PDF format
+    // Use 'image' type for PDFs to enable Cloudinary's document preview features
     const isPdf = filename.toLowerCase().endsWith('.pdf');
     const resource_type = isPdf ? 'image' : 'auto';
 
@@ -27,7 +27,6 @@ export async function uploadToCloudinary(
         {
           folder,
           resource_type: resource_type,
-          // Optional: force name for .pdf in Cloudinary
           public_id: isPdf ? path.parse(filename).name : undefined,
           invalidate: true,
         },

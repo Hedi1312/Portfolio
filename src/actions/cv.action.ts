@@ -24,7 +24,7 @@ export async function uploadCvAction(payload: Record<string, unknown>): Promise<
 
     const { url, public_id, resource_type, size } = validation.data;
 
-    // Handle old CV deletion (atomicity guarantee on Cloudinary side might be weak, but we do best effort)
+    // Best-effort cleanup of old CVs on Cloudinary
     const oldCvs = await prisma.cv.findMany();
     for (const old of oldCvs) {
       if (old.public_id !== public_id) {
@@ -32,7 +32,7 @@ export async function uploadCvAction(payload: Record<string, unknown>): Promise<
       }
     }
 
-    // Replace the record
+    // Atomically replace record
     await prisma.$transaction(async (tx) => {
       await tx.cv.deleteMany({});
       await tx.cv.create({
