@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma migrate deploy && next build",
+    "build": "prisma generate && DATABASE_URL=${DIRECT_DATABASE_URL:-$DATABASE_URL} prisma migrate deploy && next build",
     "setup": "npm install && npm run pull:env && docker compose up -d && npm run db:init",
     "db:init": "npm run db:generate && npm run db:migrate && npm run db:seed",
     "refresh": "npm run pull:env && npx prisma generate && npm run db:migrate && npm run db:generate",
