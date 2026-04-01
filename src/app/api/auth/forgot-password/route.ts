@@ -3,27 +3,33 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import nodemailer from 'nodemailer';
 import { render } from '@react-email/components';
 
 import { prisma } from '@/lib/prisma';
 import { resetSchema } from '@/lib/schemas/auth';
 import { PasswordReset } from '@/emails/PasswordReset';
+import { authRateLimit } from '@/lib/rate-limit';
+import { transporter, getEmailSubjectPrefix } from '@/lib/mailer';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// Rate limit: 5 attempts per 15 minutes per IP
+const limiter = authRateLimit({ limit: 5, window: '15 m', prefix: 'rl:forgot-pw' });
 
 const SUCCESS_MESSAGE =
   'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.';
 
 export async function POST(req: Request) {
+  // IP Rate limiting
+  const forwarded = req.headers.get('x-forwarded-for');
+  const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
+  const { success, retryAfter } = await limiter.check(ip);
+
+  if (!success) {
+    return NextResponse.json(
+      { error: `Trop de tentatives. Réessayez dans ${retryAfter}s.` },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    );
+  }
+
   try {
     const body = await req.json();
     const validation = resetSchema.safeParse(body);
@@ -35,48 +41,36 @@ export async function POST(req: Request) {
     const { email } = validation.data;
     const admin = await prisma.admin.findUnique({ where: { email } });
 
-    // Always return success to avoid email enumeration
+    // Prevent email enumeration by always returning success
     if (!admin) {
       return NextResponse.json({ message: SUCCESS_MESSAGE });
     }
 
-    // Generate a secure token with 1-hour expiry
     const token = randomUUID();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Upsert: replace any existing token for this admin
     await prisma.passwordReset.upsert({
       where: { adminId: admin.id },
       update: { token, expiresAt },
       create: { token, expiresAt, adminId: admin.id },
     });
 
-    // Build the reset link
     const baseUrl = process.env.AUTH_URL || 'http://localhost:3000';
     const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
-    // Send the email
-    let prefixe = '';
-    if (process.env.VERCEL_ENV === 'preview') {
-      prefixe = '[PREVIEW] ';
-    } else if (!process.env.VERCEL_ENV) {
-      prefixe = '[LOCAL] ';
-    }
-
+    const prefixe = getEmailSubjectPrefix();
     const html = await render(PasswordReset({ resetLink }));
 
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: admin.email,
-      subject: `${prefixe}Réinitialisation de ton mot de passe`,
+      subject: `${prefixe}Password Reset Request`,
       html,
     });
 
-    console.log(`🔒 [RESET] Email de réinitialisation envoyé à : ${admin.email}`);
-
     return NextResponse.json({ message: SUCCESS_MESSAGE });
   } catch (error) {
-    console.error('Erreur forgot-password:', error);
+    console.error('[api/auth/forgot-password]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

@@ -1,10 +1,12 @@
 'use client';
-import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
-import { contactSchema } from '@/lib/schemas/contact';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useState } from 'react';
-import { FiMail, FiX, FiSend, FiCheckCircle, FiPaperclip } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import { useNeonHover } from '@/hooks/useNeonHover';
+import { contactSchema } from '@/lib/schemas/contact';
+import { AnimatePresence, m } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { FiCheckCircle, FiMail, FiPaperclip, FiSend, FiX } from 'react-icons/fi';
 
 export default function Contact() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,7 +16,12 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [fileError, setFileError] = useState('');
+  const [mounted, setMounted] = useState(false);
+  const neonHover = useNeonHover(-8);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useLockBodyScroll(isOpen);
 
@@ -40,21 +47,21 @@ export default function Contact() {
     if (selectedFiles) {
       const filesArray = Array.from(selectedFiles);
       if (filesArray.length > MAX_FILES) {
-        setFileError(`Maximum ${MAX_FILES} fichiers autorisés.`);
+        setError('Veuillez sélectionner uniquement des fichiers .pdf, .doc ou .docx');
         setFiles([]);
         e.target.value = '';
         return;
       }
       const tooBig = filesArray.filter((f) => f.size > MAX_FILE_SIZE);
       if (tooBig.length > 0) {
-        setFileError(
+        setError(
           `Fichier(s) trop volumineux (max 10 Mo) : ${tooBig.map((f) => f.name).join(', ')}`,
         );
         setFiles([]);
         e.target.value = '';
         return;
       }
-      setFileError('');
+      setError('');
       setFiles(filesArray);
     }
   };
@@ -81,12 +88,11 @@ export default function Contact() {
     files.forEach((f) => formData.append('files', f));
 
     try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        body: formData,
-      });
+      // Dynamic import of Server Action
+      const { submitContact } = await import('@/actions/contact.action');
+      const result = await submitContact({}, formData);
 
-      if (res.ok) {
+      if (result.success) {
         setSubmitted(true);
         setForm({ name: '', email: '', subject: '', message: '' });
         setHoneypot('');
@@ -95,9 +101,11 @@ export default function Contact() {
           window.umami.track('contact-form-submit');
         setTimeout(() => setIsOpen(false), 2500);
       } else {
-        const data = await res.json();
-        alert(data.error || "Erreur lors de l'envoi du message.");
+        setError(result.error || "Erreur lors de l'envoi du message.");
       }
+    } catch (err) {
+      console.error(err);
+      setError("Erreur inattendue lors de l'envoi du message.");
     } finally {
       setIsSubmitting(false);
     }
@@ -107,248 +115,254 @@ export default function Contact() {
     'w-full p-3.5 rounded-xl bg-neutral-50/50 dark:bg-neutral-800/50 border border-neutral-200/80 dark:border-neutral-700/50 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:outline-none transition-all duration-200';
 
   return (
-    <section
-      id="contact"
-      className="relative px-6 py-24 md:py-32 bg-neutral-50 dark:bg-[#0a0f1a] text-center text-neutral-900 dark:text-white transition-colors duration-500"
-    >
-      {/* Background accent */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,213,190,0.06)_0%,transparent_60%)]" />
+    <>
+      <m.div
+        className="glass-card p-8 md:p-12 text-center h-full flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer"
+        whileHover={neonHover.whileHover}
+        transition={neonHover.transition}
+        style={{ willChange: 'transform' }}
+        onClick={() => {
+          setSubmitted(false);
+          setIsOpen(true);
+        }}
+      >
+        <div className="w-16 h-16 mb-6 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-900 dark:text-white transition-colors mx-auto">
+          <FiMail size={28} />
+        </div>
 
-      <div className="relative max-w-2xl mx-auto">
-        {/* Section heading */}
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h3 className="text-3xl md:text-4xl section-heading">Contact</h3>
-        </motion.div>
+        <h4 className="text-3xl font-bold mb-3 font-(family-name:--font-space-grotesk) text-neutral-900 dark:text-white text-center">
+          Discutons de ton projet
+        </h4>
 
-        <motion.p
-          className="text-neutral-500 dark:text-neutral-400 mb-8"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
-        >
-          Tu veux collaborer ou discuter d&apos;un projet ?
-        </motion.p>
+        <p className="text-neutral-500 dark:text-neutral-400 mb-8 max-w-md grow leading-relaxed mx-auto text-center">
+          Tu as une idée en tête, un besoin technique spécifique ou tu cherches un développeur pour
+          rejoindre ton équipe ? Je lis tous mes messages et réponds très rapidement.
+        </p>
 
-        <motion.button
-          onClick={() => {
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
             setSubmitted(false);
             setIsOpen(true);
           }}
-          className="btn-glow inline-flex items-center gap-2 px-8 py-4 bg-brand-500 hover:bg-brand-400 text-white rounded-xl font-semibold text-lg transition-colors cursor-pointer"
+          variant="primary"
+          className="w-fit hover:-translate-y-1 hover:shadow-xl mx-auto"
           data-umami-event="click-contact-open"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.15 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
         >
-          <FiMail size={20} />
-          Me contacter
-        </motion.button>
-      </div>
+          <FiMail size={18} />
+          M&apos;envoyer un message
+        </Button>
+      </m.div>
 
       {/* Modal */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4"
-            onClick={handleClose}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="glass-card max-w-lg w-full p-8 relative text-left"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {isOpen && (
+              <m.div
+                key="contact-modal"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-[9999] p-4"
                 onClick={handleClose}
-                className="absolute top-4 right-4 p-2 rounded-xl hover:bg-brand-400/10 text-neutral-500 hover:text-foreground transition-all cursor-pointer"
               >
-                <FiX size={20} />
-              </button>
+                <m.div
+                  initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                  transition={{ duration: 0.15, ease: 'easeOut' }}
+                  className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-2xl rounded-2xl max-w-lg w-full p-8 relative text-left"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={handleClose}
+                    className="absolute top-4 right-4 p-2 rounded-xl hover:bg-brand-400/10 text-neutral-500 hover:text-foreground transition-all cursor-pointer"
+                  >
+                    <FiX size={20} />
+                  </button>
 
-              <h2 className="text-2xl font-bold mb-1 font-[family-name:var(--font-space-grotesk)]">
-                <span className="gradient-text">Contacte-moi</span>
-              </h2>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
-                Je te réponds en moins de 24h.
-              </p>
+                  <h2 className="text-2xl font-bold mb-1 font-(family-name:--font-space-grotesk)">
+                    <span className="gradient-text">Contacte-moi</span>
+                  </h2>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
+                    Je te réponds en moins de 24h.
+                  </p>
 
-              {error && (
-                <div className="mb-4 rounded-xl bg-danger-50 dark:bg-danger-100/10 border border-danger-200 dark:border-danger-500/30 p-3 text-center text-danger-600 dark:text-danger-400 text-sm font-medium">
-                  {error}
-                </div>
-              )}
+                  {error && (
+                    <div className="mb-4 rounded-xl bg-danger-50 dark:bg-danger-100/10 border border-danger-200 dark:border-danger-500/30 p-3 text-center text-danger-600 dark:text-danger-400 text-sm font-medium">
+                      {error}
+                    </div>
+                  )}
 
-              {!submitted ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <input
-                    type="text"
-                    name="company"
-                    value={honeypot}
-                    onChange={(e) => setHoneypot(e.target.value)}
-                    style={{ display: 'none' }}
-                    tabIndex={-1}
-                    autoComplete="off"
-                  />
-
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      Prénom NOM
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
-                      required
-                      className={inputClasses}
-                      placeholder="Prénom NOM"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      required
-                      className={inputClasses}
-                      placeholder="exemple@exemple.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      Sujet
-                    </label>
-                    <input
-                      type="text"
-                      name="subject"
-                      value={form.subject}
-                      onChange={handleChange}
-                      required
-                      className={inputClasses}
-                      placeholder="Ex : Proposition de collaboration"
-                      maxLength={150}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      Message
-                    </label>
-                    <textarea
-                      name="message"
-                      value={form.message}
-                      onChange={handleChange}
-                      required
-                      rows={4}
-                      className={`${inputClasses} resize-none`}
-                      placeholder="Mon message..."
-                    ></textarea>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2">
-                      Pièces jointes
-                    </label>
-                    <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-50/50 dark:bg-neutral-800/50 border border-neutral-200/80 dark:border-neutral-700/50 text-neutral-500 dark:text-neutral-400 hover:border-brand-400 hover:text-brand-400 cursor-pointer transition-all text-sm">
-                      <FiPaperclip size={16} />
-                      Parcourir les fichiers
+                  {!submitted ? (
+                    <form onSubmit={handleSubmit} className="space-y-4">
                       <input
-                        type="file"
-                        accept=".png,.jpg,.jpeg,.pdf"
-                        multiple
-                        onChange={handleFileChange}
-                        className="hidden"
+                        type="text"
+                        name="company"
+                        value={honeypot}
+                        onChange={(e) => setHoneypot(e.target.value)}
+                        style={{ display: 'none' }}
+                        tabIndex={-1}
+                        autoComplete="off"
                       />
-                    </label>
-                    {fileError && <p className="text-xs text-danger-500 mt-1.5">{fileError}</p>}
-                    <p className="text-xs text-neutral-400 mt-4">Max 3 fichiers, 10 Mo chacun</p>
-                    {files.length > 0 && (
-                      <div className="flex items-center gap-1.5 flex-wrap mt-2">
-                        {files.map((f, i) => (
-                          <span
-                            key={i}
-                            className="inline-flex items-center gap-1 text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 px-2 py-1 rounded-md"
-                          >
-                            <FiPaperclip size={10} />
-                            {f.name}
-                            <button
-                              type="button"
-                              onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
-                              className="text-neutral-400 hover:text-danger-500 cursor-pointer"
-                            >
-                              <FiX size={12} />
-                            </button>
-                          </span>
-                        ))}
-                        {files.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => setFiles([])}
-                            className="text-xs text-neutral-400 hover:text-danger-500 cursor-pointer ml-1"
-                          >
-                            Tout retirer
-                          </button>
+
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                          Prénom NOM
+                        </label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={form.name}
+                          onChange={handleChange}
+                          required
+                          className={inputClasses}
+                          placeholder="Prénom NOM"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={form.email}
+                          onChange={handleChange}
+                          required
+                          className={inputClasses}
+                          placeholder="exemple@exemple.com"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                          Sujet
+                        </label>
+                        <input
+                          type="text"
+                          name="subject"
+                          value={form.subject}
+                          onChange={handleChange}
+                          required
+                          className={inputClasses}
+                          placeholder="Ex : Proposition de collaboration"
+                          maxLength={150}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                          Message
+                        </label>
+                        <textarea
+                          name="message"
+                          value={form.message}
+                          onChange={handleChange}
+                          required
+                          rows={4}
+                          className={inputClasses}
+                          placeholder="Ton message..."
+                        ></textarea>
+                      </div>
+
+                      {/* Multi-file upload UI */}
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                          Pièces jointes (optionnel - max 10 Mo)
+                        </label>
+                        <div className="relative group">
+                          <input
+                            type="file"
+                            multiple
+                            onChange={handleFileChange}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            title="Ajouter des fichiers"
+                          />
+                          <div className="w-full flex items-center justify-between p-3.5 rounded-xl border border-dashed border-neutral-300 dark:border-neutral-600 bg-neutral-50/30 dark:bg-neutral-800/20 group-hover:bg-neutral-100 dark:group-hover:bg-neutral-800 transition-colors">
+                            <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+                              <FiPaperclip size={16} />
+                              {files.length > 0 ? (
+                                <span className="text-foreground font-medium">
+                                  {files.length} fichier(s) sélectionné(s)
+                                </span>
+                              ) : (
+                                <span>Clique ou glisse tes fichiers ici</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {/* Selected files list */}
+                        {files.length > 0 && (
+                          <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                            {files.map((f, i) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center gap-1 text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 px-2 py-1 rounded-md"
+                              >
+                                <FiPaperclip size={10} />
+                                {f.name}
+                                <button
+                                  type="button"
+                                  onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
+                                  className="text-neutral-400 hover:text-danger-500 cursor-pointer ml-1"
+                                >
+                                  <FiX size={12} />
+                                </button>
+                              </span>
+                            ))}
+                            {files.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => setFiles([])}
+                                className="text-xs text-neutral-400 hover:text-danger-500 cursor-pointer ml-1"
+                              >
+                                Tout retirer
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
-                    )}
-                  </div>
 
-                  <Button
-                    type="submit"
-                    isLoading={isSubmitting}
-                    loadingText="Envoi en cours..."
-                    fullWidth
-                    className="mt-6"
-                  >
-                    <FiSend size={16} />
-                    Envoyer
-                  </Button>
-                </form>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
-                >
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', damping: 15, stiffness: 200, delay: 0.1 }}
-                  >
-                    <FiCheckCircle size={56} className="text-success-400 mx-auto mb-4" />
-                  </motion.div>
-                  <p className="text-xl font-semibold mb-2">Message envoyé !</p>
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                    Je te réponds très vite 🚀
-                  </p>
-                </motion.div>
-              )}
-            </motion.div>
-          </motion.div>
+                      <Button
+                        type="submit"
+                        isLoading={isSubmitting}
+                        loadingText="Envoi en cours..."
+                        fullWidth
+                        className="mt-6"
+                      >
+                        <FiSend size={16} />
+                        Envoyer
+                      </Button>
+                    </form>
+                  ) : (
+                    <m.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="text-center py-12"
+                    >
+                      <m.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 15, stiffness: 200, delay: 0.1 }}
+                      >
+                        <FiCheckCircle size={56} className="text-success-400 mx-auto mb-4" />
+                      </m.div>
+                      <p className="text-xl font-semibold mb-2">Message envoyé !</p>
+                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        Je te réponds très vite
+                      </p>
+                    </m.div>
+                  )}
+                </m.div>
+              </m.div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
-    </section>
+    </>
   );
 }

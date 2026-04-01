@@ -3,9 +3,22 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { authRateLimit } from '@/lib/rate-limit';
+
+// Rate limit: 10 requests/min per IP (prevents brute-force of reset tokens)
+const limiter = authRateLimit({ limit: 10, window: '1 m', prefix: 'rl:verify-token' });
 
 export async function GET(req: Request) {
   try {
+    // IP Rate limiting
+    const forwarded = req.headers.get('x-forwarded-for');
+    const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
+    const { success } = await limiter.check(ip);
+
+    if (!success) {
+      return NextResponse.json({ valid: false }, { status: 429 });
+    }
+
     const { searchParams } = new URL(req.url);
     const token = searchParams.get('token');
 
@@ -23,7 +36,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ valid: true });
   } catch (error) {
-    console.error('Erreur verify-token:', error);
+    console.error('[api/auth/verify-token]', error);
     return NextResponse.json({ valid: false }, { status: 500 });
   }
 }

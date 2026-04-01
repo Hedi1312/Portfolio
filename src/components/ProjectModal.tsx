@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import {
   FiX,
@@ -60,14 +60,14 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
 
   return (
     <>
-      <motion.div
+      <m.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       >
-        <motion.div
+        <m.div
           initial={{ y: 50, scale: 0.95, opacity: 0 }}
           animate={{ y: 0, scale: 1, opacity: 1 }}
           exit={{ y: 20, scale: 0.95, opacity: 0 }}
@@ -84,14 +84,14 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
 
           {/* Left Side: Images Carousel */}
           <div
-            className={`w-full md:w-[65%] h-[40vh] md:h-full shrink-0 relative bg-gradient-to-br ${project.gradient} overflow-hidden group`}
+            className={`w-full md:w-[65%] h-[40vh] md:h-full shrink-0 relative bg-linear-to-br ${project.gradient} overflow-hidden group`}
           >
             {images.length > 0 ? (
               <AnimatePresence initial={false} custom={direction} mode="popLayout">
                 {images.map(
                   (img, idx) =>
                     idx === currentImageIndex && (
-                      <motion.div
+                      <m.div
                         key={img.id}
                         custom={direction}
                         variants={slideVariants}
@@ -135,7 +135,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                             sizes="(max-width: 768px) 100vw, 65vw"
                           />
                         )}
-                      </motion.div>
+                      </m.div>
                     ),
                 )}
               </AnimatePresence>
@@ -180,7 +180,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
 
           {/* Right Side: Details */}
           <div className="w-full md:w-[35%] p-6 md:p-10 flex flex-col h-full overflow-y-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-(family-name:--font-space-grotesk) text-neutral-900 dark:text-white break-words">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-(family-name:--font-space-grotesk) text-neutral-900 dark:text-white wrap-break-word">
               {project.title}
             </h2>
 
@@ -205,7 +205,9 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
               })}
             </div>
 
-            <div className="prose prose-sm dark:prose-invert text-neutral-600 dark:text-neutral-300 leading-relaxed mb-8 grow break-words">
+            <div className="h-px bg-neutral-100 dark:bg-neutral-800 my-6" />
+
+            <div className="prose prose-sm dark:prose-invert text-neutral-600 dark:text-neutral-300 leading-relaxed mb-8 grow wrap-break-word">
               {project.description.split('\\n').map((paragraph, idx) => (
                 <p key={idx} className="mb-4">
                   {paragraph}
@@ -240,13 +242,13 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
               )}
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
 
       {/* Full Screen Image Viewer */}
       <AnimatePresence>
         {isFullScreen && images.length > 0 && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -301,7 +303,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                 </button>
               </>
             )}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

@@ -5,18 +5,19 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 
 import { prisma } from '@/lib/prisma';
-import { rateLimit } from '@/lib/rate-limit';
+import { authRateLimit } from '@/lib/rate-limit';
 import { newPasswordSchema } from '@/lib/schemas/auth';
-const { verifySync } = require('otplib');
+import { verifyOTP } from '@/lib/otp';
+import { decrypt } from '@/lib/crypto';
 
-// Rate limit : 5 tentatives par minute par IP (anti brute-force OTP)
-const limiter = rateLimit({ interval: 60_000, limit: 5 });
+// Rate limit: 5 attempts/min per IP
+const limiter = authRateLimit({ limit: 5, window: '1 m', prefix: 'rl:reset-pw' });
 
 export async function POST(req: Request) {
-  // Rate limiting par IP
+  // IP Rate limiting
   const forwarded = req.headers.get('x-forwarded-for');
   const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-  const { success, retryAfter } = limiter.check(ip);
+  const { success, retryAfter } = await limiter.check(ip);
 
   if (!success) {
     return NextResponse.json(
@@ -58,27 +59,20 @@ export async function POST(req: Request) {
       );
     }
 
-    // A2F Verification
-    if (!otpCode || typeof otpCode !== 'string') {
-      return NextResponse.json({ error: 'Le code OTP est requis.' }, { status: 400 });
-    }
-
+    // TOTP verification (only when 2FA is active)
     const admin = resetRecord.admin;
     if (admin.otpSecret) {
-      // A2F active: verify real TOTP code
-      const result = verifySync({ token: otpCode, secret: admin.otpSecret, window: 1 });
+      if (!otpCode || typeof otpCode !== 'string') {
+        return NextResponse.json({ error: 'Le code OTP est requis.' }, { status: 400 });
+      }
+      const result = verifyOTP({ token: otpCode, secret: decrypt(admin.otpSecret), window: 1 });
       if (!result.valid) {
         return NextResponse.json({ error: 'Code OTP invalide ou expiré.' }, { status: 400 });
-      }
-    } else {
-      // A2F inactive: only accept '000000'
-      if (otpCode !== '000000') {
-        return NextResponse.json({ error: 'Code OTP invalide.' }, { status: 400 });
       }
     }
 
     // Hash the new password and update the admin
-    const passwordHash = await bcrypt.hash(validation.data.password, 10);
+    const passwordHash = await bcrypt.hash(validation.data.password, 12);
 
     await prisma.admin.update({
       where: { id: resetRecord.adminId },
@@ -91,13 +85,11 @@ export async function POST(req: Request) {
     // Delete the used token
     await prisma.passwordReset.delete({ where: { id: resetRecord.id } });
 
-    console.log(`✅ [RESET] Mot de passe mis à jour pour : ${resetRecord.admin.email}`);
-
     return NextResponse.json({
       message: 'Mot de passe mis à jour avec succès.',
     });
   } catch (error) {
-    console.error('Erreur reset-password:', error);
+    console.error('[api/auth/reset-password]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

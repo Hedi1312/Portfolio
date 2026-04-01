@@ -1,25 +1,20 @@
 'use client';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
-import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { FiEye, FiDownload, FiX } from 'react-icons/fi';
+import { useState } from 'react';
+import { AnimatePresence, m } from 'framer-motion';
+import { FiEye, FiDownload, FiX, FiFileText } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';
+import { useNeonHover } from '@/hooks/useNeonHover';
 
-export default function CV() {
-  const [cvUrl, setCvUrl] = useState('/cv/CV_OKBA_Hedi.pdf');
+interface CVProps {
+  initialUrl: string | null;
+}
+
+export default function CV({ initialUrl }: CVProps) {
+  const cvUrl = initialUrl || '/cv/CV_OKBA_Hedi.pdf';
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/admin/cv')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.url) {
-          setCvUrl(`${data.url}?t=${Date.now()}`);
-        }
-      })
-      .catch((err) => console.error('Erreur chargement CV :', err));
-  }, []);
+  const neonHover = useNeonHover(-8);
 
   useLockBodyScroll(isOpen);
 
@@ -36,91 +31,74 @@ export default function CV() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
+    } catch (_error) {
     } finally {
       setIsDownloading(false);
     }
   };
 
   return (
-    <section
-      id="cv"
-      className="relative px-6 py-24 md:py-32 bg-white dark:bg-neutral-900 text-center text-neutral-900 dark:text-white transition-colors duration-500"
-    >
-      <div className="max-w-2xl mx-auto">
-        {/* Section heading */}
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h3 className="text-3xl md:text-4xl section-heading">Mon CV</h3>
-        </motion.div>
+    <>
+      <m.div
+        className="glass-card p-8 md:p-10 flex flex-col items-center justify-center text-center h-full group relative overflow-hidden"
+        whileHover={neonHover.whileHover}
+        transition={neonHover.transition}
+        style={{ willChange: 'transform' }}
+      >
+        <div className="w-16 h-16 mb-6 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-brand-400 transition-colors">
+          <FiFileText size={28} />
+        </div>
 
-        {/* Glass card */}
-        <motion.div
-          className="glass-card p-10 mx-auto"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          {/* Decorative icon */}
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-brand-400/10 flex items-center justify-center">
-            <motion.div
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <FiEye size={32} className="text-brand-400" />
-            </motion.div>
-          </div>
+        <h4 className="text-3xl font-bold mb-3 font-(family-name:--font-space-grotesk) text-neutral-900 dark:text-white">
+          Consulter mon profil
+        </h4>
 
-          <p className="text-neutral-500 dark:text-neutral-400 mb-8">
-            Consulte mon CV ou télécharge-le directement.
-          </p>
+        <p className="text-neutral-500 dark:text-neutral-400 mb-8 grow">
+          Découvre mon parcours détaillé, mes compétences et mes expériences, ou télécharge mon CV
+          complet au format PDF.
+        </p>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button
-              onClick={() => setIsOpen(true)}
-              variant="primary"
-              data-umami-event="click-cv-view"
-            >
-              <FiEye size={18} />
-              Voir mon CV
-            </Button>
+        <div className="flex flex-col sm:flex-row justify-center gap-6 w-full">
+          <Button
+            onClick={() => setIsOpen(true)}
+            variant="primary"
+            className="flex-1 hover:-translate-y-1 hover:shadow-xl"
+            data-umami-event="click-cv-view"
+          >
+            <FiEye size={18} />
+            Voir mon CV
+          </Button>
 
-            <Button
-              onClick={handleDownload}
-              variant="glass"
-              isLoading={isDownloading}
-              loadingText="Téléchargement en cours..."
-              data-umami-event="click-cv-download"
-            >
-              <FiDownload size={18} className="text-brand-400" />
-              Télécharger
-            </Button>
-          </div>
-        </motion.div>
-      </div>
+          <Button
+            onClick={handleDownload}
+            variant="secondary"
+            className="flex-1 hover:-translate-y-1 hover:shadow-xl"
+            isLoading={isDownloading}
+            loadingText="Téléchargement..."
+            data-umami-event="click-cv-download"
+          >
+            <FiDownload size={18} className="text-brand-400" />
+            Télécharger
+          </Button>
+        </div>
+      </m.div>
 
       {/* Modal */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4"
             onClick={() => setIsOpen(false)}
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+            <m.div
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
               className="glass-card max-w-5xl w-full p-6 relative"
               onClick={(e) => e.stopPropagation()}
             >
@@ -138,7 +116,7 @@ export default function CV() {
                 className="w-full h-[80vh] rounded-xl border border-neutral-200/20 dark:border-neutral-700/30 bg-white"
               />
               <p className="text-center text-neutral-500 dark:text-neutral-400 text-sm mt-4">
-                📱 Si l&apos;affichage n&apos;est pas optimal,{' '}
+                Si l&apos;affichage n&apos;est pas optimal,{' '}
                 <a
                   href={cvUrl}
                   target="_blank"
@@ -149,10 +127,10 @@ export default function CV() {
                 </a>
                 .
               </p>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
-    </section>
+    </>
   );
 }

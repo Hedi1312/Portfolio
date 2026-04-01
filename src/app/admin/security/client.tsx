@@ -3,11 +3,11 @@
 import { useState, useRef } from 'react';
 import QRCode from 'qrcode';
 import { Button } from '@/components/ui/Button';
-import { Shield, ShieldCheck, Smartphone, KeyRound, Loader2 } from 'lucide-react';
+import { Shield, ShieldCheck, KeyRound, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FiArrowLeft, FiAlertTriangle } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
+import { FiArrowLeft, FiAlertTriangle, FiLock } from 'react-icons/fi';
+import { m, AnimatePresence } from 'framer-motion';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 
@@ -19,7 +19,7 @@ export default function SecuritySettingsClient({
   const [is2FAEnabled, setIs2FAEnabled] = useState(initialIs2FAEnabled);
   const [setupStep, setSetupStep] = useState<'idle' | 'scanning' | 'verifying'>('idle');
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
-  const [secretStr, setSecretStr] = useState<string | null>(null);
+
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -50,7 +50,6 @@ export default function SecuritySettingsClient({
       });
 
       setQrCodeDataUrl(qrUrl);
-      setSecretStr(data.secret);
       setSetupStep('scanning');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
@@ -61,7 +60,7 @@ export default function SecuritySettingsClient({
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otpCode.length !== 6 || !secretStr) return;
+    if (otpCode.length !== 6) return;
 
     setLoading(true);
     setError('');
@@ -69,7 +68,7 @@ export default function SecuritySettingsClient({
       const res = await fetch('/api/admin/2fa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: otpCode, secret: secretStr }),
+        body: JSON.stringify({ code: otpCode }),
       });
       const data = await res.json();
 
@@ -78,7 +77,6 @@ export default function SecuritySettingsClient({
       setIs2FAEnabled(true);
       setSetupStep('idle');
       setQrCodeDataUrl(null);
-      setSecretStr(null);
       setOtpCode('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
@@ -124,7 +122,7 @@ export default function SecuritySettingsClient({
   return (
     <>
       <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -208,7 +206,7 @@ export default function SecuritySettingsClient({
                       {loading ? (
                         <Loader2 className="w-4 h-4 animate-spin mr-2" />
                       ) : (
-                        <Smartphone className="w-4 h-4 mr-2" />
+                        <FiLock className="w-4 h-4 mr-2" />
                       )}
                       Activer l&apos;A2F
                     </Button>
@@ -297,20 +295,20 @@ export default function SecuritySettingsClient({
               </div>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       </section>
 
       {/* Disable A2F Confirmation Modal */}
       <AnimatePresence>
         {showDisableModal && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-9999 p-4"
             onClick={() => setShowDisableModal(false)}
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.9, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 10 }}
@@ -378,8 +376,8 @@ export default function SecuritySettingsClient({
                   </button>
                 </div>
               </form>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

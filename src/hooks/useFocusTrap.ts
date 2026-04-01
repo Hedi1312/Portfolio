@@ -20,7 +20,7 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, isActive: boole
     const focusableElements = Array.from(
       modalElement.querySelectorAll<HTMLElement>(focusableSelectors),
     ).filter((el) => {
-      // S'assurer que l'élément n'est pas caché
+      // Ensure element is not hidden
       return el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0;
     });
 
@@ -29,7 +29,7 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, isActive: boole
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
 
-    // Mettre le focus sur le premier élément à l'ouverture
+    // Focus first element on open
     // On met un petit setTimeout pour s'assurer que l'animation Framer Motion a démarré
     const focusTimer = setTimeout(() => {
       firstElement.focus();

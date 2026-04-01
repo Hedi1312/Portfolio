@@ -1,16 +1,21 @@
 import { NextResponse } from 'next/server';
 import { cloudinary } from '@/lib/cloudinary';
 import { rateLimit } from '@/lib/rate-limit';
+import { requireAdmin } from '@/lib/auth-guard';
+import { cloudinarySignSchema } from '@/lib/schemas/admin';
 
-// Rate limit : 10 requêtes par minute par IP
-const limiter = rateLimit({ interval: 60_000, limit: 10 });
+// Rate limit: 10 requests/min per IP
+const limiter = rateLimit({ limit: 10, window: '1 m', prefix: 'rl:cloudinary' });
 
 export async function POST(req: Request) {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
-    // Rate limiting par IP
+    // IP Rate limiting
     const forwarded = req.headers.get('x-forwarded-for');
     const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-    const { success, retryAfter } = limiter.check(ip);
+    const { success, retryAfter } = await limiter.check(ip);
 
     if (!success) {
       return NextResponse.json(
@@ -20,19 +25,21 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { subfolder, public_id } = body;
 
-    if (!subfolder) {
-      return NextResponse.json({ error: 'Le paramètre "subfolder" est requis.' }, { status: 400 });
+    const validation = cloudinarySignSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
     }
 
-    // Construire le chemin complet côté serveur (pas besoin de NEXT_PUBLIC_)
+    const { subfolder, public_id } = validation.data;
+
+    // Build full path on server
     const baseFolder = process.env.CLOUDINARY_FOLDER || 'development';
     const folder = `${baseFolder}/${subfolder}`;
 
     const timestamp = Math.round(Date.now() / 1000);
 
-    // Paramètres à signer (doivent correspondre exactement à ceux envoyés à Cloudinary)
+    // Parameters to sign (must match exactly those sent to Cloudinary)
     const paramsToSign: Record<string, string | number> = {
       timestamp,
       folder,
@@ -55,7 +62,7 @@ export async function POST(req: Request) {
       folder,
     });
   } catch (error) {
-    console.error('Erreur signature Cloudinary:', error);
+    console.error('[api/admin/cloudinary/sign]', error);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

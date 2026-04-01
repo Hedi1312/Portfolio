@@ -15,7 +15,7 @@ import {
   AlertTriangle,
   KeyRound,
 } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 
 function ResetPasswordForm() {
@@ -300,13 +300,13 @@ function ResetPasswordForm() {
       {/* A2F Verification Modal */}
       <AnimatePresence>
         {showOtpModal && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-9999 p-4"
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.9, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 10 }}
@@ -374,8 +374,8 @@ function ResetPasswordForm() {
                   </button>
                 </div>
               </form>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </section>

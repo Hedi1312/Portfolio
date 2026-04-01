@@ -1,8 +1,11 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { SKILL_ICONS } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
+import { useNeonHover, buildNeonHover } from '@/hooks/useNeonHover';
+import type { NeonHoverConfig } from '@/hooks/useNeonHover';
+import { SKILL_ICONS } from '@/lib/skill-icons';
+import { m } from 'framer-motion';
+import { useState } from 'react';
+import { FiGrid, FiZap } from 'react-icons/fi';
 
 interface StatItem {
   value: string;
@@ -15,16 +18,20 @@ interface TechItem {
   color: string;
 }
 
-interface AboutData {
+export interface AboutData {
   bio: string;
   stats: StatItem[];
   techs: TechItem[];
 }
 
+interface AProposProps {
+  data: AboutData | null;
+}
+
 const containerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.08 },
+    transition: { staggerChildren: 0.3 },
   },
 };
 
@@ -33,66 +40,114 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' as const },
+    transition: { duration: 1.5, ease: [0.23, 1, 0.32, 1] as const },
   },
 };
 
-export default function APropos() {
-  const isDark = useIsDark();
-  const [data, setData] = useState<AboutData | null>(null);
+const renderTechTag = (tech: TechItem, index: number, isDark: boolean, neon: NeonHoverConfig) => {
+  const match = tech.icon ? SKILL_ICONS[tech.icon] : null;
+  const Icon = match?.icon;
+  return (
+    <m.div
+      key={`${tech.name}-${index}`}
+      className="glass-card flex items-center justify-center gap-2.5 px-5 py-3 cursor-default"
+      whileHover={neon.whileHover}
+      transition={neon.transition}
+    >
+      {Icon && (
+        <Icon
+          size={20}
+          style={{
+            color: isDark ? match.color : match.colorLight || match.color,
+          }}
+        />
+      )}
+      <span className="text-[15px] font-medium text-neutral-700 dark:text-neutral-200 whitespace-nowrap">
+        {tech.name}
+      </span>
+    </m.div>
+  );
+};
 
-  useEffect(() => {
-    fetch('/api/admin/about')
-      .then((res) => res.json())
-      .then((d) => {
-        setData({
-          bio: d.bio || '',
-          stats: Array.isArray(d.stats) ? d.stats : [],
-          techs: (d.techs || []).map((t: TechItem) => ({
-            name: t.name,
-            icon: t.icon,
-            color: t.color,
-          })),
-        });
-      })
-      .catch((err) => console.error('Erreur chargement à propos:', err));
-  }, []);
+const TechMarquee = ({
+  items,
+  reverse = false,
+  isDark,
+}: {
+  items: TechItem[];
+  reverse?: boolean;
+  isDark: boolean;
+}) => {
+  const neonTag = buildNeonHover(-4, isDark);
+  // Duplicate items for seamless infinite scroll
+  const multipliedItems = [...items, ...items];
+
+  const halfBlock = (
+    <div className="flex gap-6 pr-6 items-center shrink-0">
+      {multipliedItems.map((tech, i) => renderTechTag(tech, i, isDark, neonTag))}
+    </div>
+  );
+
+  return (
+    <div className="flex overflow-hidden group relative w-full py-4 -my-4 mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+      <div
+        className={`flex w-max ${reverse ? 'animate-marquee-right' : 'animate-marquee-left'} group-hover:[animation-play-state:paused]`}
+      >
+        {halfBlock}
+        {halfBlock}
+      </div>
+    </div>
+  );
+};
+
+export default function APropos({ data }: AProposProps) {
+  const isDark = useIsDark();
+  const neonBio = useNeonHover(-8);
+  const neonStat = useNeonHover(-6);
+  const neonTag = buildNeonHover(-4, isDark);
+  const [isAnimated, setIsAnimated] = useState(true);
 
   if (!data) return null;
   if (!data.bio && data.stats.length === 0 && data.techs.length === 0) return null;
 
-  // Séparer le bio en paragraphes
+  // Split bio into paragraphs
   const paragraphs = data.bio.split('\n\n').filter((p) => p.trim());
+
+  // Split techs into two rows for marquee
+  const halfLength = Math.ceil(data.techs.length / 2);
+  const row1 = data.techs.slice(0, halfLength);
+  const row2 = data.techs.slice(halfLength);
 
   return (
     <section
       id="a-propos"
-      className="relative px-6 py-24 md:py-32 bg-white dark:bg-[#0f172a] text-neutral-900 dark:text-white transition-colors duration-500"
+      className="relative px-6 py-16 md:py-24 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-500 overflow-hidden"
     >
-      <div className="max-w-5xl mx-auto">
-        {/* Section heading */}
-        <motion.div
+      <div className="max-w-6xl mx-auto">
+        <m.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.5 }}
+          viewport={{ once: false, amount: 0.5 }}
+          transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] as const }}
         >
           <h3 className="text-3xl md:text-4xl section-heading">À propos</h3>
-        </motion.div>
+        </m.div>
 
-        {/* Content grid */}
-        <div className="grid md:grid-cols-5 gap-12 items-start">
-          {/* Text column */}
+        <div className="grid md:grid-cols-5 gap-12 items-start mb-24 max-w-5xl mx-auto">
           {paragraphs.length > 0 && (
-            <motion.div
+            <m.div
               className="md:col-span-3"
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              viewport={{ once: false, amount: 0.5 }}
+              transition={{ duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
             >
-              <div className="glass-card p-8">
+              <m.div
+                className="glass-card p-8"
+                whileHover={neonBio.whileHover}
+                transition={neonBio.transition}
+              >
                 {paragraphs.map((paragraph, idx) => (
                   <p
                     key={idx}
@@ -105,82 +160,86 @@ export default function APropos() {
                     {paragraph}
                   </p>
                 ))}
-              </div>
-            </motion.div>
+              </m.div>
+            </m.div>
           )}
 
-          {/* Stats column */}
           {data.stats.length > 0 && (
-            <motion.div
+            <m.div
               className="md:col-span-2 flex flex-col gap-4"
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true }}
+              viewport={{ once: false, amount: 0.5 }}
             >
               {data.stats.map((stat) => (
-                <motion.div
+                <m.div
                   key={stat.label}
                   className="glass-card p-6 text-center"
                   variants={itemVariants}
+                  whileHover={neonStat.whileHover}
+                  transition={neonStat.transition}
                 >
-                  <p className="text-3xl font-bold gradient-text font-[family-name:var(--font-space-grotesk)]">
+                  <p className="text-3xl font-bold gradient-text font-(family-name:--font-space-grotesk)">
                     {stat.value}
                   </p>
                   <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                     {stat.label}
                   </p>
-                </motion.div>
+                </m.div>
               ))}
-            </motion.div>
+            </m.div>
           )}
         </div>
 
-        {/* Tech stack */}
         {data.techs.length > 0 && (
-          <motion.div
-            className="mt-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+          <m.div
+            className="w-full relative py-12"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.4 }}
+            transition={{ duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
           >
-            <p className="text-center text-sm uppercase tracking-widest text-neutral-900 dark:text-white mb-8 font-medium">
-              Technologies
-            </p>
-            <motion.div
-              className="flex flex-wrap justify-center gap-3"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {data.techs.map((tech) => {
-                const match = tech.icon ? SKILL_ICONS[tech.icon] : null;
-                const Icon = match?.icon;
-                return (
-                  <motion.div
-                    key={tech.name}
-                    className="glass-card flex items-center gap-2.5 px-4 py-2.5 cursor-default"
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                  >
-                    {Icon && (
-                      <Icon
-                        size={18}
-                        style={{
-                          color: isDark ? match.color : match.colorLight || match.color,
-                        }}
-                      />
-                    )}
-                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
-                      {tech.name}
-                    </span>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </motion.div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-10">
+              <p className="text-center text-md md:text-lg uppercase tracking-widest text-neutral-900 dark:text-white font-medium m-0">
+                Technologies & Outils
+              </p>
+              <button
+                onClick={() => setIsAnimated(!isAnimated)}
+                className="px-4 py-2 cursor-pointer text-xs sm:text-sm font-bold text-neutral-900 dark:text-white bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700 border border-brand-400 rounded-full shadow-sm transition-colors"
+                title={isAnimated ? 'Passer en vue statique' : 'Activer le défilement'}
+              >
+                {isAnimated ? (
+                  <span className="flex items-center gap-2">
+                    <FiGrid className="w-4 h-4" />
+                    Mode grille
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <FiZap className="w-4 h-4" />
+                    Mode défilement
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {isAnimated ? (
+              <div className="relative w-screen left-1/2 -translate-x-1/2 flex flex-col gap-4 sm:gap-6">
+                <TechMarquee items={row1} isDark={isDark} />
+                <TechMarquee items={row2} reverse={true} isDark={isDark} />
+              </div>
+            ) : (
+              <m.div
+                className="flex flex-wrap justify-center gap-3"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: false, amount: 0.2 }}
+              >
+                {data.techs.map((tech, i) => renderTechTag(tech, i, isDark, neonTag))}
+              </m.div>
+            )}
+          </m.div>
         )}
       </div>
     </section>

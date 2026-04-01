@@ -13,8 +13,6 @@ async function main() {
   const email = 'admin@test.fr';
   const hashedPassword = await bcrypt.hash('Test1010!', 10);
 
-  console.log('🌱 Seeding en cours...');
-
   await prisma.admin.upsert({
     where: { email: email },
     update: {
@@ -26,13 +24,11 @@ async function main() {
     },
   });
 
-  console.log(`✅ Admin créé : ${email}`);
-
   // ─── Section « À propos » ────────────────────────────
   const existingAbout = await prisma.aboutMe.findFirst();
 
   if (!existingAbout) {
-    const aboutMe = await prisma.aboutMe.create({
+    const _aboutMe = await prisma.aboutMe.create({
       data: {
         bio: "Je suis un développeur front-end, passionné par la création d'interfaces élégantes et performantes. J'aime transformer des idées en expériences concrètes avec un soin particulier pour le design et la performance.\n\nMon objectif : concevoir des applications web qui allient esthétique soignée, code propre et expérience utilisateur fluide. Chaque projet est une occasion d'apprendre et de repousser mes limites.",
         stats: [
@@ -54,9 +50,7 @@ async function main() {
         },
       },
     });
-    console.log(`✅ Section « À propos » créée (id: ${aboutMe.id})`);
   } else {
-    console.log('ℹ️  Section « À propos » déjà existante, skip.');
   }
 }
 
@@ -64,8 +58,7 @@ main()
   .then(async () => {
     await prisma.$disconnect();
   })
-  .catch(async (e) => {
-    console.error('❌ Erreur de seeding :', e);
+  .catch(async (_e) => {
     await prisma.$disconnect();
     process.exit(1);
   });
