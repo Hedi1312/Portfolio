@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { m, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { FiExternalLink, FiGithub, FiInfo, FiPlay } from 'react-icons/fi';
 import { findSkillIcon } from '@/lib/skill-icons';
@@ -32,6 +32,10 @@ export interface Project {
   images?: ProjectImage[];
 }
 
+interface MesProjetsProps {
+  projects: Project[];
+}
+
 const containerVariants = {
   hidden: {},
   visible: {
@@ -48,28 +52,12 @@ const cardVariants = {
   },
 };
 
-export default function MesProjets() {
-  const [projets, setProjets] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function MesProjets({ projects }: MesProjetsProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const isDark = useIsDark();
   const neonHover = useNeonHover(-10);
 
-  useEffect(() => {
-    fetch('/api/projects')
-      .then((res) => res.json())
-      .then((data: Project[] | { error: string }) => {
-        if (Array.isArray(data)) {
-          setProjets(data);
-        } else {
-        }
-      })
-      .catch((_err) => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return null;
-  if (projets.length === 0) return null;
+  if (projects.length === 0) return null;
 
   return (
     <section
@@ -82,12 +70,11 @@ export default function MesProjets() {
         )}
       </AnimatePresence>
 
-      {/* Subtle background gradient */}
+      {/* Background gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,213,190,0.05)_0%,transparent_50%)]" />
 
       <div className="relative max-w-6xl mx-auto">
-        {/* Section heading */}
-        <motion.div
+        <m.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -95,40 +82,39 @@ export default function MesProjets() {
           transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] as const }}
         >
           <h3 className="text-3xl md:text-4xl section-heading">Mes Projets</h3>
-        </motion.div>
+        </m.div>
 
-        {/* Cards grid */}
-        <motion.div
+        <m.div
           className="grid md:grid-cols-3 gap-6"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: false, amount: 0.5 }}
         >
-          {projets.map((projet, index) => (
-            <motion.div key={projet.id} variants={cardVariants}>
-              <motion.div
+          {projects.map((project: Project, index: number) => (
+            <m.div key={project.id} variants={cardVariants}>
+              <m.div
                 className="glass-card flex flex-col h-full overflow-hidden group cursor-pointer relative"
                 whileHover={neonHover.whileHover}
                 transition={neonHover.transition}
                 style={{ willChange: 'transform' }}
                 onClick={() => {
-                  setSelectedProject(projet);
+                  setSelectedProject(project);
                   if (typeof window !== 'undefined' && window.umami) {
-                    window.umami.track(`Projet Détails: ${projet.title}`);
+                    window.umami.track(`Projet Détails: ${project.title}`);
                   }
                 }}
               >
                 {/* Preview area */}
                 <div
-                  className={`h-40 relative overflow-hidden ${!projet.images || projet.images.length === 0 ? `bg-linear-to-br ${projet.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
+                  className={`h-40 relative overflow-hidden ${!project.images || project.images.length === 0 ? `bg-linear-to-br ${project.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
                 >
-                  {projet.images &&
-                    projet.images.length > 0 &&
-                    (projet.images[0].url.match(/\.(mp4|webm|mov|avi)$/i) ? (
+                  {project.images &&
+                    project.images.length > 0 &&
+                    (project.images[0].url.match(/\.(mp4|webm|mov|avi)$/i) ? (
                       <>
                         <video
-                          src={projet.images[0].url}
+                          src={project.images[0].url}
                           className="object-cover w-full h-full group-hover:scale-105 transition-all duration-700 pointer-events-none"
                           muted
                           playsInline
@@ -142,8 +128,8 @@ export default function MesProjets() {
                       </>
                     ) : (
                       <Image
-                        src={projet.images[0].url}
-                        alt={projet.title}
+                        src={project.images[0].url}
+                        alt={project.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-all duration-700"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -151,24 +137,19 @@ export default function MesProjets() {
                       />
                     ))}
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.4)_0%,transparent_60%)] dark:bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1)_0%,transparent_60%)] z-10" />
-                  {/* Decorative elements */}
-                  <div className="absolute top-4 right-4 w-12 h-12 rounded-full border border-black/10 dark:border-white/20 group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute bottom-4 left-4 w-8 h-8 rounded-lg border border-black/10 dark:border-white/15 rotate-45 group-hover:rotate-90 transition-transform duration-700" />
                 </div>
-
-                {/* Card content */}
                 <div className="p-6 flex flex-col grow">
                   <h4 className="text-xl font-bold mb-3 font-(family-name:--font-space-grotesk) group-hover:text-brand-400 transition-colors duration-300 wrap-break-word line-clamp-2">
-                    {projet.title}
+                    {project.title}
                   </h4>
                   <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed mb-6 wrap-break-word line-clamp-3">
-                    {projet.description}
+                    {project.description}
                   </p>
 
-                  {/* Skills with icons */}
-                  {projet.skills.length > 0 && (
+                  {/* Tech stack */}
+                  {project.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-5">
-                      {projet.skills.map((skill, index) => {
+                      {project.skills.map((skill: Skill, skillIndex: number) => {
                         const match = findSkillIcon(skill.icon || skill.name);
                         const Icon = match?.icon;
 
@@ -179,7 +160,7 @@ export default function MesProjets() {
 
                         return (
                           <span
-                            key={`${skill.name}-${index}`}
+                            key={`${skill.name}-${skillIndex}`}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[0.8125rem] font-medium rounded-full bg-brand-400/10 text-brand-600 dark:text-brand-400 border border-brand-400/20 shadow-sm"
                           >
                             {Icon && <Icon size={12} style={{ color }} />}
@@ -192,27 +173,27 @@ export default function MesProjets() {
 
                   {/* Links */}
                   <div className="flex items-center gap-3 mt-auto pt-4">
-                    {projet.github && (
+                    {project.github && (
                       <a
-                        href={projet.github}
+                        href={project.github}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
                         className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 hover:text-foreground transition-colors"
-                        data-umami-event={`Projet Code: ${projet.title}`}
+                        data-umami-event={`Projet Code: ${project.title}`}
                       >
                         <FiGithub size={16} />
                         Code
                       </a>
                     )}
-                    {projet.link && (
+                    {project.link && (
                       <a
-                        href={projet.link}
+                        href={project.link}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
                         className="flex items-center gap-1.5 text-sm text-brand-500 hover:text-brand-100 transition-colors"
-                        data-umami-event={`Projet Live: ${projet.title}`}
+                        data-umami-event={`Projet Live: ${project.title}`}
                       >
                         <FiExternalLink size={16} />
                         Voir en ligne
@@ -221,20 +202,20 @@ export default function MesProjets() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedProject(projet);
+                        setSelectedProject(project);
                       }}
                       className="ml-auto flex items-center gap-1.5 text-sm font-medium transition-opacity text-brand-500 hover:text-brand-100 cursor-pointer"
-                      data-umami-event={`Projet Détails: ${projet.title}`}
+                      data-umami-event={`Projet Détails: ${project.title}`}
                     >
                       <FiInfo size={16} />
                       Détails
                     </button>
                   </div>
                 </div>
-              </motion.div>
-            </motion.div>
+              </m.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

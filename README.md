@@ -59,9 +59,11 @@ A bespoke, heavily guarded private workspace accessible only via biometric/2FA v
 
 ### Backend & Infrastructure
 
+- **Architecture Pure Server Components** : Zero REST API. 100% Next.js Server Actions for flawless RPC communication and maximum edge security.
 - **Database Engine**: PostgreSQL
 - **ORM & Type Safety**: [Prisma 7](https://www.prisma.io/)
 - **Authentication**: NextAuth.js (Credentials Provider) + Custom TOTP 2FA Verification
+- **Security Protocols**: PostgreSQL-backed Atomic Rate Limiting (in-middleware) protecting auth and contact endpoints against brute-force attacks.
 - **Media CDN**: [Cloudinary](https://cloudinary.com/) API Integration
 - **Mailing**: Nodemailer alongside `react-email` templates
 
@@ -109,9 +111,11 @@ erDiagram
 
 ## 📸 Gallery & Performance
 
-### Core Web Vitals
+### Core Web Vitals & Bundle Architecture
 
 This portfolio is strictly engineered to achieve **100/100 across all Lighthouse metrics**: Performance, Accessibility, Best Practices, and SEO.
+
+**Extreme Bundle Optimization**: Heavy JavaScript dependencies (`pdf-lib`, `browser-image-compression`, `recharts`, `@dnd-kit`) are violently stripped from the initial server load using `next/dynamic` (`ssr: false`) and dynamic imports, resulting in an near-instantaneous Client and Dashboard hydration.
 
 ### Previews
 

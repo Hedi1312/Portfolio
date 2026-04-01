@@ -1,9 +1,13 @@
 'use client';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import Contact from './Contact';
 import CV from './CV';
 
-export default function NextSteps() {
+interface NextStepsProps {
+  cvUrl: string | null;
+}
+
+export default function NextSteps({ cvUrl }: NextStepsProps) {
   return (
     <section
       id="contact"
@@ -13,8 +17,7 @@ export default function NextSteps() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,213,190,0.06)_0%,transparent_60%)] pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto">
-        {/* Section heading — same pattern as APropos & MesProjets */}
-        <motion.div
+        <m.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -27,10 +30,10 @@ export default function NextSteps() {
             </span>{' '}
             <span className="text-brand-400 transition-colors duration-300">& CV</span>
           </h3>
-        </motion.div>
+        </m.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <motion.div
+          <m.div
             className="lg:col-span-7"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -38,17 +41,17 @@ export default function NextSteps() {
             transition={{ duration: 2.0, delay: 0.1, ease: [0.23, 1, 0.32, 1] as const }}
           >
             <Contact />
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             className="lg:col-span-5"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: false, amount: 0.5 }}
             transition={{ duration: 2.0, delay: 0.2, ease: [0.23, 1, 0.32, 1] as const }}
           >
-            <CV />
-          </motion.div>
+            <CV initialUrl={cvUrl} />
+          </m.div>
         </div>
       </div>
     </section>

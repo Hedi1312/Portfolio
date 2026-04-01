@@ -1,17 +1,18 @@
-import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { rateLimit } from '@/lib/rate-limit';
-const { generateSecret, generateURI } = require('otplib');
+import { authRateLimit } from '@/lib/rate-limit';
+import { generateOTPSecret, generateOTPUri } from '@/lib/otp';
+import { encrypt } from '@/lib/crypto';
+import { requireAdmin } from '@/lib/auth-guard';
 import { NextResponse } from 'next/server';
 
 // Rate limit: 5 requests/min per IP
-const limiter = rateLimit({ interval: 60_000, limit: 5 });
+const limiter = authRateLimit({ limit: 5, window: '1 m', prefix: 'rl:2fa-gen' });
 
 export async function POST(req: Request) {
   // IP Rate limiting
   const forwarded = req.headers.get('x-forwarded-for');
   const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-  const { success, retryAfter } = limiter.check(ip);
+  const { success, retryAfter } = await limiter.check(ip);
 
   if (!success) {
     return NextResponse.json(
@@ -20,33 +21,36 @@ export async function POST(req: Request) {
     );
   }
   try {
-    const session = await auth();
-    // @api-security-best-practices: Strong Authentication check
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { session, unauthorized } = await requireAdmin();
+    if (unauthorized) return unauthorized;
+
+    const email = session?.user?.email;
+    if (!email) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
     const admin = await prisma.admin.findUnique({
-      where: { email: session.user.email },
+      where: { email },
     });
 
     if (!admin) {
       return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
     }
 
-    // Generate secret
-    const secret = generateSecret();
+    const secret = generateOTPSecret();
 
-    // Create otpauth URL for the QR code
-    const otpauthUrl = generateURI({
+    await prisma.admin.update({
+      where: { id: admin.id },
+      data: { pendingOtpSecret: encrypt(secret) },
+    });
+
+    const otpauthUrl = generateOTPUri({
       label: admin.email,
       issuer: 'Portfolio Admin',
       secret,
     });
 
-    return NextResponse.json({ secret, otpauthUrl });
-  } catch (_error) {
-    // @api-security-best-practices: Sanitize error messages
+    return NextResponse.json({ otpauthUrl });
+  } catch (error) {
+    console.error('[api/admin/2fa/generate]', error);
     return NextResponse.json({ error: 'An error occurred during generation' }, { status: 500 });
   }
 }

@@ -3,7 +3,7 @@
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { smoothScrollTo } from '@/lib/utils/scroll';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -18,6 +18,7 @@ import {
   FaUser,
 } from 'react-icons/fa';
 import { FiMenu, FiX } from 'react-icons/fi';
+import { getUnreadCountAction } from '@/actions/message.action';
 
 const navLinks = [
   { href: '/', icon: FaHome, label: 'Accueil', section: 'home' },
@@ -41,20 +42,31 @@ export default function Navbar() {
   const isMessagesPage = pathname === '/admin/messages';
   const isDashboardPage = pathname.startsWith('/admin') && !isMessagesPage;
 
-  const fetchUnread = useCallback(() => {
+  const fetchUnread = useCallback(async () => {
     if (status !== 'authenticated') return;
-    fetch('/api/admin/messages/unread-count')
-      .then((res) => res.json())
-      .then((data) => setUnreadCount(data.count || 0))
-      .catch(() => {});
+    try {
+      const res = await getUnreadCountAction();
+      if (res.success && res.data) {
+        setUnreadCount((res.data as { count: number }).count || 0);
+      }
+    } catch {
+      // Background fetch handles errors silently
+    }
   }, [status]);
 
   useEffect(() => {
-    fetchUnread();
+    // Initial fetch deferred to avoid lint error about synchronous state updates in effects
+    const timer = setTimeout(() => {
+      void fetchUnread();
+    }, 0);
+
     const interval = setInterval(fetchUnread, 30000);
-    const handleUnreadUpdate = () => fetchUnread();
+    const handleUnreadUpdate = () => {
+      void fetchUnread();
+    };
     window.addEventListener('unread-updated', handleUnreadUpdate);
     return () => {
+      clearTimeout(timer);
       clearInterval(interval);
       window.removeEventListener('unread-updated', handleUnreadUpdate);
     };
@@ -233,7 +245,7 @@ export default function Navbar() {
                 />
                 {/* Active indicator dot */}
                 {isActive && (
-                  <motion.div
+                  <m.div
                     layoutId="activeIndicator"
                     className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
@@ -265,7 +277,7 @@ export default function Navbar() {
                 </span>
               )}
               {isMessagesPage && (
-                <motion.div
+                <m.div
                   layoutId="activeIndicator"
                   className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full"
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
@@ -296,7 +308,7 @@ export default function Navbar() {
               />
             )}
             {(isDashboardPage || pathname === '/admin-login') && (
-              <motion.div
+              <m.div
                 layoutId="activeIndicator"
                 className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
@@ -318,7 +330,7 @@ export default function Navbar() {
         >
           <AnimatePresence mode="wait" initial={false}>
             {isOpen ? (
-              <motion.span
+              <m.span
                 key="close"
                 initial={{ rotate: -90, opacity: 0 }}
                 animate={{ rotate: 0, opacity: 1 }}
@@ -326,9 +338,9 @@ export default function Navbar() {
                 transition={{ duration: 0.15 }}
               >
                 <FiX size={26} />
-              </motion.span>
+              </m.span>
             ) : (
-              <motion.span
+              <m.span
                 key="menu"
                 initial={{ rotate: 90, opacity: 0 }}
                 animate={{ rotate: 0, opacity: 1 }}
@@ -336,7 +348,7 @@ export default function Navbar() {
                 transition={{ duration: 0.15 }}
               >
                 <FiMenu size={26} />
-              </motion.span>
+              </m.span>
             )}
           </AnimatePresence>
         </button>
@@ -347,7 +359,7 @@ export default function Navbar() {
         {isOpen && (
           <>
             {/* Backdrop */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -355,7 +367,7 @@ export default function Navbar() {
               onClick={handleLinkClick}
             />
             {/* Slide-in panel */}
-            <motion.div
+            <m.div
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
@@ -375,7 +387,7 @@ export default function Navbar() {
                   const Icon = link.icon;
                   const isActive = activeSection === link.section;
                   return (
-                    <motion.div
+                    <m.div
                       key={link.section}
                       initial={{ x: 40, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
@@ -400,13 +412,13 @@ export default function Navbar() {
                         <Icon size={22} />
                         <span className="font-medium">{link.label}</span>
                       </Link>
-                    </motion.div>
+                    </m.div>
                   );
                 })}
 
                 {status === 'authenticated' && (
                   <>
-                    <motion.div
+                    <m.div
                       initial={{ x: 40, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: (navLinks.length + 1) * 0.05 }}
@@ -426,11 +438,11 @@ export default function Navbar() {
                         </div>
                         <span className="font-medium">Messages</span>
                       </Link>
-                    </motion.div>
+                    </m.div>
                   </>
                 )}
 
-                <motion.div
+                <m.div
                   initial={{ x: 40, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: navLinks.length * 0.05 }}
@@ -443,13 +455,13 @@ export default function Navbar() {
                     {status === 'authenticated' ? <FaUnlockAlt size={22} /> : <FaLock size={22} />}
                     <span className="font-medium">Admin</span>
                   </Link>
-                </motion.div>
+                </m.div>
               </nav>
 
               <div className="mt-auto pt-6 border-t border-neutral-300/20 dark:border-neutral-600/20 flex justify-center">
                 <ThemeToggle />
               </div>
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>

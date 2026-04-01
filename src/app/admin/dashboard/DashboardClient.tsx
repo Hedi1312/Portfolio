@@ -3,7 +3,7 @@
 import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
   LogOut,
   Mail,
@@ -17,6 +17,8 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { GrDocumentPdf } from 'react-icons/gr';
+import { getUmamiStatsAction } from '@/actions/analytics.action';
+import type { AnalyticsData } from '../analytics/AnalyticsClient';
 
 interface KpiData {
   visitors: number | null;
@@ -32,7 +34,7 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ unreadCount, projectsCount }: DashboardClientProps) {
   const router = useRouter();
-  // On hydrate directement avec les données du Server Component (0ms de lag)
+  // Hydrate from Server Component data
   const [kpi, setKpi] = useState<KpiData>({
     visitors: null,
     pageviews: null,
@@ -40,20 +42,20 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
     projects: projectsCount,
   });
 
-  // Le loader n'affecte plus que les Visitors/Pageviews
+  // Analytics-only loading state
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
 
   const fetchAnalytics = useCallback(async () => {
     setLoadingAnalytics(true);
     try {
-      // On requête JUSTE l'analytics lourd en tâche de fond
-      const analyticsRes = await fetch('/api/admin/analytics?period=7d');
+      // Background fetch for heavy analytics data
+      const analyticsRes = await getUmamiStatsAction('7d');
 
       let visitors: number | null = null;
       let pageviews: number | null = null;
 
-      if (analyticsRes.ok) {
-        const analytics = await analyticsRes.json();
+      if (analyticsRes.success && analyticsRes.data) {
+        const analytics = analyticsRes.data as AnalyticsData;
         visitors = analytics.stats?.visitors ?? null;
         pageviews = analytics.stats?.pageviews ?? null;
       }
@@ -100,7 +102,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       icon: Mail,
       color: kpi.unread > 0 ? 'text-danger-500' : 'text-emerald-500',
       bg: kpi.unread > 0 ? 'bg-danger-500/10' : 'bg-emerald-500/10',
-      isLoading: false, // Donnée 100% back-end (Server Component)
+      isLoading: false,
     },
     {
       label: 'Projets',
@@ -109,7 +111,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       icon: FileText,
       color: 'text-amber-500',
       bg: 'bg-amber-500/10',
-      isLoading: false, // Donnée 100% back-end (Server Component)
+      isLoading: false,
     },
   ];
 
@@ -165,8 +167,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
   return (
     <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
       <div className="mx-auto max-w-7xl w-full">
-        {/* Header */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -187,14 +188,13 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
             <LogOut className="h-4 w-4" />
             Déconnexion
           </button>
-        </motion.div>
+        </m.div>
 
-        {/* KPI Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {kpis.map((item, i) => {
             const Icon = item.icon;
             return (
-              <motion.div
+              <m.div
                 key={item.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -218,23 +218,22 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
                 <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                   {item.label} &middot; {item.subtitle}
                 </p>
-              </motion.div>
+              </m.div>
             );
           })}
         </div>
 
-        {/* Quick Actions */}
-        <motion.h2
+        <m.h2
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
           className="text-lg font-bold text-neutral-900 dark:text-white mb-4"
         >
           Accès rapide
-        </motion.h2>
+        </m.h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {actions.map((action, index) => (
-            <motion.div
+            <m.div
               key={action.title}
               onClick={() => router.push(action.href)}
               className="group cursor-pointer rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-5 shadow-sm transition-all hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-700 relative overflow-hidden"
@@ -265,7 +264,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
                 </div>
                 <ArrowRight className="h-5 w-5 text-neutral-300 dark:text-neutral-600 group-hover:text-neutral-500 dark:group-hover:text-neutral-400 group-hover:translate-x-1 transition-all mt-1 shrink-0" />
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

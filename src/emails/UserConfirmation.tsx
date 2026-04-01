@@ -42,7 +42,7 @@ export const UserConfirmation = ({ name }: UserConfirmationProps) => (
                   </Text>
 
                   <div style={ctaSection}>
-                    <Link href="https://hedi-okba.fr" style={button}>
+                    <Link href={process.env.NEXT_PUBLIC_APP_URL} style={button}>
                       Retourner sur le site
                     </Link>
                   </div>

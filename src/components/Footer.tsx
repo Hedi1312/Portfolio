@@ -1,5 +1,5 @@
 'use client';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import Link from 'next/link';
 import { FaEnvelope, FaFolderOpen, FaGithub, FaHome, FaLinkedin, FaUser } from 'react-icons/fa';
 
@@ -127,7 +127,7 @@ export default function Footer() {
               ].map((social) => {
                 const Icon = social.icon;
                 return (
-                  <motion.a
+                  <m.a
                     key={social.label}
                     href={social.href}
                     target="_blank"
@@ -143,7 +143,7 @@ export default function Footer() {
                     <span className="text-sm font-medium group-hover:text-brand-400 transition-colors">
                       {social.username}
                     </span>
-                  </motion.a>
+                  </m.a>
                 );
               })}
             </div>

@@ -1,56 +1,100 @@
 /**
- * Rate limiter in-memory (sans dépendance externe).
- * Utilise une Map pour stocker les requêtes par clé (ex: IP).
- * Nettoyage automatique des entrées expirées.
+ * Postgres-backed rate limiter for serverless environments.
+ * Shared database ensures global limits across all Lambda instances.
  */
 
-interface RateLimitOptions {
-  /** Fenêtre de temps en millisecondes */
-  interval: number;
-  /** Nombre max de requêtes autorisées dans la fenêtre */
+import { prisma } from '@/lib/prisma';
+
+type Duration = `${number} ms` | `${number} s` | `${number} m` | `${number} h` | `${number} d`;
+
+interface RateLimitConfig {
   limit: number;
+  window: Duration;
+  prefix?: string;
 }
 
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
+interface RateLimitResult {
+  success: boolean;
+  retryAfter?: number;
 }
 
-export function rateLimit({ interval, limit }: RateLimitOptions) {
-  const tokenCache = new Map<string, RateLimitEntry>();
+interface RateLimiter {
+  check(key: string): Promise<RateLimitResult>;
+}
 
-  // Periodic cleanup of expired entries
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of tokenCache.entries()) {
-      if (now > entry.resetTime) {
-        tokenCache.delete(key);
-      }
-    }
-  }, 60_000).unref();
+function parseDurationMs(window: Duration): number {
+  const match = window.match(/^(\d+)\s*(ms|s|m|h|d)$/);
+  if (!match) return 60_000;
+  const value = Number(match[1]);
+  const multipliers: Record<string, number> = {
+    ms: 1,
+    s: 1_000,
+    m: 60_000,
+    h: 3_600_000,
+    d: 86_400_000,
+  };
+  return value * (multipliers[match[2]] ?? 60_000);
+}
+
+function createLimiter(config: RateLimitConfig, failClosed: boolean): RateLimiter {
+  const windowMs = parseDurationMs(config.window);
+  const prefix = config.prefix || 'rl';
 
   return {
-    /**
-     * Vérifie si la clé a dépassé la limite.
-     * @returns `{ success: true }` si autorisé, `{ success: false, retryAfter }` sinon.
-     */
-    check(key: string): { success: boolean; retryAfter?: number } {
-      const now = Date.now();
-      const entry = tokenCache.get(key);
+    async check(identifier: string): Promise<RateLimitResult> {
+      const key = `${prefix}:${identifier}`;
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + windowMs);
 
-      if (!entry || now > entry.resetTime) {
-        // Nouvelle fenêtre
-        tokenCache.set(key, { count: 1, resetTime: now + interval });
+      try {
+        // Atomic SQL to prevent race conditions during concurrent hits
+        const result = await prisma.$queryRaw<{ count: number; expires_at: Date }[]>`
+          INSERT INTO rate_limits (key, count, "expiresAt")
+          VALUES (${key}, 1, ${expiresAt})
+          ON CONFLICT (key) DO UPDATE SET
+            count = CASE
+              WHEN rate_limits."expiresAt" < ${now} THEN 1
+              ELSE rate_limits.count + 1
+            END,
+            "expiresAt" = CASE
+              WHEN rate_limits."expiresAt" < ${now} THEN ${expiresAt}
+              ELSE rate_limits."expiresAt"
+            END
+          RETURNING count, "expiresAt" AS expires_at
+        `;
+
+        const entry = result[0];
+
+        if (entry.count > config.limit) {
+          const retryAfter = Math.ceil(
+            (new Date(entry.expires_at).getTime() - now.getTime()) / 1000,
+          );
+          return { success: false, retryAfter: Math.max(retryAfter, 1) };
+        }
+
+        return { success: true };
+      } catch {
+        if (failClosed) {
+          // Block access if DB is down to prevent bypass during outages
+          return { success: false, retryAfter: 60 };
+        }
+        // Fail-open for non-critical paths
         return { success: true };
       }
-
-      if (entry.count >= limit) {
-        const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
-        return { success: false, retryAfter };
-      }
-
-      entry.count++;
-      return { success: true };
     },
   };
+}
+
+/**
+ * Standard limiter - fails open on DB error.
+ */
+export function rateLimit(config: RateLimitConfig): RateLimiter {
+  return createLimiter(config, false);
+}
+
+/**
+ * Critical limiter - fails closed on DB error to ensure protection.
+ */
+export function authRateLimit(config: RateLimitConfig): RateLimiter {
+  return createLimiter(config, true);
 }

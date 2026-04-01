@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { FiSun, FiMoon } from 'react-icons/fi';
 
 export default function ThemeToggle() {
@@ -34,7 +34,7 @@ export default function ThemeToggle() {
   }, []);
 
   return (
-    <motion.button
+    <m.button
       onClick={toggleTheme}
       className="relative p-2.5 w-10 h-10 flex items-center justify-center rounded-xl glass hover:border-brand-400/30 text-neutral-600 dark:text-neutral-300 hover:text-brand-400 cursor-pointer transition-all duration-300"
       aria-label="Toggle theme"
@@ -46,7 +46,7 @@ export default function ThemeToggle() {
       ) : (
         <AnimatePresence mode="wait" initial={false}>
           {theme === 'light' ? (
-            <motion.div
+            <m.div
               key="sun"
               initial={{ rotate: -90, scale: 0 }}
               animate={{ rotate: 0, scale: 1 }}
@@ -54,9 +54,9 @@ export default function ThemeToggle() {
               transition={{ duration: 0.2 }}
             >
               <FiSun size={18} />
-            </motion.div>
+            </m.div>
           ) : (
-            <motion.div
+            <m.div
               key="moon"
               initial={{ rotate: 90, scale: 0 }}
               animate={{ rotate: 0, scale: 1 }}
@@ -64,10 +64,10 @@ export default function ThemeToggle() {
               transition={{ duration: 0.2 }}
             >
               <FiMoon size={18} />
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       )}
-    </motion.button>
+    </m.button>
   );
 }

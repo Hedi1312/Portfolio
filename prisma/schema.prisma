@@ -12,6 +12,7 @@ model Admin {
   passwordHash      String
   passwordUpdatedAt DateTime?
   otpSecret         String?
+  pendingOtpSecret  String?
   createdAt         DateTime        @default(now())
 
   passwordReset     PasswordReset?
@@ -145,4 +146,14 @@ model AboutMeTech {
   aboutMe   AboutMe @relation(fields: [aboutMeId], references: [id], onDelete: Cascade)
 
   @@map("about_me_techs")
+}
+
+// Rate limiting — serverless-compatible via shared PostgreSQL
+model RateLimit {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+  @@map("rate_limits")
 }

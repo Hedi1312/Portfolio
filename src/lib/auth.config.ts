@@ -12,18 +12,15 @@ export const authConfig = {
       const isProtectedAdminPath = nextUrl.pathname.startsWith('/admin') && !isLoginPath;
       const isProtectedApiAdminPath = nextUrl.pathname.startsWith('/api/admin');
 
-      // Block unauthenticated Admin APIs
       if (isProtectedApiAdminPath && !isLoggedIn) {
         return Response.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
-      // Redirect to login if unauthenticated
       if (isProtectedAdminPath) {
         if (isLoggedIn) return true;
         return Response.redirect(new URL('/admin-login', nextUrl));
       }
 
-      // Block login access if logged in
       if (isLoginPath) {
         if (isLoggedIn) return Response.redirect(new URL('/admin/dashboard', nextUrl));
         return true;
