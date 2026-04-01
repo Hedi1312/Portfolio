@@ -2,7 +2,8 @@
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { contactSchema } from '@/lib/schemas/contact';
 import { AnimatePresence, m } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FiMail, FiX, FiSend, FiCheckCircle, FiPaperclip } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';
 import { useNeonHover } from '@/hooks/useNeonHover';
@@ -15,7 +16,12 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [mounted, setMounted] = useState(false);
   const neonHover = useNeonHover(-8);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useLockBodyScroll(isOpen);
 
@@ -149,209 +155,213 @@ export default function Contact() {
       </m.div>
 
       {/* Modal */}
-      <AnimatePresence>
-        {isOpen && (
-          <m.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4"
-            onClick={handleClose}
-          >
+      {mounted && createPortal(
+        <AnimatePresence>
+          {isOpen && (
             <m.div
-              initial={{ scale: 0.95, opacity: 0, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="glass-card max-w-lg w-full p-8 relative text-left"
-              onClick={(e) => e.stopPropagation()}
+              key="contact-modal"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-[9999] p-4"
+              onClick={handleClose}
             >
-              <button
-                onClick={handleClose}
-                className="absolute top-4 right-4 p-2 rounded-xl hover:bg-brand-400/10 text-neutral-500 hover:text-foreground transition-all cursor-pointer"
+              <m.div
+                initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
+                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-2xl rounded-2xl max-w-lg w-full p-8 relative text-left"
+                onClick={(e) => e.stopPropagation()}
               >
-                <FiX size={20} />
-              </button>
+                <button
+                  onClick={handleClose}
+                  className="absolute top-4 right-4 p-2 rounded-xl hover:bg-brand-400/10 text-neutral-500 hover:text-foreground transition-all cursor-pointer"
+                >
+                  <FiX size={20} />
+                </button>
 
-              <h2 className="text-2xl font-bold mb-1 font-(family-name:--font-space-grotesk)">
-                <span className="gradient-text">Contacte-moi</span>
-              </h2>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
-                Je te réponds en moins de 24h.
-              </p>
+                <h2 className="text-2xl font-bold mb-1 font-(family-name:--font-space-grotesk)">
+                  <span className="gradient-text">Contacte-moi</span>
+                </h2>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
+                  Je te réponds en moins de 24h.
+                </p>
 
-              {error && (
-                <div className="mb-4 rounded-xl bg-danger-50 dark:bg-danger-100/10 border border-danger-200 dark:border-danger-500/30 p-3 text-center text-danger-600 dark:text-danger-400 text-sm font-medium">
-                  {error}
-                </div>
-              )}
+                {error && (
+                  <div className="mb-4 rounded-xl bg-danger-50 dark:bg-danger-100/10 border border-danger-200 dark:border-danger-500/30 p-3 text-center text-danger-600 dark:text-danger-400 text-sm font-medium">
+                    {error}
+                  </div>
+                )}
 
-              {!submitted ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <input
-                    type="text"
-                    name="company"
-                    value={honeypot}
-                    onChange={(e) => setHoneypot(e.target.value)}
-                    style={{ display: 'none' }}
-                    tabIndex={-1}
-                    autoComplete="off"
-                  />
-
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      Prénom NOM
-                    </label>
+                {!submitted ? (
+                  <form onSubmit={handleSubmit} className="space-y-4">
                     <input
                       type="text"
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
-                      required
-                      className={inputClasses}
-                      placeholder="Prénom NOM"
+                      name="company"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      style={{ display: 'none' }}
+                      tabIndex={-1}
+                      autoComplete="off"
                     />
-                  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      required
-                      className={inputClasses}
-                      placeholder="exemple@exemple.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      Sujet
-                    </label>
-                    <input
-                      type="text"
-                      name="subject"
-                      value={form.subject}
-                      onChange={handleChange}
-                      required
-                      className={inputClasses}
-                      placeholder="Ex : Proposition de collaboration"
-                      maxLength={150}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      Message
-                    </label>
-                    <textarea
-                      name="message"
-                      value={form.message}
-                      onChange={handleChange}
-                      required
-                      rows={4}
-                      className={inputClasses}
-                      placeholder="Ton message..."
-                    ></textarea>
-                  </div>
-
-                  {/* Multi-file upload UI */}
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                      Pièces jointes (optionnel - max 10 Mo)
-                    </label>
-                    <div className="relative group">
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                        Prénom NOM
+                      </label>
                       <input
-                        type="file"
-                        multiple
-                        onChange={handleFileChange}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        title="Ajouter des fichiers"
+                        type="text"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        required
+                        className={inputClasses}
+                        placeholder="Prénom NOM"
                       />
-                      <div className="w-full flex items-center justify-between p-3.5 rounded-xl border border-dashed border-neutral-300 dark:border-neutral-600 bg-neutral-50/30 dark:bg-neutral-800/20 group-hover:bg-neutral-100 dark:group-hover:bg-neutral-800 transition-colors">
-                        <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-                          <FiPaperclip size={16} />
-                          {files.length > 0 ? (
-                            <span className="text-foreground font-medium">
-                              {files.length} fichier(s) sélectionné(s)
-                            </span>
-                          ) : (
-                            <span>Clique ou glisse tes fichiers ici</span>
-                          )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        required
+                        className={inputClasses}
+                        placeholder="exemple@exemple.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                        Sujet
+                      </label>
+                      <input
+                        type="text"
+                        name="subject"
+                        value={form.subject}
+                        onChange={handleChange}
+                        required
+                        className={inputClasses}
+                        placeholder="Ex : Proposition de collaboration"
+                        maxLength={150}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                        Message
+                      </label>
+                      <textarea
+                        name="message"
+                        value={form.message}
+                        onChange={handleChange}
+                        required
+                        rows={4}
+                        className={inputClasses}
+                        placeholder="Ton message..."
+                      ></textarea>
+                    </div>
+
+                    {/* Multi-file upload UI */}
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+                        Pièces jointes (optionnel - max 10 Mo)
+                      </label>
+                      <div className="relative group">
+                        <input
+                          type="file"
+                          multiple
+                          onChange={handleFileChange}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                          title="Ajouter des fichiers"
+                        />
+                        <div className="w-full flex items-center justify-between p-3.5 rounded-xl border border-dashed border-neutral-300 dark:border-neutral-600 bg-neutral-50/30 dark:bg-neutral-800/20 group-hover:bg-neutral-100 dark:group-hover:bg-neutral-800 transition-colors">
+                          <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+                            <FiPaperclip size={16} />
+                            {files.length > 0 ? (
+                              <span className="text-foreground font-medium">
+                                {files.length} fichier(s) sélectionné(s)
+                              </span>
+                            ) : (
+                              <span>Clique ou glisse tes fichiers ici</span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    {/* Selected files list */}
-                    {files.length > 0 && (
-                      <div className="flex items-center gap-1.5 flex-wrap mt-2">
-                        {files.map((f, i) => (
-                          <span
-                            key={i}
-                            className="inline-flex items-center gap-1 text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 px-2 py-1 rounded-md"
-                          >
-                            <FiPaperclip size={10} />
-                            {f.name}
+                      {/* Selected files list */}
+                      {files.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                          {files.map((f, i) => (
+                            <span
+                              key={i}
+                              className="inline-flex items-center gap-1 text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 px-2 py-1 rounded-md"
+                            >
+                              <FiPaperclip size={10} />
+                              {f.name}
+                              <button
+                                type="button"
+                                onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
+                                className="text-neutral-400 hover:text-danger-500 cursor-pointer ml-1"
+                              >
+                                <FiX size={12} />
+                              </button>
+                            </span>
+                          ))}
+                          {files.length > 1 && (
                             <button
                               type="button"
-                              onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
-                              className="text-neutral-400 hover:text-danger-500 cursor-pointer ml-1"
+                              onClick={() => setFiles([])}
+                              className="text-xs text-neutral-400 hover:text-danger-500 cursor-pointer ml-1"
                             >
-                              <FiX size={12} />
+                              Tout retirer
                             </button>
-                          </span>
-                        ))}
-                        {files.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => setFiles([])}
-                            className="text-xs text-neutral-400 hover:text-danger-500 cursor-pointer ml-1"
-                          >
-                            Tout retirer
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
 
-                  <Button
-                    type="submit"
-                    isLoading={isSubmitting}
-                    loadingText="Envoi en cours..."
-                    fullWidth
-                    className="mt-6"
-                  >
-                    <FiSend size={16} />
-                    Envoyer
-                  </Button>
-                </form>
-              ) : (
-                <m.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
-                >
+                    <Button
+                      type="submit"
+                      isLoading={isSubmitting}
+                      loadingText="Envoi en cours..."
+                      fullWidth
+                      className="mt-6"
+                    >
+                      <FiSend size={16} />
+                      Envoyer
+                    </Button>
+                  </form>
+                ) : (
                   <m.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', damping: 15, stiffness: 200, delay: 0.1 }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-12"
                   >
-                    <FiCheckCircle size={56} className="text-success-400 mx-auto mb-4" />
+                    <m.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', damping: 15, stiffness: 200, delay: 0.1 }}
+                    >
+                      <FiCheckCircle size={56} className="text-success-400 mx-auto mb-4" />
+                    </m.div>
+                    <p className="text-xl font-semibold mb-2">Message envoyé !</p>
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                      Je te réponds très vite
+                    </p>
                   </m.div>
-                  <p className="text-xl font-semibold mb-2">Message envoyé !</p>
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                    Je te réponds très vite
-                  </p>
-                </m.div>
-              )}
+                )}
+              </m.div>
             </m.div>
-          </m.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }

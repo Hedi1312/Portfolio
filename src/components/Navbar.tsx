@@ -18,6 +18,7 @@ import {
   FaUser,
 } from 'react-icons/fa';
 import { FiMenu, FiX } from 'react-icons/fi';
+import { getUnreadCountAction } from '@/actions/message.action';
 
 const navLinks = [
   { href: '/', icon: FaHome, label: 'Accueil', section: 'home' },
@@ -41,12 +42,16 @@ export default function Navbar() {
   const isMessagesPage = pathname === '/admin/messages';
   const isDashboardPage = pathname.startsWith('/admin') && !isMessagesPage;
 
-  const fetchUnread = useCallback(() => {
+  const fetchUnread = useCallback(async () => {
     if (status !== 'authenticated') return;
-    fetch('/api/admin/messages/unread-count')
-      .then((res) => res.json())
-      .then((data) => setUnreadCount(data.count || 0))
-      .catch(() => {});
+    try {
+      const res = await getUnreadCountAction();
+      if (res.success && res.data) {
+        setUnreadCount((res.data as { count: number }).count || 0);
+      }
+    } catch {
+      // Background fetch handles errors silently
+    }
   }, [status]);
 
   useEffect(() => {

@@ -28,7 +28,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: 'Hëdi OKBA | Ingénieur et Développeur Full-Stack',
+    default: 'Hëdi OKBA | Développeur Full-Stack',
     template: '%s | Hëdi OKBA',
   },
   description:
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Hëdi OKBA | Ingénieur et Développeur Full-Stack',
+    title: 'Hëdi OKBA | Développeur Full-Stack',
     description:
       "Développeur passionné par la création d'expériences web modernes, performantes et élégantes.",
     url: APP_URL,
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Hëdi OKBA | Ingénieur et Développeur Full-Stack',
+    title: 'Hëdi OKBA | Développeur Full-Stack',
     description: 'Découvrez mon portfolio, mes projets et mon parcours web.',
     images: ['/og-image.png'],
   },

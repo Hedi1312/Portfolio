@@ -60,9 +60,11 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
   const [sending, setSending] = useState(false);
   const [replyFileError, setReplyFileError] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
+    setIsMounted(true);
     setContacts(initialContacts);
   }, [initialContacts]);
 
@@ -250,11 +252,13 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
             </Link>
             <div>
               <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900 dark:text-white flex items-center gap-3">
-                <FiMail className="text-brand-500" />
+                <span className="p-2 bg-brand-500/10 rounded-xl">
+                  <FiMail className="text-brand-500" />
+                </span>
                 Messages
                 {totalUnread > 0 && (
-                  <span className="ml-3 text-sm font-bold bg-danger-500 text-white px-2.5 py-1 rounded-full mt-1">
-                    {totalUnread} non lu{totalUnread > 1 ? 's' : ''}
+                  <span className="text-sm px-3 py-1 bg-danger-500 text-white rounded-full font-bold shadow-sm shadow-danger-500/20">
+                    {totalUnread} non lus
                   </span>
                 )}
               </h1>
@@ -312,8 +316,8 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
                               {unread}
                             </span>
                           )}
-                          <span className="text-xs text-neutral-400 dark:text-neutral-500 shrink-0 ml-auto">
-                            {formatDate(contact.updatedAt)}
+                          <span className="text-xs text-neutral-400 dark:text-neutral-500 shrink-0 ml-auto min-w-[32px] text-right">
+                            {isMounted ? formatDate(contact.updatedAt) : ''}
                           </span>
                         </div>
                         <p className="text-xs text-neutral-500 mb-1 truncate">{contact.email}</p>
@@ -431,7 +435,7 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
                                     {selected.name}
                                   </span>
                                   <span className="text-xs text-neutral-400">
-                                    {formatFull(msg.createdAt)}
+                                    {isMounted ? formatFull(msg.createdAt) : ''}
                                   </span>
                                 </div>
                                 <div className="bg-neutral-50 dark:bg-neutral-900/50 rounded-xl rounded-tl-sm p-4 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap wrap-break-word">
@@ -446,8 +450,8 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
                               <div key={reply.id} className="flex gap-3 mt-4 justify-end">
                                 <div className="flex-1 min-w-0 max-w-[85%]">
                                   <div className="flex items-center gap-2 mb-1 justify-end">
-                                    <span className="text-xs text-neutral-400">
-                                      {formatFull(reply.createdAt)}
+                                    <span className="text-xs text-neutral-500">
+                                      {isMounted ? formatFull(reply.createdAt) : ''}
                                     </span>
                                     <span className="text-sm font-semibold text-brand-600 dark:text-brand-400">
                                       Moi
@@ -478,7 +482,7 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
                         className="w-full p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:outline-none resize-none transition-all"
                       />
 
-                      <div className="flex items-center justify-between mt-3 gap-3">
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-200 dark:border-neutral-700/50">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <label className="inline-flex items-center gap-2 px-3 py-2 text-sm text-neutral-600 dark:text-neutral-400 hover:text-brand-500 cursor-pointer rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
                             <FiPaperclip size={16} />
@@ -534,6 +538,7 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
                                 </span>
                               ))}
                               <button
+                                type="button"
                                 onClick={() => setReplyFiles([])}
                                 className="text-xs text-neutral-400 hover:text-danger-500 cursor-pointer ml-1"
                               >
@@ -561,8 +566,8 @@ export default function MessagesClient({ initialContacts }: { initialContacts: C
                     animate={{ opacity: 1 }}
                     className="hidden lg:flex items-center justify-center h-96 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl"
                   >
-                    <div className="text-center text-neutral-400 dark:text-neutral-500">
-                      <FiMail size={40} className="mx-auto mb-3 opacity-50" />
+                    <div className="flex flex-col items-center justify-center h-full text-neutral-400 dark:text-neutral-500 p-8">
+                      <FiMail size={48} className="mb-4 opacity-20" />
                       <p>Sélectionne une conversation</p>
                     </div>
                   </m.div>

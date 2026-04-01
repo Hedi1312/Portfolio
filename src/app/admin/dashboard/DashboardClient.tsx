@@ -17,6 +17,8 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { GrDocumentPdf } from 'react-icons/gr';
+import { getUmamiStatsAction } from '@/actions/analytics.action';
+import type { AnalyticsData } from '../analytics/AnalyticsClient';
 
 interface KpiData {
   visitors: number | null;
@@ -47,13 +49,13 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
     setLoadingAnalytics(true);
     try {
       // Background fetch for heavy analytics data
-      const analyticsRes = await fetch('/api/admin/analytics?period=7d');
+      const analyticsRes = await getUmamiStatsAction('7d');
 
       let visitors: number | null = null;
       let pageviews: number | null = null;
 
-      if (analyticsRes.ok) {
-        const analytics = await analyticsRes.json();
+      if (analyticsRes.success && analyticsRes.data) {
+        const analytics = analyticsRes.data as AnalyticsData;
         visitors = analytics.stats?.visitors ?? null;
         pageviews = analytics.stats?.pageviews ?? null;
       }
@@ -100,7 +102,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       icon: Mail,
       color: kpi.unread > 0 ? 'text-danger-500' : 'text-emerald-500',
       bg: kpi.unread > 0 ? 'bg-danger-500/10' : 'bg-emerald-500/10',
-      isLoading: false, // Server-side data
+      isLoading: false, 
     },
     {
       label: 'Projets',
@@ -109,7 +111,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       icon: FileText,
       color: 'text-amber-500',
       bg: 'bg-amber-500/10',
-      isLoading: false, // Server-side data
+      isLoading: false, 
     },
   ];
 

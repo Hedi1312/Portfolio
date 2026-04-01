@@ -49,6 +49,22 @@ export async function markAsReadAction(contactId: string): Promise<ActionResult>
   }
 }
 
+export async function getUnreadCountAction(): Promise<ActionResult> {
+  const { unauthorized } = await requireAdmin();
+  if (unauthorized) return { error: 'Non autorisé' };
+
+  try {
+    const count = await prisma.contactMessage.count({
+      where: { isRead: false },
+    });
+
+    return { success: true, data: { count } };
+  } catch (error) {
+    console.error('[actions/message:getUnreadCount]', error);
+    return { error: 'Erreur serveur lors de la récupération des messages non lus.' };
+  }
+}
+
 export async function deleteContactAction(contactId: string): Promise<ActionResult> {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return { error: 'Non autorisé' };
@@ -102,6 +118,9 @@ export async function deleteContactAction(contactId: string): Promise<ActionResu
     }
 
     // Cascade delete handles message/reply removal in DB
+    await prisma.contact.delete({
+      where: { id: contactId },
+    });
 
     revalidatePath('/admin/messages');
     return { success: true };
