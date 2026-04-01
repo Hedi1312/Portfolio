@@ -102,7 +102,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       icon: Mail,
       color: kpi.unread > 0 ? 'text-danger-500' : 'text-emerald-500',
       bg: kpi.unread > 0 ? 'bg-danger-500/10' : 'bg-emerald-500/10',
-      isLoading: false, 
+      isLoading: false,
     },
     {
       label: 'Projets',
@@ -111,7 +111,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       icon: FileText,
       color: 'text-amber-500',
       bg: 'bg-amber-500/10',
-      isLoading: false, 
+      isLoading: false,
     },
   ];
 

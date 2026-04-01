@@ -55,11 +55,18 @@ export default function Navbar() {
   }, [status]);
 
   useEffect(() => {
-    fetchUnread();
+    // Initial fetch deferred to avoid lint error about synchronous state updates in effects
+    const timer = setTimeout(() => {
+      void fetchUnread();
+    }, 0);
+
     const interval = setInterval(fetchUnread, 30000);
-    const handleUnreadUpdate = () => fetchUnread();
+    const handleUnreadUpdate = () => {
+      void fetchUnread();
+    };
     window.addEventListener('unread-updated', handleUnreadUpdate);
     return () => {
+      clearTimeout(timer);
       clearInterval(interval);
       window.removeEventListener('unread-updated', handleUnreadUpdate);
     };
