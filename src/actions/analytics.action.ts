@@ -11,18 +11,19 @@ export type ActionResult = {
 
 const periodSchema = z.enum(['24h', '7d', '30d', '90d']).catch('7d');
 
-const UMAMI_API_URL = process.env.UMAMI_API_URL;
-const UMAMI_API_KEY = process.env.UMAMI_API_KEY;
-const WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
-
-async function umamiGet(path: string, params?: Record<string, string>) {
-  const url = new URL(`${UMAMI_API_URL}${path}`);
+async function umamiGet(
+  urlBase: string,
+  key: string,
+  path: string,
+  params?: Record<string, string>,
+) {
+  const url = new URL(`${urlBase}${path}`);
   if (params) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   }
   const res = await fetch(url.toString(), {
     headers: {
-      'x-umami-api-key': UMAMI_API_KEY!,
+      'x-umami-api-key': key,
       Accept: 'application/json',
     },
     next: { revalidate: 0 },
@@ -59,6 +60,10 @@ export async function getUmamiStatsAction(rawPeriod: string): Promise<ActionResu
   const { unauthorized } = await requireAdmin();
   if (unauthorized) return { error: 'Non autorisé' };
 
+  const UMAMI_API_URL = process.env.UMAMI_API_URL;
+  const UMAMI_API_KEY = process.env.UMAMI_API_KEY;
+  const WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+
   if (!UMAMI_API_URL || !UMAMI_API_KEY || !WEBSITE_ID) {
     return { error: 'Variables Umami non configurées' };
   }
@@ -82,11 +87,21 @@ export async function getUmamiStatsAction(rawPeriod: string): Promise<ActionResu
     const basePath = `/websites/${WEBSITE_ID}`;
 
     const [active, stats, pageviews, ...metricsData] = await Promise.all([
-      umamiGet(`${basePath}/active`),
-      umamiGet(`${basePath}/stats`, { startAt, endAt }),
-      umamiGet(`${basePath}/pageviews`, { startAt, endAt, unit, timezone: tz }),
+      umamiGet(UMAMI_API_URL, UMAMI_API_KEY, `${basePath}/active`),
+      umamiGet(UMAMI_API_URL, UMAMI_API_KEY, `${basePath}/stats`, { startAt, endAt }),
+      umamiGet(UMAMI_API_URL, UMAMI_API_KEY, `${basePath}/pageviews`, {
+        startAt,
+        endAt,
+        unit,
+        timezone: tz,
+      }),
       ...metricsConfig.map(({ type, limit }) =>
-        umamiGet(`${basePath}/metrics`, { startAt, endAt, type, limit }),
+        umamiGet(UMAMI_API_URL, UMAMI_API_KEY, `${basePath}/metrics`, {
+          startAt,
+          endAt,
+          type,
+          limit,
+        }),
       ),
     ]);
 

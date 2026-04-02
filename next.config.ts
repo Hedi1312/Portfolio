@@ -17,12 +17,12 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : ''} https://cloud.umami.is https://va.vercel-scripts.com`,
+      `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : ''} https://va.vercel-scripts.com`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://res.cloudinary.com https://flagcdn.com",
+      "img-src 'self' data: blob: https://res.cloudinary.com https://flagcdn.com https://raw.githubusercontent.com",
       "media-src 'self' https://res.cloudinary.com",
-      "connect-src 'self' https://cloud.umami.is https://api.cloudinary.com https://api.umami.is https://va.vercel-scripts.com",
+      "connect-src 'self' https://api.cloudinary.com https://va.vercel-scripts.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -41,6 +41,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'flagcdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
       },
     ],
   },
