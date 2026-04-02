@@ -2,7 +2,7 @@
 
 import { m } from 'framer-motion';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import {
   FiActivity,
   FiArrowLeft,
@@ -36,7 +36,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { AlertCircle, Monitor, Laptop, Smartphone, Tablet, BarChart3 } from 'lucide-react';
+import { AlertCircle, Monitor, BarChart3 } from 'lucide-react';
 import Image from 'next/image';
 
 // Types
@@ -127,46 +127,65 @@ const BROWSER_MAP: Record<
     label: 'Chrome',
     icon: FaChrome,
     color: '#4285F4',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome.svg',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/browser/chrome.png',
   },
   firefox: {
     label: 'Firefox',
     icon: FaFirefox,
     color: '#FF7139',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox.svg',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/browser/firefox.png',
   },
   safari: {
     label: 'Safari',
     icon: FaSafari,
     color: '#00AEFF',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari.svg',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/browser/safari.png',
   },
   edge: {
     label: 'Edge',
     icon: FaEdge,
     color: '#0078D7',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge.svg',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/browser/edge.png',
   },
   opera: {
     label: 'Opera',
     icon: FaOpera,
     color: '#FF1B2D',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera.svg',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/browser/opera.png',
   },
   ie: {
     label: 'Internet Explorer',
     icon: FaEdge,
     color: '#0078D7',
     logoUrl:
-      'https://raw.githubusercontent.com/alrra/browser-logos/master/src/archive/internet-explorer_9-11/internet-explorer_9-11.svg',
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/browser/ie.png',
+  },
+  'ios-webview': {
+    label: 'iOS WebView',
+    icon: FaApple,
+    color: '#555555',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/os/ios.png',
+  },
+  ios: {
+    label: 'iOS',
+    icon: FaApple,
+    color: '#555555',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/os/ios.png',
   },
 };
 
 const DEVICE_MAP: Record<string, { label: string; icon: IconComponent; color: string }> = {
-  desktop: { label: 'Ordinateur', icon: Monitor, color: '#6366F1' },
-  laptop: { label: 'PC Portable', icon: Laptop, color: '#8B5CF6' },
-  mobile: { label: 'Mobile', icon: Smartphone, color: '#10B981' },
-  tablet: { label: 'Tablette', icon: Tablet, color: '#F59E0B' },
+  desktop: { label: 'Ordinateur', icon: FiMonitor, color: '#3B82F6' },
+  laptop: { label: 'PC Portable', icon: FiMonitor, color: '#8B5CF6' },
+  tablet: { label: 'Tablette', icon: FiSmartphone, color: '#F59E0B' },
+  mobile: { label: 'Mobile', icon: FiSmartphone, color: '#10B981' },
 };
 
 const OS_MAP: Record<
@@ -177,60 +196,104 @@ const OS_MAP: Record<
     label: 'iOS',
     icon: FaApple,
     color: '#555555',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/apple/apple.svg',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/os/ios.png',
   },
   android: {
     label: 'Android',
     icon: FaAndroid,
     color: '#3DDC84',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/android/android.svg',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/os/android.png',
   },
   windows: {
     label: 'Windows',
     icon: FaWindows,
     color: '#0078D7',
     logoUrl:
-      'https://raw.githubusercontent.com/alrra/browser-logos/refs/heads/master/src/windows/windows.svg',
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/os/windows-10.png',
   },
   macos: {
     label: 'macOS',
     icon: FaApple,
     color: '#555555',
-    logoUrl: 'https://raw.githubusercontent.com/alrra/browser-logos/master/src/apple/apple.svg',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/os/mac-os.png',
   },
   linux: {
     label: 'Linux',
     icon: FaLinux,
     color: '#EAB308',
+    logoUrl:
+      'https://raw.githubusercontent.com/umami-software/umami/master/public/images/os/linux.png',
   },
+};
+
+const REFERRER_MAP: Record<string, { label: string; icon: IconComponent; color: string }> = {
+  google: { label: 'google.com', icon: FiLink, color: '#4285F4' },
+  linkedin: { label: 'linkedin.com', icon: FiLink, color: '#0077B5' },
+  github: { label: 'github.com', icon: FiLink, color: '#24292F' },
+  twitter: { label: 'twitter.com', icon: FiLink, color: '#1DA1F2' },
+  facebook: { label: 'facebook.com', icon: FiLink, color: '#1877F2' },
+  instagram: { label: 'instagram.com', icon: FiLink, color: '#E4405F' },
+  youtube: { label: 'youtube.com', icon: FiLink, color: '#FF0000' },
+  direct: { label: '(direct)', icon: FiMousePointer, color: '#9CA3AF' },
 };
 
 function formatLabel(
   label: string,
   map: Record<string, { label: string; icon: IconComponent; color: string; logoUrl?: string }>,
-) {
+): { label: string; icon: IconComponent; color: string; logoUrl?: string } {
   if (!label) return { label: 'Inconnu', icon: AlertCircle, color: '#9CA3AF' };
+
   const lower = label.toLowerCase().trim();
 
-  // OS specific checks only if map has these keys
-  if (lower.includes('windows') && map['windows']) return map['windows'];
-  if (lower.includes('ios') && map['ios']) return map['ios'];
-  if ((lower.includes('mac') || lower.includes('apple')) && map['macos']) return map['macos'];
-  if (lower.includes('android') && map['android']) return map['android'];
-  if (lower.includes('linux') && map['linux']) return map['linux'];
+  // Special case for direct traffic
+  if (lower === '(direct)' || lower === 'direct') {
+    return { ...REFERRER_MAP.direct };
+  }
 
-  // Browser checks for specific mobile
-  if (lower.includes('crios') && map['chrome']) return map['chrome'];
+  // Nettoyage systématique du label pour la casse et le formatage
+  let cleanLabel = label
+    .replace(/ios/gi, 'iOS')
+    .replace(/macos/gi, 'macOS')
+    .replace(/mac os/gi, 'macOS')
+    .replace(/webview/gi, 'WebView')
+    .trim();
 
-  const matchedKey = Object.keys(map).find((key) => lower.includes(key) || key.includes(lower));
+  // On capitalise la première lettre si c'est tout en minuscule après nettoyage
+  if (cleanLabel === cleanLabel.toLowerCase()) {
+    cleanLabel = cleanLabel.charAt(0).toUpperCase() + cleanLabel.slice(1);
+  }
 
-  return (
-    (matchedKey ? map[matchedKey] : null) || {
-      label: label.charAt(0).toUpperCase() + label.slice(1),
-      icon: Monitor,
-      color: '#6B7280',
-    }
-  );
+  let matched = null;
+
+  // OS specific checks
+  if (lower.includes('windows') && map['windows']) matched = map['windows'];
+  else if (lower.includes('ios') && map['ios']) matched = map['ios'];
+  else if ((lower.includes('mac') || lower.includes('apple')) && map['macos'])
+    matched = map['macos'];
+  else if (lower.includes('android') && map['android']) matched = map['android'];
+  else if (lower.includes('linux') && map['linux']) matched = map['linux'];
+  else if (lower.includes('crios') && map['chrome']) matched = map['chrome'];
+  else {
+    // Check if any key in map is included in the label (useful for domains)
+    const matchedKey = Object.keys(map).find((key) => lower.includes(key));
+    if (matchedKey) matched = map[matchedKey];
+  }
+
+  if (matched) {
+    return {
+      ...matched,
+      label: matched.label || cleanLabel,
+    };
+  }
+
+  return {
+    label: cleanLabel,
+    icon: map === REFERRER_MAP ? FiLink : Monitor,
+    color: '#6B7280',
+  };
 }
 
 // Logo Component
@@ -256,11 +319,22 @@ function BrandLogo({
         height={16}
         className="object-contain"
         onError={() => setError(true)}
+        unoptimized
       />
     );
   }
 
   return <Icon className="w-4 h-4" style={{ color }} />;
+}
+
+// Skeleton Components
+function Skeleton({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <div
+      className={`animate-pulse bg-neutral-200 dark:bg-neutral-700 rounded-lg ${className}`}
+      style={style}
+    />
+  );
 }
 
 // Tooltip Component
@@ -321,6 +395,7 @@ export default function AnalyticsClient({
   initialPeriod?: string;
 }) {
   const [isMounted, setIsMounted] = useState(false);
+  const initialFetchRef = useRef(true);
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -356,8 +431,9 @@ export default function AnalyticsClient({
   );
 
   useEffect(() => {
-    fetchData(period, true); // true = c'est le chargement initial potentiel
-  }, [period, fetchData]); // on ne met pas fetchData dans les deps pour éviter une boucle si fetchData change (notamment à cause des refs)
+    fetchData(period, initialFetchRef.current);
+    initialFetchRef.current = false;
+  }, [period, fetchData]);
 
   // Auto-refresh active visitors every 30s
   useEffect(() => {
@@ -498,16 +574,20 @@ export default function AnalyticsClient({
                       <div className={`p-1.5 rounded-lg ${kpi.bg}`}>
                         <Icon size={14} className={kpi.color} />
                       </div>
-                      {kpi.live && (
+                      {kpi.live && !loading && (
                         <span className="relative flex h-2.5 w-2.5">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75" />
                           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success-500" />
                         </span>
                       )}
                     </div>
-                    <p className="text-2xl font-bold text-neutral-900 dark:text-white">
-                      {kpi.value}
-                    </p>
+                    {loading ? (
+                      <Skeleton className="h-8 w-16 mb-1" />
+                    ) : (
+                      <p className="text-2xl font-bold text-neutral-900 dark:text-white">
+                        {kpi.value}
+                      </p>
+                    )}
                     <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                       {kpi.label}
                     </p>
@@ -527,7 +607,24 @@ export default function AnalyticsClient({
                 Pages vues & Sessions
               </h2>
               <div className="h-72">
-                {chartData.length > 0 ? (
+                {loading ? (
+                  <div className="w-full h-full flex flex-col gap-4">
+                    <div className="flex-1 flex items-end gap-2 px-2">
+                      {[...Array(12)].map((_, i) => (
+                        <Skeleton
+                          key={i}
+                          className="flex-1"
+                          style={{ height: `${Math.random() * 60 + 20}%` }}
+                        />
+                      ))}
+                    </div>
+                    <div className="h-4 flex justify-between px-2">
+                      <Skeleton className="w-12 h-full" />
+                      <Skeleton className="w-12 h-full" />
+                      <Skeleton className="w-12 h-full" />
+                    </div>
+                  </div>
+                ) : chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
                       <defs>
@@ -601,7 +698,15 @@ export default function AnalyticsClient({
                   Pages les plus visitées
                 </h2>
                 <div className="h-64">
-                  {(data?.pages || []).length > 0 ? (
+                  {loading ? (
+                    <div className="space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="flex items-center gap-4">
+                          <Skeleton className="w-full h-6" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (data?.pages || []).length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={(data?.pages || []).slice(0, 8)} layout="vertical">
                         <CartesianGrid
@@ -649,7 +754,19 @@ export default function AnalyticsClient({
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white px-6 pt-6 mb-4 flex items-center gap-2">
                   <FiMousePointer size={18} /> Événements trackés
                 </h2>
-                {data?.events && data.events.length > 0 ? (
+                {loading ? (
+                  <div className="space-y-4 px-6 pb-6">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="space-y-1">
+                        <div className="flex justify-between">
+                          <Skeleton className="w-24 h-4" />
+                          <Skeleton className="w-8 h-4" />
+                        </div>
+                        <Skeleton className="w-full h-2" />
+                      </div>
+                    ))}
+                  </div>
+                ) : data?.events && data.events.length > 0 ? (
                   <div className="space-y-3 max-h-64 overflow-y-auto px-6 pb-6">
                     {data.events.map((evt, i) => {
                       const maxVal = data.events![0].y;
@@ -691,18 +808,29 @@ export default function AnalyticsClient({
                 transition={{ delay: 0.4 }}
                 className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-0 overflow-hidden shadow-sm flex flex-col"
               >
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white px-6 pt-6 mb-4 flex items-center gap-2">
-                  <FiGlobe size={18} /> Pays
-                </h2>
+                <div className="flex justify-between items-center px-6 pt-6 mb-4">
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
+                    <FiGlobe size={18} /> Pays
+                  </h2>
+                  <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                    Visiteurs
+                  </span>
+                </div>
                 {data?.countries && data.countries.length > 0 ? (
                   <div className="space-y-3 max-h-72 overflow-y-auto px-6 pb-6">
                     {data.countries
                       .sort((a, b) => b.y - a.y)
                       .map((c, i) => {
-                        const total = data.countries!.reduce((acc, curr) => acc + curr.y, 0);
-                        const pct = total > 0 ? ((c.y / total) * 100).toFixed(1) : 0;
+                        const total = (data?.countries || []).reduce(
+                          (acc, curr) => acc + curr.y,
+                          0,
+                        );
+                        const pct = total > 0 ? ((c.y / total) * 100).toFixed(0) : 0;
                         return (
-                          <div key={i} className="flex items-center justify-between group">
+                          <div
+                            key={i}
+                            className="flex items-center justify-between p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg"
+                          >
                             <div className="flex items-center gap-3">
                               <div className="w-5 h-3.5 relative overflow-hidden rounded-sm border border-neutral-100 dark:border-neutral-700/50 shrink-0 shadow-xs">
                                 {getCountryFlagUrl(c.x) ? (
@@ -716,15 +844,18 @@ export default function AnalyticsClient({
                                   <FiGlobe className="w-full h-full text-neutral-400" />
                                 )}
                               </div>
-                              <span className="text-sm text-neutral-700 dark:text-neutral-300 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[140px]">
+                              <span className="text-sm text-neutral-700 dark:text-neutral-300 font-medium truncate max-w-[140px]">
                                 {getCountryName(c.x)}
                               </span>
                             </div>
-                            <div className="text-right">
-                              <span className="text-sm font-bold text-neutral-900 dark:text-white block">
+                            <div className="flex items-center gap-2 tabular-nums">
+                              <span className="text-sm font-bold text-neutral-900 dark:text-white">
                                 {c.y.toLocaleString('fr-FR')}
                               </span>
-                              <span className="text-xs text-neutral-400 font-medium">{pct}%</span>
+                              <div className="w-[1px] h-3 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+                              <span className="text-xs text-neutral-400 font-medium w-8 text-right">
+                                {pct}%
+                              </span>
                             </div>
                           </div>
                         );
@@ -747,65 +878,137 @@ export default function AnalyticsClient({
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white px-6 pt-6 mb-4 flex items-center gap-2">
                   <FiMonitor size={18} /> Navigateurs & OS
                 </h2>
-                {(data?.browsers?.length || 0) > 0 || (data?.os?.length || 0) > 0 ? (
+                {loading ? (
+                  <div className="space-y-8 px-6 pb-6">
+                    {[...Array(2)].map((_, sectionIdx) => (
+                      <div key={sectionIdx} className="space-y-3">
+                        <Skeleton className="w-24 h-3 mb-4" />
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="flex justify-between items-center py-2">
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="w-5 h-5 rounded-full" />
+                              <Skeleton className="w-24 h-4" />
+                            </div>
+                            <Skeleton className="w-12 h-4" />
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                ) : (data?.browsers?.length || 0) > 0 || (data?.os?.length || 0) > 0 ? (
                   <div className="space-y-4 px-6 pb-6 overflow-y-auto max-h-88">
-                    <div>
-                      <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
-                        Navigateurs
-                      </h3>
-                      <div className="space-y-1">
-                        {(data?.browsers || []).map((b, i) => {
-                          const itemData = formatLabel(b.x, BROWSER_MAP);
-                          const logoUrl = 'logoUrl' in itemData ? itemData.logoUrl : undefined;
-                          const { label, icon: Icon, color } = itemData;
-                          return (
-                            <div key={i} className="flex justify-between text-sm py-1">
-                              <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
-                                <BrandLogo
-                                  logoUrl={logoUrl}
-                                  label={label}
-                                  icon={Icon}
-                                  color={color}
-                                />
-                                <span>{label}</span>
-                              </span>
-                              <span className="font-medium text-neutral-900 dark:text-white">
-                                {b.y}
-                              </span>
-                            </div>
-                          );
-                        })}
+                    <section>
+                      <div className="flex justify-between items-center mb-3 px-0.5 border-b border-neutral-100 dark:border-neutral-700/50 pb-2">
+                        <h3 className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                          Navigateur
+                        </h3>
+                        <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                          Visiteurs
+                        </span>
                       </div>
-                    </div>
-                    <hr className="border-neutral-200 dark:border-neutral-700" />
-                    <div>
-                      <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
-                        Systèmes
-                      </h3>
-                      <div className="space-y-1">
-                        {(data?.os || []).map((o, i) => {
-                          const itemData = formatLabel(o.x, OS_MAP);
-                          const logoUrl = 'logoUrl' in itemData ? itemData.logoUrl : undefined;
-                          const { label, icon: Icon, color } = itemData;
-                          return (
-                            <div key={i} className="flex justify-between text-sm py-1">
-                              <span className="text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
-                                <BrandLogo
-                                  logoUrl={logoUrl}
-                                  label={label}
-                                  icon={Icon}
-                                  color={color}
-                                />
-                                <span>{label}</span>
-                              </span>
-                              <span className="font-medium text-neutral-900 dark:text-white">
-                                {o.y}
-                              </span>
-                            </div>
-                          );
-                        })}
+                      <div className="space-y-2">
+                        {(() => {
+                          type GroupedItem = { x: string; y: number } & ReturnType<
+                            typeof formatLabel
+                          >;
+                          const grouped = (data?.browsers || []).reduce((acc: GroupedItem[], b) => {
+                            const itemData = formatLabel(b.x, BROWSER_MAP);
+                            const existing = acc.find((e) => e.label === itemData.label);
+                            if (existing) {
+                              existing.y += b.y;
+                            } else {
+                              acc.push({ ...b, ...itemData });
+                            }
+                            return acc;
+                          }, []);
+
+                          const total = grouped.reduce((acc, curr) => acc + curr.y, 0);
+
+                          return grouped.slice(0, 5).map((b, i) => {
+                            const pct = total > 0 ? ((b.y / total) * 100).toFixed(0) : 0;
+                            return (
+                              <div
+                                key={i}
+                                className="flex justify-between items-center text-sm p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg"
+                              >
+                                <span className="text-neutral-700 dark:text-neutral-300 font-medium flex items-center gap-2">
+                                  <BrandLogo
+                                    logoUrl={b.logoUrl}
+                                    label={b.label}
+                                    icon={b.icon}
+                                    color={b.color}
+                                  />
+                                  <span>{b.label}</span>
+                                </span>
+                                <div className="flex items-center gap-2 tabular-nums">
+                                  <span className="font-bold text-neutral-900 dark:text-white">
+                                    {b.y.toLocaleString('fr-FR')}
+                                  </span>
+                                  <div className="w-[1px] h-3 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+                                  <span className="text-xs text-neutral-400 font-medium w-8 text-right">
+                                    {pct}%
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          });
+                        })()}
                       </div>
-                    </div>
+
+                      <div className="flex justify-between items-center mt-6 mb-3 px-2 border-b border-neutral-100 dark:border-neutral-700/50 pb-2">
+                        <h3 className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                          Système
+                        </h3>
+                      </div>
+                      <div className="space-y-2">
+                        {(() => {
+                          type GroupedItem = { x: string; y: number } & ReturnType<
+                            typeof formatLabel
+                          >;
+                          const grouped = (data?.os || []).reduce((acc: GroupedItem[], o) => {
+                            const itemData = formatLabel(o.x, OS_MAP);
+                            const existing = acc.find((e) => e.label === itemData.label);
+                            if (existing) {
+                              existing.y += o.y;
+                            } else {
+                              acc.push({ ...o, ...itemData });
+                            }
+                            return acc;
+                          }, []);
+
+                          const total = grouped.reduce((acc, curr) => acc + curr.y, 0);
+
+                          return grouped.slice(0, 5).map((o, i) => {
+                            const pct = total > 0 ? ((o.y / total) * 100).toFixed(0) : 0;
+                            return (
+                              <div
+                                key={i}
+                                className="flex justify-between items-center text-sm p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg"
+                              >
+                                <span className="text-neutral-700 dark:text-neutral-300 font-medium flex items-center gap-2">
+                                  <BrandLogo
+                                    logoUrl={o.logoUrl}
+                                    label={o.label}
+                                    icon={o.icon}
+                                    color={o.color}
+                                  />
+                                  <span>{o.label}</span>
+                                </span>
+                                <div className="flex items-center gap-2 tabular-nums">
+                                  <span className="font-bold text-neutral-900 dark:text-white">
+                                    {o.y.toLocaleString('fr-FR')}
+                                  </span>
+                                  <div className="w-[1px] h-3 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+                                  <span className="text-xs text-neutral-400 font-medium w-8 text-right">
+                                    {pct}%
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          });
+                        })()}
+                      </div>
+                    </section>
                   </div>
                 ) : (
                   <div className="flex-1 flex items-center justify-center py-8">
@@ -824,15 +1027,42 @@ export default function AnalyticsClient({
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white px-6 pt-6 mb-4 flex items-center gap-2">
                   <FiSmartphone size={18} /> Appareils & Sources
                 </h2>
-                {(data?.devices?.length || 0) > 0 || (data?.referrers?.length || 0) > 0 ? (
+                {loading ? (
+                  <div className="space-y-8 px-6 pb-6">
+                    {[...Array(2)].map((_, sectionIdx) => (
+                      <div key={sectionIdx} className="space-y-3">
+                        <Skeleton className="w-24 h-3 mb-4" />
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="flex justify-between items-center py-2">
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="w-5 h-5" />
+                              <Skeleton className="w-24 h-4" />
+                            </div>
+                            <Skeleton className="w-12 h-4" />
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                ) : (data?.devices?.length || 0) > 0 || (data?.referrers?.length || 0) > 0 ? (
                   <div className="space-y-4 px-6 pb-6 overflow-y-auto max-h-88">
                     <div>
-                      <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
-                        Appareils
-                      </h3>
+                      <div className="flex justify-between items-center mb-3 px-2 border-b border-neutral-100 dark:border-neutral-700/50 pb-2">
+                        <h3 className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                          Appareil
+                        </h3>
+                        <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                          Visiteurs
+                        </span>
+                      </div>
                       <div className="space-y-2">
                         {(data?.devices || []).map((d, i) => {
                           const { label, icon: Icon, color } = formatLabel(d.x, DEVICE_MAP);
+                          const total = (data?.devices || []).reduce(
+                            (acc, curr) => acc + curr.y,
+                            0,
+                          );
+                          const pct = total > 0 ? ((d.y / total) * 100).toFixed(0) : 0;
                           return (
                             <div
                               key={i}
@@ -842,9 +1072,15 @@ export default function AnalyticsClient({
                                 <Icon className="w-4 h-4" style={{ color }} />
                                 <span>{label}</span>
                               </span>
-                              <span className="font-bold text-neutral-900 dark:text-white">
-                                {d.y.toLocaleString('fr-FR')}
-                              </span>
+                              <div className="flex items-center gap-2 tabular-nums">
+                                <span className="font-bold text-neutral-900 dark:text-white">
+                                  {d.y.toLocaleString('fr-FR')}
+                                </span>
+                                <div className="w-[1px] h-3 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+                                <span className="text-xs text-neutral-400 font-medium w-8 text-right">
+                                  {pct}%
+                                </span>
+                              </div>
                             </div>
                           );
                         })}
@@ -852,26 +1088,58 @@ export default function AnalyticsClient({
                     </div>
                     <hr className="border-neutral-200 dark:border-neutral-700" />
                     <div>
-                      <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase mb-2">
-                        Sources
-                      </h3>
+                      <div className="flex justify-between items-center mb-3 px-2 border-b border-neutral-100 dark:border-neutral-700/50 pb-2">
+                        <h3 className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                          Source
+                        </h3>
+                        <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                          Visiteurs
+                        </span>
+                      </div>
                       <div className="space-y-2">
                         {(data?.referrers || [])
                           .filter((r) => r.x)
-                          .map((r, i) => (
-                            <div
-                              key={i}
-                              className="flex justify-between items-center text-sm p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg"
-                            >
-                              <span className="text-neutral-700 dark:text-neutral-300 font-medium truncate flex-1 min-w-0 mr-4 flex items-center gap-2">
-                                <FiLink className="w-4 h-4 text-brand-500 shrink-0" />
-                                <span className="truncate">{r.x}</span>
-                              </span>
-                              <span className="font-bold text-neutral-900 dark:text-white">
-                                {r.y.toLocaleString('fr-FR')}
-                              </span>
-                            </div>
-                          ))}
+                          .map((r, i) => {
+                            const { label, icon: Icon, color } = formatLabel(r.x, REFERRER_MAP);
+                            const total = (data?.referrers || [])
+                              .filter((ref) => ref.x)
+                              .reduce((acc, curr) => acc + curr.y, 0);
+                            const pct = total > 0 ? ((r.y / total) * 100).toFixed(0) : 0;
+
+                            return (
+                              <div
+                                key={i}
+                                className="flex justify-between items-center text-sm p-2 bg-neutral-50 dark:bg-neutral-900/50 rounded-lg group/item transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-900"
+                              >
+                                {r.x !== '(direct)' ? (
+                                  <a
+                                    href={r.x.startsWith('http') ? r.x : `https://${r.x}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-neutral-700 dark:text-neutral-300 font-medium truncate flex-1 min-w-0 mr-4 flex items-center gap-2 hover:text-brand-500 transition-colors"
+                                  >
+                                    <Icon className="w-4 h-4 shrink-0" style={{ color }} />
+                                    <span className="truncate">{label}</span>
+                                    <FiLink className="w-3 h-3 opacity-0 group-hover/item:opacity-50 shrink-0" />
+                                  </a>
+                                ) : (
+                                  <span className="text-neutral-700 dark:text-neutral-300 font-medium truncate flex-1 min-w-0 mr-4 flex items-center gap-2">
+                                    <Icon className="w-4 h-4 shrink-0" style={{ color }} />
+                                    <span className="truncate">{label}</span>
+                                  </span>
+                                )}
+                                <div className="flex items-center gap-2 tabular-nums">
+                                  <span className="font-bold text-neutral-900 dark:text-white">
+                                    {r.y.toLocaleString('fr-FR')}
+                                  </span>
+                                  <div className="w-[1px] h-3 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+                                  <span className="text-xs text-neutral-400 font-medium w-8 text-right">
+                                    {pct}%
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
                         {!data?.referrers?.length && (
                           <div className="text-neutral-400 text-sm py-2 text-center">
                             Aucune source trouvée

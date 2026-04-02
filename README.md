@@ -44,7 +44,11 @@ A bespoke, heavily guarded private workspace accessible only via biometric/2FA v
 - **Project Overlord**: Complete CRUD capabilities for managing portfolio projects, featuring drag-and-drop Cloudinary media uploads, skill assignments, and live reordering.
 - **Client Relations Manager (CRM)**: An integrated inbox to track unread counts, categorize messages, and **reply directly to clients/recruiters** with automated email signatures and Cloudinary attachments.
 - **Dynamic CV Injection**: Real-time PDF metadata extraction and live updates of the downloadable resume across the public site.
-- **Telemetry & KPIs**: Embedded analytics tracking referrers, traffic origins, operating systems, and message response rates.
+- **Smart Telemetry & KPIs**: Advanced analytics dashboard featuring:
+  - **Intelligent Data Grouping**: Automatic merging and summation of fragmented data (e.g., unifying Windows 10/11 entries).
+  - **Interactive Source Tracking**: Precision domain-matched referrer tracking with direct external links to traffic origins.
+  - **Unified Design System**: Standardized, premium UI for all telemetry lists (Countries, OS, Browsers, Devices).
+  - **Real-time Performance**: Pulse-skeleton loading states and hardware-accelerated charting via `Recharts`.
 
 ---
 
