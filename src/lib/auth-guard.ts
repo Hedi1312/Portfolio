@@ -14,7 +14,6 @@ export async function requireAdmin() {
     } as const;
   }
 
-
   if (adminEmail && session.user.email !== adminEmail) {
     return {
       session: null,
