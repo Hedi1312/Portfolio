@@ -52,21 +52,17 @@ export default function LoginPage() {
 
   return (
     <section className="min-h-screen flex items-center justify-center px-6 bg-background transition-colors duration-300 relative overflow-hidden">
-      {/* Animated grid background */}
       <div className="hero-grid pointer-events-none" />
 
-      {/* Ambient glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-500/10 dark:bg-brand-500/5 blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-md mx-auto relative z-10">
-        {/* Logo / Icon */}
         <div className="flex justify-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/25">
             <LogIn className="w-8 h-8 text-white" />
           </div>
         </div>
 
-        {/* Glass Card */}
         <div className="glass-card p-8 hover:transform-none">
           <h1 className="font-heading text-2xl md:text-3xl font-bold text-neutral-900 dark:text-white text-center">
             Connexion <span className="gradient-text">Admin</span>
@@ -140,7 +136,7 @@ export default function LoginPage() {
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="w-full rounded-xl bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-700/50 pl-10 pr-4 py-2.5 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all tracking-widest font-mono"
-                  placeholder="000000"
+                  placeholder="123456"
                   maxLength={6}
                   required
                 />

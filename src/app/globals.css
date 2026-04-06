@@ -352,24 +352,26 @@ body {
 
 @keyframes marqueeLeft {
   0% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 @keyframes marqueeRight {
   0% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
   100% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .animate-marquee-left {
-  animation: marqueeLeft 100s linear infinite;
+  animation: marqueeLeft 35s linear infinite;
+  will-change: transform;
 }
 .animate-marquee-right {
-  animation: marqueeRight 100s linear infinite;
+  animation: marqueeRight 35s linear infinite;
+  will-change: transform;
 }

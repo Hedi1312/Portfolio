@@ -2,7 +2,7 @@
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
-import { FiEye, FiDownload, FiX, FiFileText } from 'react-icons/fi';
+import { FiEye, FiDownload, FiX, FiFileText, FiAlertCircle } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';
 import { useNeonHover } from '@/hooks/useNeonHover';
 
@@ -11,7 +11,7 @@ interface CVProps {
 }
 
 export default function CV({ initialUrl }: CVProps) {
-  const cvUrl = initialUrl || '/cv/CV_OKBA_Hedi.pdf';
+  const hasCv = !!initialUrl;
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const neonHover = useNeonHover(-8);
@@ -19,9 +19,11 @@ export default function CV({ initialUrl }: CVProps) {
   useLockBodyScroll(isOpen);
 
   const handleDownload = async () => {
+    if (!hasCv) return;
     setIsDownloading(true);
     try {
-      const response = await fetch(cvUrl);
+      const response = await fetch('/api/cv?download=true');
+      if (!response.ok) throw new Error('Download failed');
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -35,6 +37,11 @@ export default function CV({ initialUrl }: CVProps) {
     } finally {
       setIsDownloading(false);
     }
+  };
+
+  const handleView = () => {
+    if (!hasCv) return;
+    setIsOpen(true);
   };
 
   return (
@@ -53,39 +60,51 @@ export default function CV({ initialUrl }: CVProps) {
           Consulter mon profil
         </h4>
 
-        <p className="text-neutral-500 dark:text-neutral-400 mb-8 grow">
-          Découvre mon parcours détaillé, mes compétences et mes expériences, ou télécharge mon CV
-          complet au format PDF.
-        </p>
+        {hasCv ? (
+          <>
+            <p className="text-neutral-500 dark:text-neutral-400 mb-8 grow">
+              Découvre mon parcours détaillé, mes compétences et mes expériences, ou télécharge mon
+              CV complet au format PDF.
+            </p>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-6 w-full">
-          <Button
-            onClick={() => setIsOpen(true)}
-            variant="primary"
-            className="flex-1 hover:-translate-y-1 hover:shadow-xl"
-            data-umami-event="click-cv-view"
-          >
-            <FiEye size={18} />
-            Voir mon CV
-          </Button>
+            <div className="flex flex-col sm:flex-row justify-center gap-6 w-full">
+              <Button
+                onClick={handleView}
+                variant="primary"
+                className="flex-1 hover:-translate-y-1 hover:shadow-xl"
+                data-umami-event="click-cv-view"
+              >
+                <FiEye size={18} />
+                Voir mon CV
+              </Button>
 
-          <Button
-            onClick={handleDownload}
-            variant="secondary"
-            className="flex-1 hover:-translate-y-1 hover:shadow-xl"
-            isLoading={isDownloading}
-            loadingText="Téléchargement..."
-            data-umami-event="click-cv-download"
-          >
-            <FiDownload size={18} className="text-brand-400" />
-            Télécharger
-          </Button>
-        </div>
+              <Button
+                onClick={handleDownload}
+                variant="secondary"
+                className="flex-1 hover:-translate-y-1 hover:shadow-xl"
+                isLoading={isDownloading}
+                loadingText="Téléchargement..."
+                data-umami-event="click-cv-download"
+              >
+                <FiDownload size={18} className="text-brand-400" />
+                Télécharger
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center grow">
+            <div className="w-12 h-12 mb-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border-2 border-dashed border-neutral-200 dark:border-neutral-700 flex items-center justify-center">
+              <FiAlertCircle className="text-neutral-400 dark:text-neutral-500" size={24} />
+            </div>
+            <p className="text-neutral-500 dark:text-neutral-400 text-sm">
+              Aucun CV ajouté pour le moment.
+            </p>
+          </div>
+        )}
       </m.div>
 
-      {/* Modal */}
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && hasCv && (
           <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -111,14 +130,14 @@ export default function CV({ initialUrl }: CVProps) {
               </button>
 
               <iframe
-                src={cvUrl}
+                src="/api/cv"
                 title="CV Hedi OKBA"
                 className="w-full h-[80vh] rounded-xl border border-neutral-200/20 dark:border-neutral-700/30 bg-white"
               />
               <p className="text-center text-neutral-500 dark:text-neutral-400 text-sm mt-4">
                 Si l&apos;affichage n&apos;est pas optimal,{' '}
                 <a
-                  href={cvUrl}
+                  href="/api/cv"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-brand-400 hover:underline"

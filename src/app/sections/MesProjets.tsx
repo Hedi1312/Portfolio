@@ -48,7 +48,7 @@ const cardVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 2.0, ease: [0.23, 1, 0.32, 1] as const },
+    transition: { duration: 0.8, ease: [0.23, 1, 0.32, 1] as const },
   },
 };
 
@@ -70,7 +70,6 @@ export default function MesProjets({ projects }: MesProjetsProps) {
         )}
       </AnimatePresence>
 
-      {/* Background gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,213,190,0.05)_0%,transparent_50%)]" />
 
       <div className="relative max-w-6xl mx-auto">
@@ -79,7 +78,7 @@ export default function MesProjets({ projects }: MesProjetsProps) {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.5 }}
-          transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] as const }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] as const }}
         >
           <h3 className="text-3xl md:text-4xl section-heading">Mes Projets</h3>
         </m.div>
@@ -105,7 +104,6 @@ export default function MesProjets({ projects }: MesProjetsProps) {
                   }
                 }}
               >
-                {/* Preview area */}
                 <div
                   className={`h-40 relative overflow-hidden ${!project.images || project.images.length === 0 ? `bg-linear-to-br ${project.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
                 >
@@ -146,14 +144,12 @@ export default function MesProjets({ projects }: MesProjetsProps) {
                     {project.description}
                   </p>
 
-                  {/* Tech stack */}
                   {project.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-5">
                       {project.skills.map((skill: Skill, skillIndex: number) => {
                         const match = findSkillIcon(skill.icon || skill.name);
                         const Icon = match?.icon;
 
-                        // Fallback color if skill.color is missing or mismatches
                         const color = isDark
                           ? match?.color || skill.color || '#00D5BE'
                           : match?.colorLight || match?.color || skill.color || '#00D5BE';
@@ -171,7 +167,6 @@ export default function MesProjets({ projects }: MesProjetsProps) {
                     </div>
                   )}
 
-                  {/* Links */}
                   <div className="flex items-center gap-3 mt-auto pt-4">
                     {project.github && (
                       <a

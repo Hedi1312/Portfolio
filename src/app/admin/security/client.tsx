@@ -24,7 +24,6 @@ export default function SecuritySettingsClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Disable modal state
   const [showDisableModal, setShowDisableModal] = useState(false);
   const [disableCode, setDisableCode] = useState('');
   const [disableLoading, setDisableLoading] = useState(false);
@@ -128,7 +127,6 @@ export default function SecuritySettingsClient({
           transition={{ duration: 0.6 }}
           className="mx-auto max-w-7xl w-full"
         >
-          {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-4">
               <Link
@@ -153,7 +151,6 @@ export default function SecuritySettingsClient({
           <div className="space-y-6">
             <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 md:p-8 shadow-sm">
               <div className="space-y-6">
-                {/* Current State */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800">
                   <div className="flex items-start gap-4">
                     <div
@@ -195,7 +192,6 @@ export default function SecuritySettingsClient({
                   </div>
                 )}
 
-                {/* Setup Flow */}
                 {!is2FAEnabled && setupStep === 'idle' && (
                   <div>
                     <Button
@@ -261,7 +257,7 @@ export default function SecuritySettingsClient({
                             onChange={(e) =>
                               setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))
                             }
-                            placeholder="000000"
+                            placeholder="123456"
                             className="w-full rounded-xl bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 pl-10 pr-4 py-3 text-lg tracking-[0.5em] font-mono text-center text-neutral-900 dark:text-white focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                             required
                             maxLength={6}
@@ -298,7 +294,6 @@ export default function SecuritySettingsClient({
         </m.div>
       </section>
 
-      {/* Disable A2F Confirmation Modal */}
       <AnimatePresence>
         {showDisableModal && (
           <m.div
@@ -352,7 +347,7 @@ export default function SecuritySettingsClient({
                     autoComplete="one-time-code"
                     value={disableCode}
                     onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="000000"
+                    placeholder="123456"
                     className="w-full rounded-xl bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 pl-10 pr-4 py-3 text-lg tracking-[0.5em] font-mono text-center text-neutral-900 dark:text-white focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                     maxLength={6}
                     autoFocus
