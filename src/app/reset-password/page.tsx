@@ -30,7 +30,6 @@ function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // A2F Modal state
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [otpError, setOtpError] = useState('');
@@ -47,7 +46,6 @@ function ResetPasswordForm() {
     { label: 'Un caractère spécial', test: passwordRegex.special },
   ];
 
-  // Close modal on outside click
   useEffect(() => {
     if (!showOtpModal) return;
     const handleClick = (e: MouseEvent) => {
@@ -59,7 +57,6 @@ function ResetPasswordForm() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showOtpModal]);
 
-  // Step 1: Validate form and show OTP modal
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -71,13 +68,11 @@ function ResetPasswordForm() {
       return;
     }
 
-    // Show A2F modal
     setOtpCode('');
     setOtpError('');
     setShowOtpModal(true);
   };
 
-  // Step 2: Submit with OTP code
   const handleConfirmWithOtp = async () => {
     if (otpCode.length !== 6) return;
     setOtpLoading(true);
@@ -152,21 +147,17 @@ function ResetPasswordForm() {
 
   return (
     <section className="min-h-screen flex items-center justify-center px-6 bg-background transition-colors duration-300 relative overflow-hidden">
-      {/* Animated grid background */}
       <div className="hero-grid pointer-events-none" />
 
-      {/* Ambient glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-500/10 dark:bg-brand-500/5 blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-md mx-auto relative z-10">
-        {/* Logo / Icon */}
         <div className="flex justify-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/25">
             <ShieldCheck className="w-8 h-8 text-white" />
           </div>
         </div>
 
-        {/* Glass Card */}
         <div className="glass-card p-8 hover:transform-none">
           <h1 className="font-heading text-2xl md:text-3xl font-bold text-neutral-900 dark:text-white text-center">
             Nouveau <span className="gradient-text">mot de passe</span>
@@ -213,7 +204,6 @@ function ResetPasswordForm() {
               </div>
             </div>
 
-            {/* Password criteria indicators */}
             {password.length > 0 && (
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                 {criteria.map((c) => {
@@ -297,7 +287,7 @@ function ResetPasswordForm() {
           </div>
         </div>
       </div>
-      {/* A2F Verification Modal */}
+
       <AnimatePresence>
         {showOtpModal && (
           <m.div
@@ -350,7 +340,7 @@ function ResetPasswordForm() {
                     autoComplete="one-time-code"
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="000000"
+                    placeholder="123456"
                     className="w-full rounded-xl bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 pl-10 pr-4 py-3 text-lg tracking-[0.5em] font-mono text-center text-neutral-900 dark:text-white focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                     maxLength={6}
                     autoFocus

@@ -10,6 +10,8 @@
     <a href="https://www.framer.com/motion/"><img src="https://img.shields.io/badge/Framer_Motion-12-0055FF?style=flat-square&logo=framer&logoColor=white" alt="Framer Motion 12" /></a>
     <a href="https://www.prisma.io"><img src="https://img.shields.io/badge/Prisma-7-2D3748?style=flat-square&logo=prisma&logoColor=white" alt="Prisma 7" /></a>
   </p>
+
+  <h3><a href="README.fr.md"><u>📖 - Version Française - <img src="https://flagcdn.com/16x12/fr.png" alt="FR" /></u></a></h3>
 </div>
 
 <br />

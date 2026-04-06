@@ -49,13 +49,10 @@ export default function Navbar() {
       if (res.success && res.data) {
         setUnreadCount((res.data as { count: number }).count || 0);
       }
-    } catch {
-      // Background fetch handles errors silently
-    }
+    } catch {}
   }, [status]);
 
   useEffect(() => {
-    // Initial fetch deferred to avoid lint error about synchronous state updates in effects
     const timer = setTimeout(() => {
       void fetchUnread();
     }, 0);
@@ -72,8 +69,7 @@ export default function Navbar() {
     };
   }, [fetchUnread]);
 
-  // Detect active section via IntersectionObserver (only on homepage)
-  // Sections render asynchronously (API calls), so we poll until they all appear in the DOM
+  // Sync IntersectionObserver for scroll spy on hydrated sections
   useEffect(() => {
     if (isAdminPage) {
       // Return early; no IntersectionObserver needed dynamically for admin pages
@@ -88,8 +84,8 @@ export default function Navbar() {
         .map((l) => document.getElementById(l.section))
         .filter(Boolean) as HTMLElement[];
 
-      // If not all sections are in the DOM yet, keep polling
-      if (sections.length < navLinks.length) return false;
+      // If no sections are in the DOM yet, keep polling (might not be hydrated yet)
+      if (sections.length === 0) return false;
 
       observer = new IntersectionObserver(
         (entries) => {
@@ -106,12 +102,16 @@ export default function Navbar() {
       return true;
     };
 
-    // Try immediately, then poll every 200ms until all sections are mounted
+    // Try immediately, then poll every 200ms (max 15 times = 3s)
+    let attempts = 0;
     if (!setupObserver()) {
       pollTimer = setInterval(() => {
-        if (setupObserver() && pollTimer) {
-          clearInterval(pollTimer);
-          pollTimer = null;
+        attempts++;
+        if (setupObserver() || attempts >= 15) {
+          if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+          }
         }
       }, 200);
     }
@@ -122,7 +122,6 @@ export default function Navbar() {
     };
   }, [isAdminPage, pathname]);
 
-  // Sync activeSection with URL and reset when returning to home at top
   useEffect(() => {
     const timer = setTimeout(() => {
       if (pathname === '/') {
@@ -136,7 +135,6 @@ export default function Navbar() {
     return () => clearTimeout(timer);
   }, [pathname, activeSection]);
 
-  // Handle hash scroll on fresh navigation to home
   useEffect(() => {
     if (pathname === '/' && window.location.hash) {
       const hash = window.location.hash;
@@ -154,7 +152,6 @@ export default function Navbar() {
     }
   }, [pathname]);
 
-  // Detect scroll for navbar background
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     handleScroll();
@@ -183,7 +180,6 @@ export default function Navbar() {
       />
 
       <div className="relative z-10 max-w-7xl mx-auto flex justify-between items-center px-2">
-        {/* Logo */}
         <Link
           href="/"
           className="group flex items-center"
@@ -217,7 +213,6 @@ export default function Navbar() {
           </h1>
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => {
             const Icon = link.icon;
@@ -243,7 +238,7 @@ export default function Navbar() {
                   size={22}
                   className="transition-transform duration-200 group-hover:scale-110"
                 />
-                {/* Active indicator dot */}
+
                 {isActive && (
                   <m.div
                     layoutId="activeIndicator"
@@ -251,7 +246,7 @@ export default function Navbar() {
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
-                {/* Hover glow */}
+
                 <span className="absolute inset-0 rounded-xl bg-brand-400/0 group-hover:bg-brand-400/10 transition-colors duration-300" />
               </Link>
             );
@@ -322,7 +317,6 @@ export default function Navbar() {
           </div>
         </nav>
 
-        {/* Mobile menu button */}
         <button
           className="md:hidden p-2 rounded-xl text-foreground hover:bg-brand-400/10 transition-colors"
           onClick={() => setIsOpen(!isOpen)}
@@ -354,11 +348,9 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
             <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -366,7 +358,7 @@ export default function Navbar() {
               className="fixed inset-0 bg-black/40 backdrop-blur-sm md:hidden"
               onClick={handleLinkClick}
             />
-            {/* Slide-in panel */}
+
             <m.div
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}

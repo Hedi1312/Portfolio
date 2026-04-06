@@ -35,10 +35,8 @@ export default function Accueil() {
       id="home"
       className="relative flex flex-col items-center justify-center text-center min-h-screen px-6 overflow-hidden bg-neutral-50 dark:bg-[#0a0f1a] text-neutral-900 dark:text-white transition-colors duration-500"
     >
-      {/* Grid background */}
       <div className="hero-grid opacity-50 dark:opacity-30" />
 
-      {/* Gradient overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,213,190,0.15)_0%,transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(0,213,190,0.12)_0%,transparent_70%)]" />
 
       <div className="relative z-10 max-w-3xl">
@@ -57,7 +55,7 @@ export default function Accueil() {
           initial={{ opacity: 0, y: -30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.2 }}
-          transition={{ duration: 1.5, delay: 0.3, ease: [0.23, 1, 0.32, 1] as const }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.23, 1, 0.32, 1] as const }}
         >
           Salut, moi c&apos;est{' '}
           <span className="inline-flex">
@@ -82,7 +80,7 @@ export default function Accueil() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.4 }}
-          transition={{ duration: 2.0, delay: 1.2, ease: [0.23, 1, 0.32, 1] as const }}
+          transition={{ duration: 0.8, delay: 0.6, ease: [0.23, 1, 0.32, 1] as const }}
         >
           Développeur passionné par la création d&apos;expériences web modernes, performantes et
           élégantes.
@@ -92,7 +90,7 @@ export default function Accueil() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.5 }}
-          transition={{ duration: 2.0, delay: 1.4, ease: [0.23, 1, 0.32, 1] as const }}
+          transition={{ duration: 0.8, delay: 0.8, ease: [0.23, 1, 0.32, 1] as const }}
           className="flex flex-col items-center gap-6"
         >
           <button
@@ -114,7 +112,6 @@ export default function Accueil() {
         </m.div>
       </div>
 
-      {/* Scroll indicator */}
       {mounted && (
         <m.div
           className="hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 hover:opacity-100 transition-opacity duration-300 cursor-pointer"
@@ -123,7 +120,7 @@ export default function Accueil() {
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.4 }}
-          transition={{ delay: 2.2, duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
+          transition={{ delay: 1.2, duration: 0.8, ease: [0.23, 1, 0.32, 1] as const }}
         >
           <div className="w-5 h-9 border-2 border-neutral-500 dark:border-neutral-400 rounded-full flex justify-center p-1">
             <m.div
@@ -143,7 +140,7 @@ export default function Accueil() {
           className="absolute bottom-8 left-1/2 -translate-x-1/2 text-neutral-400 dark:text-neutral-500 md:hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 2.5, duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
+          transition={{ delay: 1.4, duration: 0.8, ease: [0.23, 1, 0.32, 1] as const }}
         >
           <m.div
             animate={{ y: [0, 8, 0] }}

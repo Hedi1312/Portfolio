@@ -32,7 +32,6 @@ export default function CvClient({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { toast, showToast, hideToast } = useToast();
 
-  // Load existing CV from props
   useEffect(() => {
     if (initialCv?.url) {
       setPreviewUrl(initialCv.url);
@@ -122,7 +121,7 @@ export default function CvClient({
     setLoading(true);
 
     try {
-      // 1. Modify PDF metadata on client side
+      // Set PDF metadata client-side before upload
       const bytes = await file.arrayBuffer();
       const { PDFDocument } = await import('pdf-lib');
       const pdfDoc = await PDFDocument.load(bytes);
@@ -141,14 +140,12 @@ export default function CvClient({
       });
       const sizeStr = (modifiedPdfBytes.length / 1024).toFixed(1) + ' Ko';
 
-      // 2. Direct Upload to Cloudinary
       const uploaded = await directUploadToCloudinary(modifiedFile, {
         subfolder: 'cv',
         resource_type: 'image',
         public_id: 'CV_OKBA_Hedi',
       });
 
-      // 3. Send metadata to backend via Server Action
       const { uploadCvAction } = await import('@/actions/cv.action');
       const res = await uploadCvAction({
         url: uploaded.url,
@@ -179,7 +176,8 @@ export default function CvClient({
     if (!previewUrl) return;
     setIsDownloading(true);
     try {
-      const response = await fetch(previewUrl);
+      const response = await fetch('/api/cv?download=true');
+      if (!response.ok) throw new Error('Download failed');
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -190,6 +188,7 @@ export default function CvClient({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (_error) {
+      showToast('error', 'Erreur lors du téléchargement.');
     } finally {
       setIsDownloading(false);
     }
@@ -202,7 +201,6 @@ export default function CvClient({
       <ToastContainer toast={toast} onClose={hideToast} />
       <section className="min-h-screen bg-background transition-colors duration-300 px-4 md:px-6 pt-28 md:pt-36 pb-16">
         <div className="mx-auto max-w-7xl w-full">
-          {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-4">
               <Link
@@ -225,7 +223,6 @@ export default function CvClient({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full relative z-10">
-            {/* Upload section */}
             <div className="lg:col-span-5 flex flex-col gap-6">
               <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow">
                 <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6">
@@ -285,7 +282,6 @@ export default function CvClient({
               </div>
             </div>
 
-            {/* Preview section */}
             <div className="lg:col-span-7 flex flex-col gap-6">
               <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
                 <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6">
@@ -355,7 +351,7 @@ export default function CvClient({
                         className="flex-1"
                       >
                         <iframe
-                          src={previewUrl}
+                          src="/api/cv"
                           className="w-full h-[60vh] border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-inner bg-neutral-100 dark:bg-neutral-950"
                           allow="fullscreen"
                         />
