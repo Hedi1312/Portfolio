@@ -40,7 +40,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 1.5, ease: [0.23, 1, 0.32, 1] as const },
+    transition: { duration: 0.8, ease: [0.23, 1, 0.32, 1] as const },
   },
 };
 
@@ -79,7 +79,7 @@ const TechMarquee = ({
   isDark: boolean;
 }) => {
   const neonTag = buildNeonHover(-4, isDark);
-  // Duplicate items for seamless infinite scroll
+  // Clone for seamless loop
   const multipliedItems = [...items, ...items];
 
   const halfBlock = (
@@ -110,10 +110,8 @@ export default function APropos({ data }: AProposProps) {
   if (!data) return null;
   if (!data.bio && data.stats.length === 0 && data.techs.length === 0) return null;
 
-  // Split bio into paragraphs
   const paragraphs = data.bio.split('\n\n').filter((p) => p.trim());
 
-  // Split techs into two rows for marquee
   const halfLength = Math.ceil(data.techs.length / 2);
   const row1 = data.techs.slice(0, halfLength);
   const row2 = data.techs.slice(halfLength);
@@ -129,7 +127,7 @@ export default function APropos({ data }: AProposProps) {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.5 }}
-          transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] as const }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] as const }}
         >
           <h3 className="text-3xl md:text-4xl section-heading">À propos</h3>
         </m.div>
@@ -141,7 +139,7 @@ export default function APropos({ data }: AProposProps) {
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: false, amount: 0.5 }}
-              transition={{ duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
+              transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] as const }}
             >
               <m.div
                 className="glass-card p-8"
@@ -198,7 +196,7 @@ export default function APropos({ data }: AProposProps) {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: false, amount: 0.4 }}
-            transition={{ duration: 2.0, ease: [0.23, 1, 0.32, 1] as const }}
+            transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] as const }}
           >
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-10">
               <p className="text-center text-md md:text-lg uppercase tracking-widest text-neutral-900 dark:text-white font-medium m-0">

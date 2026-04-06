@@ -23,6 +23,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https://res.cloudinary.com https://flagcdn.com https://raw.githubusercontent.com",
       "media-src 'self' https://res.cloudinary.com",
       "connect-src 'self' https://api.cloudinary.com https://va.vercel-scripts.com",
+      "frame-src 'self'",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -51,7 +52,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        // Excluding /api/cv to allow same-origin iframe embedding
+        source: '/((?!api/cv).*)',
         headers: securityHeaders,
       },
     ];
