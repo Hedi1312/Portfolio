@@ -71,7 +71,7 @@ A bespoke, heavily guarded private workspace accessible only via biometric/2FA v
 - **Authentication**: NextAuth.js (Credentials Provider) + Custom TOTP 2FA Verification
 - **Security Protocols**: PostgreSQL-backed Atomic Rate Limiting (in-middleware) protecting auth and contact endpoints against brute-force attacks.
 - **Media CDN**: [Cloudinary](https://cloudinary.com/) API Integration
-- **Mailing**: Nodemailer alongside `react-email` templates
+- **Mailing**: [Resend](https://resend.com/) SDK (Production) & Nodemailer/Mailpit (Development) with `react-email` templates
 
 ### Database Architecture
 
@@ -79,7 +79,8 @@ The application features a fully normalized PostgreSQL database managed by Prism
 
 ```mermaid
 erDiagram
-    Admin ||--o{ PasswordReset : requests
+    Admin ||--o{ PasswordReset : "requests"
+    Admin ||--o{ MessageReply : "replies to messages"
     Contact ||--o{ ContactMessage : "sends"
     ContactMessage ||--o{ MessageReply : "receives admin replies"
     Project ||--o{ ProjectSkill : "has"

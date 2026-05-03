@@ -5,10 +5,10 @@ import { headers } from 'next/headers';
 
 import { AdminNotification } from '@/emails/AdminNotification';
 import { UserConfirmation } from '@/emails/UserConfirmation';
+import { getEmailSubjectPrefix, sendEmail } from '@/lib/mailer';
 import { prisma } from '@/lib/prisma';
-import { contactSchema } from '@/lib/schemas/contact';
 import { rateLimit } from '@/lib/rate-limit';
-import { transporter, getEmailSubjectPrefix } from '@/lib/mailer';
+import { contactSchema } from '@/lib/schemas/contact';
 
 // IP rate limit: 5 submissions/min
 const limiter = rateLimit({ limit: 5, window: '1 m', prefix: 'rl:contact' });
@@ -124,7 +124,7 @@ export async function submitContact(
     });
 
     // Send emails to admin and user
-    const destinataire = process.env.ADMIN_MAIL as string;
+    const destinataire = process.env.CONTACT_NOTIFICATION_EMAIL as string;
     const prefixe = getEmailSubjectPrefix();
 
     const emailSubject = `${prefixe}[${subject}] Nouveau message de ${name}`;
@@ -132,8 +132,8 @@ export async function submitContact(
     const adminHtml = await render(AdminNotification({ name, email, subject, message }));
     const userHtml = await render(UserConfirmation({ name }));
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+    await sendEmail({
+      from: process.env.SMTP_FROM as string,
       to: destinataire,
       replyTo: email,
       subject: emailSubject,
@@ -141,8 +141,8 @@ export async function submitContact(
       html: adminHtml,
     });
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+    await sendEmail({
+      from: process.env.SMTP_FROM as string,
       to: email,
       subject: `${prefixe}Merci pour ton message !`,
       html: userHtml,

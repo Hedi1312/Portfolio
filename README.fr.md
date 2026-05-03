@@ -71,7 +71,7 @@ Un espace de travail privé sur mesure et lourdement protégé, accessible uniqu
 - **Authentification** : NextAuth.js (Provider Credentials) + Vérification A2F TOTP Personnalisée
 - **Protocoles de Sécurité** : Limiteur de débit atomique soutenu par PostgreSQL (dans le middleware) protégeant l'authentification et le formulaire de contact contre les attaques par force brute.
 - **Media CDN** : Intégration de l'API [Cloudinary](https://cloudinary.com/)
-- **Mailing** : Nodemailer couplé avec les modèles `react-email`
+- **Mailing** : SDK [Resend](https://resend.com/) (Production) & Nodemailer/Mailpit (Développement) avec templates `react-email`
 
 ### Architecture de la Base de Données
 
@@ -79,12 +79,13 @@ L'application repose sur une base de données PostgreSQL entièrement normalisé
 
 ```mermaid
 erDiagram
-    Admin ||--o{ PasswordReset : requests
-    Contact ||--o{ ContactMessage : "sends"
-    ContactMessage ||--o{ MessageReply : "receives admin replies"
-    Project ||--o{ ProjectSkill : "has"
-    Project ||--o{ ProjectImage : "displays"
-    AboutMe ||--o{ AboutMeTech : "highlights"
+    Admin ||--o{ PasswordReset : "demande"
+    Admin ||--o{ MessageReply : "répond aux messages"
+    Contact ||--o{ ContactMessage : "envoie"
+    ContactMessage ||--o{ MessageReply : "reçoit des réponses admin"
+    Project ||--o{ ProjectSkill : "possède"
+    Project ||--o{ ProjectImage : "affiche"
+    AboutMe ||--o{ AboutMeTech : "met en avant"
 
     Admin {
         String id PK
