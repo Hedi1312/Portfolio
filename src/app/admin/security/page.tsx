@@ -1,12 +1,11 @@
-import { auth } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth-guard';
 import { prisma } from '@/lib/prisma';
 import SecuritySettingsClient from './client';
 import { redirect } from 'next/navigation';
 
 export default async function SecuritySettingsPage() {
-  const session = await auth();
-
-  if (!session?.user?.email) {
+  const { session, unauthorized } = await requireAdmin();
+  if (unauthorized || !session?.user?.email) {
     redirect('/admin-login');
   }
 
