@@ -157,8 +157,8 @@ export default function Footer() {
           <p className="text-xs">© {currentYear} - Hëdi OKBA - Tous droits réservés.</p>
           <p className="text-xs flex items-center gap-1.5 flex-wrap justify-center">
             Construit avec{' '}
-            <span className="font-semibold text-neutral-900 dark:text-neutral-200">Next.js</span>,{' '}
-            <span className="font-semibold text-brand-400">Tailwind CSS</span> &{' '}
+            <span className="font-semibold text-neutral-900 dark:text-neutral-200">Next.js,</span>
+            <span className="font-semibold text-brand-400">Tailwind CSS &</span>
             <span className="font-semibold text-pink-500">Framer Motion.</span>
           </p>
         </div>

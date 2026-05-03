@@ -175,7 +175,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
         >
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-neutral-900 dark:text-white">
-              Bienvenue, Hedi
+              Bienvenue, Hëdi
             </h1>
             <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
               Voici un résumé de ton espace admin
