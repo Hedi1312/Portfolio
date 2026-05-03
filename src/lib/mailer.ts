@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 
-// ─── Interface partagée pour l'envoi d'emails ──────────────────────
+// ─── Shared Email Interface ────────────────────────────────────────
 export interface SendEmailOptions {
   from: string;
   to: string;
@@ -11,11 +11,12 @@ export interface SendEmailOptions {
   attachments?: { filename: string; content: Buffer }[];
 }
 
-// ─── Sélection de la stratégie de transport ────────────────────────
+// ─── Transport Strategy Selection ──────────────────────────────────
 const isResendConfigured = !!process.env.RESEND_API_KEY;
 
 /**
- * Envoie un email via le SDK Resend (Prod/Staging) ou SMTP/Mailpit (Local).
+ * Sends an email using Resend SDK (Prod/Staging) or SMTP/Mailpit (Local).
+ * Automatically toggles transport based on RESEND_API_KEY presence.
  */
 export async function sendEmail(options: SendEmailOptions): Promise<void> {
   if (isResendConfigured) {
@@ -25,16 +26,16 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
   }
 }
 
-// ─── Transport via SDK Resend (Production / Staging) ───────────────
+// ─── Resend SDK Transport (Production / Staging) ───────────────────
 async function sendViaResend(options: SendEmailOptions): Promise<void> {
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  const { data, error } = await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: options.from,
     to: options.to,
     subject: options.subject,
     html: options.html,
-    replyTo: options.replyTo, // Resend SDK uses camelCase for replyTo
+    replyTo: options.replyTo,
     attachments: options.attachments?.map((a) => ({
       filename: a.filename,
       content: a.content,
@@ -44,11 +45,9 @@ async function sendViaResend(options: SendEmailOptions): Promise<void> {
   if (error) {
     throw new Error(`[Resend SDK] ${error.name}: ${error.message}`);
   }
-
-  console.log(`[Resend SDK] Email envoyé avec succès. ID: ${data?.id}`);
 }
 
-// ─── Transport via SMTP (Local / Fallback) ─────────────────────────
+// ─── SMTP Transport (Local / Fallback) ─────────────────────────────
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
@@ -71,14 +70,14 @@ async function sendViaSMTP(options: SendEmailOptions): Promise<void> {
       content: a.content,
     })),
   });
-  console.log(`[SMTP] Email envoyé via ${process.env.SMTP_HOST}`);
 }
 
-// Export temporaire pour compatibilité pendant la migration
+// Temporary export for compatibility during migration
 export { transporter };
 
 /**
- * Retourne le préfixe du sujet selon l'environnement.
+ * Returns the environment-specific subject prefix.
+ * Prod: '' | Preview: '[PREVIEW] ' | Local: '[LOCAL] '
  */
 export function getEmailSubjectPrefix(): string {
   if (process.env.VERCEL_ENV === 'preview') return '[PREVIEW] ';
