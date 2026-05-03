@@ -1,11 +1,11 @@
 import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 // Defense-in-depth secondary auth gate
+// Validates the session email exists in the Admin table (single source of truth: database)
 export async function requireAdmin() {
   const session = await auth();
-
-  const adminEmail = process.env.ADMIN_MAIL;
 
   if (!session?.user?.email) {
     return {
@@ -14,7 +14,12 @@ export async function requireAdmin() {
     } as const;
   }
 
-  if (adminEmail && session.user.email !== adminEmail) {
+  const admin = await prisma.admin.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  });
+
+  if (!admin) {
     return {
       session: null,
       unauthorized: NextResponse.json({ error: 'Forbidden: Admin access only' }, { status: 403 }),

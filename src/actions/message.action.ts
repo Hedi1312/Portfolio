@@ -1,13 +1,13 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { AdminReply } from '@/emails/AdminReply';
 import { requireAdmin } from '@/lib/auth-guard';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
+import { getEmailSubjectPrefix, sendEmail } from '@/lib/mailer';
+import { prisma } from '@/lib/prisma';
 import { render } from '@react-email/components';
-import { AdminReply } from '@/emails/AdminReply';
-import { transporter, getEmailSubjectPrefix } from '@/lib/mailer';
-import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
 const idSchema = z.string().cuid('Invalid ID format');
 
@@ -229,8 +229,8 @@ export async function sendReplyAction(
       },
     });
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+    await sendEmail({
+      from: process.env.SMTP_FROM as string,
       to: contact.email,
       subject: `${prefixe}Réponse à votre message — Hëdi OKBA`,
       html,

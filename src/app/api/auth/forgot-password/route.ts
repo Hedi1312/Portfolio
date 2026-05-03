@@ -1,15 +1,15 @@
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-import { NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
 import { render } from '@react-email/components';
+import { randomUUID } from 'crypto';
+import { NextResponse } from 'next/server';
 
-import { prisma } from '@/lib/prisma';
-import { resetSchema } from '@/lib/schemas/auth';
 import { PasswordReset } from '@/emails/PasswordReset';
+import { getEmailSubjectPrefix, sendEmail } from '@/lib/mailer';
+import { prisma } from '@/lib/prisma';
 import { authRateLimit } from '@/lib/rate-limit';
-import { transporter, getEmailSubjectPrefix } from '@/lib/mailer';
+import { resetSchema } from '@/lib/schemas/auth';
 
 // Rate limit: 5 attempts per 15 minutes per IP
 const limiter = authRateLimit({ limit: 5, window: '15 m', prefix: 'rl:forgot-pw' });
@@ -61,8 +61,8 @@ export async function POST(req: Request) {
     const prefixe = getEmailSubjectPrefix();
     const html = await render(PasswordReset({ resetLink }));
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+    await sendEmail({
+      from: process.env.SMTP_FROM as string,
       to: admin.email,
       subject: `${prefixe}Password Reset Request`,
       html,
