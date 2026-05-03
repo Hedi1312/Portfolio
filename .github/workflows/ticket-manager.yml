@@ -47,11 +47,11 @@ jobs:
           NODE_ID=$(gh issue view ${{ matrix.issue_num }} --repo ${{ github.repository }} --json id --jq '.id')
           echo "node_id=$NODE_ID" >> $GITHUB_OUTPUT
 
-      - name: 🟣 Déplacer vers "En attente de validation"
+      - name: 🟣 Déplacer vers le statut cible
         uses: leonsteinhaeuser/project-beta-automations@v2.2.1
         with:
           gh_token: ${{ secrets.PROJECT_PAT }}
-          user: 'Hedi1312'
-          project_id: 4
+          user: ${{ vars.PROJECT_OWNER }}
+          project_id: ${{ vars.PROJECT_ID }}
           resource_node_id: ${{ steps.get_node_id.outputs.node_id }}
-          status_value: 'En attente de validation'
+          status_value: ${{ vars.PROJECT_STATUS_NAME }}
