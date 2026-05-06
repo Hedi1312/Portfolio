@@ -6,7 +6,7 @@ import { getUmamiStatsAction } from '@/actions/analytics.action';
 export default async function AdminAnalyticsPage() {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) {
-    redirect('/admin-login');
+    redirect('/admin-login?error=SessionExpired');
   }
 
   // Pre-fetch '7d' data on the server
