@@ -3,12 +3,12 @@
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { smoothScrollTo } from '@/lib/utils/scroll';
-import { AnimatePresence, m, type Variants } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { Home, UserRound, FolderKanban, Send, Bell, Lock, LockOpen, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import {
   AnimatedHome,
   AnimatedUser,

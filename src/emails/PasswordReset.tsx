@@ -59,7 +59,7 @@ export const PasswordReset = ({ resetLink }: PasswordResetProps) => (
 
                 <div style={footer}>
                   <Text style={footerText}>
-                    Message généré par le système de sécurité portfolio.
+                    Message généré par le système de sécurité du portfolio.
                   </Text>
                 </div>
               </td>
