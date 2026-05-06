@@ -6,7 +6,7 @@ import MessagesClient from './MessagesClient';
 export default async function MessagesPage() {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) {
-    redirect('/admin-login');
+    redirect('/admin-login?error=SessionExpired');
   }
 
   // Fetch all contacts with nested messages and replies

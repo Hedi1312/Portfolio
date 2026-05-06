@@ -6,7 +6,7 @@ import ProjectsClient from './ProjectsClient';
 export default async function AdminProjectsPage() {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) {
-    redirect('/admin-login');
+    redirect('/admin-login?error=SessionExpired');
   }
 
   // Fetch all projects, their nested skills, and sorted images

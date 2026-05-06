@@ -6,7 +6,7 @@ import CvClient from './CvClient';
 export default async function AdminCVPage() {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) {
-    redirect('/admin-login');
+    redirect('/admin-login?error=SessionExpired');
   }
 
   const cv = await prisma.cv.findFirst({

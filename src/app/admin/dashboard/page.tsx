@@ -7,7 +7,7 @@ export default async function DashboardPage() {
   // 1. Admin authorization (checks session email against Admin table)
   const { unauthorized } = await requireAdmin();
   if (unauthorized) {
-    redirect('/admin-login');
+    redirect('/admin-login?error=SessionExpired');
   }
 
   // 2. Parallel database queries

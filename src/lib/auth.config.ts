@@ -22,7 +22,11 @@ export const authConfig = {
       }
 
       if (isLoginPath) {
-        if (isLoggedIn) return Response.redirect(new URL('/admin/dashboard', nextUrl));
+        // Break infinite loop if the server component rejected the session
+        const hasError = nextUrl.searchParams.has('error');
+        if (isLoggedIn && !hasError) {
+          return Response.redirect(new URL('/admin/dashboard', nextUrl));
+        }
         return true;
       }
 

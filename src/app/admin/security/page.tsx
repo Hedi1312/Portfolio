@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 export default async function SecuritySettingsPage() {
   const { session, unauthorized } = await requireAdmin();
   if (unauthorized || !session?.user?.email) {
-    redirect('/admin-login');
+    redirect('/admin-login?error=SessionExpired');
   }
 
   // @react-best-practices: Fetch data on the server and pass minimal props to client
