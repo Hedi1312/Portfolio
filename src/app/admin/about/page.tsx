@@ -9,7 +9,7 @@ import { UserCircle } from 'lucide-react';
 export default async function AdminAboutPage() {
   const { unauthorized } = await requireAdmin();
   if (unauthorized) {
-    redirect('/admin-login');
+    redirect('/admin-login?error=SessionExpired');
   }
 
   // Next.js cache bypass if necessary or let standard caching operate
