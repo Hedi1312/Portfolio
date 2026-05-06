@@ -58,6 +58,7 @@ export async function createProjectAction(payload: Record<string, unknown>): Pro
     });
 
     revalidatePath('/admin/projects');
+    revalidatePath('/');
     return { success: true, data: project };
   } catch (error) {
     console.error('[actions/project:create]', error);
@@ -119,6 +120,7 @@ export async function updateProjectAction(
     });
 
     revalidatePath('/admin/projects');
+    revalidatePath('/');
     return { success: true, data: project };
   } catch (error) {
     console.error('[actions/project:update]', error);
@@ -150,6 +152,7 @@ export async function deleteProjectAction(id: string): Promise<ActionResult> {
     await prisma.project.delete({ where: { id } });
 
     revalidatePath('/admin/projects');
+    revalidatePath('/');
     return { success: true };
   } catch (error) {
     console.error('[actions/project:delete]', error);

@@ -8,117 +8,16 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { Home, UserRound, FolderKanban, Send, Bell, Lock, LockOpen } from 'lucide-react';
-import { FiMenu, FiX } from 'react-icons/fi';
+import { Home, UserRound, FolderKanban, Send, Bell, Lock, LockOpen, Menu, X } from 'lucide-react';
+import {
+  AnimatedHome,
+  AnimatedUser,
+  AnimatedProjects,
+  AnimatedSend,
+  AnimatedBell,
+  AnimatedLock,
+} from '@/components/ui/AnimatedIcons';
 import { getUnreadCountAction } from '@/actions/message.action';
-
-// --- Animated Icon Wrappers ---
-
-const bounceVariants: Variants = {
-  idle: { y: 0 },
-  hover: {
-    y: [0, -3, 0],
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
-
-const wiggleVariants: Variants = {
-  idle: { rotate: 0 },
-  hover: {
-    rotate: [0, -12, 12, -6, 0],
-    transition: { duration: 0.5, ease: 'easeInOut' },
-  },
-};
-
-const tiltVariants: Variants = {
-  idle: { rotate: 0, scale: 1 },
-  hover: {
-    rotate: [0, -10, 10, 0],
-    scale: [1, 1.15, 1.15, 1],
-    transition: { duration: 0.5, ease: 'easeInOut' },
-  },
-};
-
-const sendVariants: Variants = {
-  idle: { x: 0, y: 0 },
-  hover: {
-    x: [0, 3, 0],
-    y: [0, -2, 0],
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
-
-const bellVariants: Variants = {
-  idle: { rotate: 0 },
-  hover: {
-    rotate: [0, 15, -15, 10, -10, 0],
-    transition: { duration: 0.5, ease: 'easeInOut' },
-  },
-};
-
-const lockVariants: Variants = {
-  idle: { scale: 1 },
-  hover: {
-    scale: [1, 1.15, 1],
-    transition: { duration: 0.3, ease: 'easeInOut' },
-  },
-};
-
-function AnimatedHome({ size, className }: { size: number; className?: string }) {
-  return (
-    <m.span variants={bounceVariants} className={`inline-flex ${className || ''}`}>
-      <Home size={size} />
-    </m.span>
-  );
-}
-
-function AnimatedUser({ size, className }: { size: number; className?: string }) {
-  return (
-    <m.span variants={tiltVariants} className={`inline-flex ${className || ''}`}>
-      <UserRound size={size} />
-    </m.span>
-  );
-}
-
-function AnimatedProjects({ size, className }: { size: number; className?: string }) {
-  return (
-    <m.span variants={wiggleVariants} className={`inline-flex ${className || ''}`}>
-      <FolderKanban size={size} />
-    </m.span>
-  );
-}
-
-function AnimatedSend({ size, className }: { size: number; className?: string }) {
-  return (
-    <m.span variants={sendVariants} className={`inline-flex ${className || ''}`}>
-      <Send size={size} />
-    </m.span>
-  );
-}
-
-function AnimatedBell({ size, className }: { size: number; className?: string }) {
-  return (
-    <m.span variants={bellVariants} className={`inline-flex ${className || ''}`}>
-      <Bell size={size} />
-    </m.span>
-  );
-}
-
-function AnimatedLock({
-  size,
-  className,
-  open,
-}: {
-  size: number;
-  className?: string;
-  open: boolean;
-}) {
-  return (
-    <m.span variants={lockVariants} className={`inline-flex ${className || ''}`}>
-      {open ? <LockOpen size={size} /> : <Lock size={size} />}
-    </m.span>
-  );
-}
 
 const navLinks = [
   { href: '/', icon: AnimatedHome, label: 'Accueil', section: 'home' },
@@ -426,7 +325,7 @@ export default function Navbar() {
                 exit={{ rotate: 90, opacity: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                <FiX size={26} />
+                <X size={26} />
               </m.span>
             ) : (
               <m.span
@@ -436,7 +335,7 @@ export default function Navbar() {
                 exit={{ rotate: -90, opacity: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                <FiMenu size={26} />
+                <Menu size={26} />
               </m.span>
             )}
           </AnimatePresence>
@@ -466,7 +365,7 @@ export default function Navbar() {
                 className="absolute top-6 right-6 p-2 rounded-xl hover:bg-brand-400/10 transition-colors"
                 aria-label="Fermer"
               >
-                <FiX size={24} />
+                <X size={24} />
               </button>
 
               <nav className="flex flex-col gap-2">
@@ -484,12 +383,10 @@ export default function Navbar() {
                       <Link
                         href={link.href}
                         onClick={(e) => {
-                          handleLinkClick();
-                          if (window.location.pathname === '/') {
-                            e.preventDefault();
-                            const el = document.getElementById(link.section);
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
-                          }
+                          e.preventDefault();
+                          // On scrolle d'abord, puis on ferme le menu pour éviter les saccades
+                          smoothScrollTo(link.section, 2000);
+                          setTimeout(handleLinkClick, 100);
                         }}
                         className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
                           isActive
