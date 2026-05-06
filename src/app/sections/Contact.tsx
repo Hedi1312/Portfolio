@@ -165,7 +165,7 @@ export default function Contact() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-[9999] p-4"
+                className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-9999 p-4"
                 onClick={handleClose}
               >
                 <m.div
@@ -173,7 +173,7 @@ export default function Contact() {
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.95, opacity: 0, y: 10 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-2xl rounded-2xl max-w-lg w-full p-8 relative text-left"
+                  className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-2xl rounded-2xl max-w-lg w-full p-6 md:p-8 relative text-left max-h-dvh md:max-h-[90vh] overflow-y-auto"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
