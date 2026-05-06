@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 
     await sendEmail({
       to: admin.email,
-      subject: `${prefixe}Password Reset Request`,
+      subject: `${prefixe}Demande de réinitialisation de mot de passe`,
       html,
     });
 
