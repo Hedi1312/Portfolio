@@ -40,9 +40,10 @@ export async function POST(req: Request) {
     const timestamp = Math.round(Date.now() / 1000);
 
     // Parameters to sign (must match exactly those sent to Cloudinary)
-    const paramsToSign: Record<string, string | number> = {
+    const paramsToSign: Record<string, string | number | boolean> = {
       timestamp,
       folder,
+      invalidate: true,
     };
 
     if (public_id) {
