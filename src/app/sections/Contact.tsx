@@ -272,7 +272,7 @@ export default function Contact() {
                       {/* Multi-file upload UI */}
                       <div>
                         <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
-                          Pièces jointes (optionnel - max 10 Mo)
+                          Pièces jointes (optionnel - max 10 Mo par pièce)
                         </label>
                         <div className="relative group">
                           <input
