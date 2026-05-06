@@ -383,10 +383,13 @@ export default function Navbar() {
                       <Link
                         href={link.href}
                         onClick={(e) => {
-                          e.preventDefault();
-                          // On scrolle d'abord, puis on ferme le menu pour éviter les saccades
-                          smoothScrollTo(link.section, 2000);
-                          setTimeout(handleLinkClick, 100);
+                          if (pathname === '/') {
+                            e.preventDefault();
+                            smoothScrollTo(link.section, 2000);
+                            setTimeout(handleLinkClick, 100);
+                          } else {
+                            handleLinkClick();
+                          }
                         }}
                         className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
                           isActive
