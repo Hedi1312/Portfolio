@@ -1,7 +1,13 @@
 'use client';
 import { m } from 'framer-motion';
 import Link from 'next/link';
-import { FaEnvelope, FaFolderOpen, FaGithub, FaHome, FaLinkedin, FaUser } from 'react-icons/fa';
+import { FaGithub, FaLinkedin } from 'react-icons/fa';
+import {
+  AnimatedHome,
+  AnimatedUser,
+  AnimatedProjects,
+  AnimatedSend,
+} from '@/components/ui/AnimatedIcons';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -67,36 +73,43 @@ export default function Footer() {
             </h4>
             <ul className="flex flex-col gap-3">
               {[
-                { label: 'Accueil', href: '#home', section: 'home', icon: FaHome },
-                { label: 'À propos', href: '#a-propos', section: 'a-propos', icon: FaUser },
+                { label: 'Accueil', href: '#home', section: 'home', icon: AnimatedHome },
+                { label: 'À propos', href: '#a-propos', section: 'a-propos', icon: AnimatedUser },
                 {
                   label: 'Projets',
                   href: '#mes-projets',
                   section: 'mes-projets',
-                  icon: FaFolderOpen,
+                  icon: AnimatedProjects,
                 },
                 {
                   label: 'Contact & CV',
                   href: '#next-steps',
                   section: 'next-steps',
-                  icon: FaEnvelope,
+                  icon: AnimatedSend,
                 },
               ].map((link) => {
                 const Icon = link.icon;
                 return (
                   <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        const el = document.getElementById(link.section);
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }}
+                    <m.div
                       className="text-sm hover:text-brand-400 hover:translate-x-2 transition-all duration-300 flex items-center gap-2.5 w-fit"
+                      initial="idle"
+                      whileHover="hover"
+                      animate="idle"
                     >
-                      <Icon size={15} />
-                      {link.label}
-                    </Link>
+                      <Link
+                        href={link.href}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const el = document.getElementById(link.section);
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="flex items-center gap-2.5"
+                      >
+                        <Icon size={18} />
+                        {link.label}
+                      </Link>
+                    </m.div>
                   </li>
                 );
               })}
