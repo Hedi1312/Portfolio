@@ -54,8 +54,6 @@ const lockVariants: Variants = {
   },
 };
 
-
-
 // --- Components ---
 
 interface IconProps {
