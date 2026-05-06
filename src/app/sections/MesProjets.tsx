@@ -7,6 +7,9 @@ import { findSkillIcon } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
 import { useNeonHover } from '@/hooks/useNeonHover';
 import { ProjectModal } from '@/components/ProjectModal';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 
 export interface ProjectImage {
   id: string;
@@ -28,6 +31,7 @@ export interface Project {
   gradient: string;
   link?: string | null;
   github?: string | null;
+  useGradientBanner?: boolean;
   skills: Skill[];
   images?: ProjectImage[];
 }
@@ -105,10 +109,11 @@ export default function MesProjets({ projects }: MesProjetsProps) {
                 }}
               >
                 <div
-                  className={`h-40 relative overflow-hidden ${!project.images || project.images.length === 0 ? `bg-linear-to-br ${project.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
+                  className={`h-40 relative overflow-hidden ${!project.images || project.images.length === 0 || project.useGradientBanner ? `bg-linear-to-br ${project.gradient}` : 'bg-neutral-100 dark:bg-neutral-800'}`}
                 >
                   {project.images &&
                     project.images.length > 0 &&
+                    !project.useGradientBanner &&
                     (project.images[0].url.match(/\.(mp4|webm|mov|avi)$/i) ? (
                       <>
                         <video
@@ -140,9 +145,11 @@ export default function MesProjets({ projects }: MesProjetsProps) {
                   <h4 className="text-xl font-bold mb-3 font-(family-name:--font-space-grotesk) group-hover:text-brand-400 transition-colors duration-300 wrap-break-word line-clamp-2">
                     {project.title}
                   </h4>
-                  <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed mb-6 wrap-break-word line-clamp-3">
-                    {project.description}
-                  </p>
+                  <div className="prose prose-sm dark:prose-invert prose-p:my-0 text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed mb-6 wrap-break-word line-clamp-3">
+                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                      {project.description}
+                    </ReactMarkdown>
+                  </div>
 
                   {project.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-5">

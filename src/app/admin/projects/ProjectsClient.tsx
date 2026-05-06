@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 import {
   FiArrowLeft,
   FiPlus,
@@ -107,6 +110,7 @@ interface Project {
   github?: string | null;
   order: number;
   visible: boolean;
+  useGradientBanner: boolean;
   skills: Skill[];
   images: ProjectImage[];
   createdAt: string;
@@ -166,9 +170,11 @@ function SortableProjectItem({
               </span>
             )}
           </div>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 mb-3">
-            {project.description}
-          </p>
+          <div className="prose prose-sm dark:prose-invert prose-p:my-0 text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 mb-3">
+            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+              {project.description}
+            </ReactMarkdown>
+          </div>
 
           {/* Tech list */}
           {project.skills.length > 0 && (
@@ -393,6 +399,7 @@ const defaultForm = {
   link: '',
   github: '',
   visible: true,
+  useGradientBanner: false,
   skills: [] as Skill[],
 };
 
@@ -422,6 +429,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [existingImages, setExistingImages] = useState<ProjectImage[]>([]);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [descriptionTab, setDescriptionTab] = useState<'edit' | 'preview'>('edit');
 
   const { toast, showToast, hideToast } = useToast();
   const isDark = useIsDark();
@@ -510,6 +518,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
       link: project.link || '',
       github: project.github || '',
       visible: project.visible,
+      useGradientBanner: project.useGradientBanner || false,
       skills: project.skills.map((s) => ({
         name: s.name,
         icon: s.icon,
@@ -948,15 +957,61 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">Description *</label>
-                  <textarea
-                    value={form.description}
-                    onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                    className={`${inputClasses} resize-none ${formErrors.description ? 'border-danger-500 focus:border-danger-500 focus:ring-danger-500' : ''}`}
-                    rows={3}
-                    placeholder="Description du projet..."
-                    disabled={saving || isUploadingImage}
-                  />
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Description *</label>
+                    <div className="flex bg-neutral-100 dark:bg-neutral-800 rounded-lg p-0.5 border border-neutral-200 dark:border-neutral-700">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setDescriptionTab('edit');
+                        }}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                          descriptionTab === 'edit'
+                            ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm'
+                            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                        }`}
+                      >
+                        Éditer
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setDescriptionTab('preview');
+                        }}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                          descriptionTab === 'preview'
+                            ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm'
+                            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                        }`}
+                      >
+                        Aperçu
+                      </button>
+                    </div>
+                  </div>
+
+                  {descriptionTab === 'edit' ? (
+                    <textarea
+                      value={form.description}
+                      onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                      className={`${inputClasses} resize-none min-h-[120px] ${formErrors.description ? 'border-danger-500 focus:border-danger-500 focus:ring-danger-500' : ''}`}
+                      rows={6}
+                      placeholder="Description du projet avec Markdown supporté..."
+                      disabled={saving || isUploadingImage}
+                    />
+                  ) : (
+                    <div className="prose prose-sm dark:prose-invert prose-p:my-2 min-h-[120px] p-4 bg-neutral-50 dark:bg-neutral-900/50 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-y-auto max-h-[300px]">
+                      {form.description ? (
+                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                          {form.description}
+                        </ReactMarkdown>
+                      ) : (
+                        <span className="text-neutral-400 italic">Aperçu vide...</span>
+                      )}
+                    </div>
+                  )}
+
                   {formErrors.description && (
                     <p className="text-danger-500 text-xs mt-1">{formErrors.description}</p>
                   )}
@@ -983,8 +1038,36 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                   </div>
                 </div>
 
+                {/* Bannière dégradé ou image */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center h-5">
+                    <input
+                      type="checkbox"
+                      id="useGradientBanner"
+                      checked={form.useGradientBanner}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, useGradientBanner: e.target.checked }))
+                      }
+                      className="w-4 h-4 text-brand-500 bg-neutral-100 border-neutral-300 rounded-sm focus:ring-brand-500 dark:focus:ring-brand-600 dark:ring-offset-neutral-800 focus:ring-2 dark:bg-neutral-700 dark:border-neutral-600"
+                      disabled={saving || isUploadingImage}
+                    />
+                  </div>
+                  <div className="text-sm">
+                    <label
+                      htmlFor="useGradientBanner"
+                      className="font-medium text-neutral-900 dark:text-white cursor-pointer"
+                    >
+                      Utiliser le dégradé comme miniature
+                    </label>
+                    <p className="text-neutral-500 dark:text-neutral-400">
+                      Cochez cette case pour afficher le dégradé sur la carte, même s&apos;il y a
+                      des images.
+                    </p>
+                  </div>
+                </div>
+
                 {/* Liens */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-sm font-medium mb-1">Lien projet</label>
                     <input
