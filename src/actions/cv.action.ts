@@ -46,6 +46,8 @@ export async function uploadCvAction(payload: Record<string, unknown>): Promise<
     });
 
     revalidatePath('/admin/cv');
+    revalidatePath('/');
+    revalidatePath('/api/cv');
     return { success: true, data: { url, name: 'CV_OKBA_Hedi.pdf' } };
   } catch (error) {
     console.error('[actions/cv:upload]', error);
@@ -66,6 +68,8 @@ export async function deleteCvAction(): Promise<ActionResult> {
     await prisma.cv.deleteMany();
 
     revalidatePath('/admin/cv');
+    revalidatePath('/');
+    revalidatePath('/api/cv');
     return { success: true };
   } catch (error) {
     console.error('[actions/cv:delete]', error);

@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Always hit DB — CV can be deleted at any time from admin
+export const dynamic = 'force-dynamic';
+
 /**
  * Proxies Cloudinary PDF to same-origin to bypass CORS and CSP restrictions.
  */
@@ -31,7 +34,7 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': isDownload
           ? 'attachment; filename="CV_OKBA_Hedi.pdf"'
           : 'inline; filename="CV_OKBA_Hedi.pdf"',
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Content-Length': String(pdfBuffer.byteLength),
         // Override global DENY for same-origin iframes
         'X-Frame-Options': 'SAMEORIGIN',

@@ -51,6 +51,7 @@ export async function directUploadToCloudinary(
   formData.append('signature', signature);
   formData.append('api_key', apiKey);
   formData.append('folder', folder);
+  formData.append('invalidate', 'true');
 
   if (options.public_id) {
     formData.append('public_id', options.public_id);
