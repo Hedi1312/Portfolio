@@ -1,9 +1,11 @@
 import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 import { Resend } from 'resend';
 
 // ─── Shared Email Interface ────────────────────────────────────────
 export interface SendEmailOptions {
-  from: string;
+  /** Sender address. Falls back to EMAIL_FROM or SMTP_FROM env var if omitted. */
+  from?: string;
   to: string;
   subject: string;
   html: string;
@@ -15,19 +17,38 @@ export interface SendEmailOptions {
 const isResendConfigured = !!process.env.RESEND_API_KEY;
 
 /**
+ * Resolves the sender address from env vars.
+ * Checks EMAIL_FROM first, then SMTP_FROM for backward compatibility.
+ */
+function getDefaultFromAddress(): string {
+  const from = process.env.EMAIL_FROM || process.env.SMTP_FROM;
+  if (!from) {
+    throw new Error(
+      '[Mailer] Missing sender address: set EMAIL_FROM or SMTP_FROM in environment variables.',
+    );
+  }
+  return from;
+}
+
+/**
  * Sends an email using Resend SDK (Prod/Staging) or SMTP/Mailpit (Local).
  * Automatically toggles transport based on RESEND_API_KEY presence.
  */
 export async function sendEmail(options: SendEmailOptions): Promise<void> {
+  const resolvedOptions = {
+    ...options,
+    from: options.from || getDefaultFromAddress(),
+  };
+
   if (isResendConfigured) {
-    await sendViaResend(options);
+    await sendViaResend(resolvedOptions);
   } else {
-    await sendViaSMTP(options);
+    await sendViaSMTP(resolvedOptions);
   }
 }
 
 // ─── Resend SDK Transport (Production / Staging) ───────────────────
-async function sendViaResend(options: SendEmailOptions): Promise<void> {
+async function sendViaResend(options: SendEmailOptions & { from: string }): Promise<void> {
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   const { error } = await resend.emails.send({
@@ -47,19 +68,26 @@ async function sendViaResend(options: SendEmailOptions): Promise<void> {
   }
 }
 
-// ─── SMTP Transport (Local / Fallback) ─────────────────────────────
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// ─── SMTP Transport (Local / Fallback — Lazy Init) ─────────────────
+let _transporter: Transporter | null = null;
 
-async function sendViaSMTP(options: SendEmailOptions): Promise<void> {
-  await transporter.sendMail({
+function getTransporter(): Transporter {
+  if (!_transporter) {
+    _transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
+  return _transporter;
+}
+
+async function sendViaSMTP(options: SendEmailOptions & { from: string }): Promise<void> {
+  await getTransporter().sendMail({
     from: options.from,
     to: options.to,
     subject: options.subject,
@@ -73,7 +101,7 @@ async function sendViaSMTP(options: SendEmailOptions): Promise<void> {
 }
 
 // Temporary export for compatibility during migration
-export { transporter };
+export { getTransporter as transporter };
 
 /**
  * Returns the environment-specific subject prefix.

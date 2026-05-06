@@ -62,7 +62,6 @@ export async function POST(req: Request) {
     const html = await render(PasswordReset({ resetLink }));
 
     await sendEmail({
-      from: process.env.SMTP_FROM as string,
       to: admin.email,
       subject: `${prefixe}Password Reset Request`,
       html,
