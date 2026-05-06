@@ -54,14 +54,7 @@ const lockVariants: Variants = {
   },
 };
 
-const socialVariants: Variants = {
-  idle: { scale: 1, rotate: 0 },
-  hover: {
-    scale: 1.2,
-    rotate: [0, -10, 10, 0],
-    transition: { duration: 0.3 },
-  },
-};
+
 
 // --- Components ---
 
