@@ -48,7 +48,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id;
       }
-      
+
       if (token.id) {
         try {
           const admin = await prisma.admin.findUnique({
