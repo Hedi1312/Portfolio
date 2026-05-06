@@ -29,7 +29,8 @@ export async function createProjectAction(payload: Record<string, unknown>): Pro
       return { error: validation.error.issues[0].message };
     }
 
-    const { title, description, gradient, link, github, visible, skills } = validation.data;
+    const { title, description, gradient, link, github, visible, useGradientBanner, skills } =
+      validation.data;
 
     const maxOrder = await prisma.project.aggregate({ _max: { order: true } });
     const nextOrder = (maxOrder._max.order ?? -1) + 1;
@@ -42,6 +43,7 @@ export async function createProjectAction(payload: Record<string, unknown>): Pro
         link: link || null,
         github: github || null,
         visible: visible ?? true,
+        useGradientBanner: useGradientBanner ?? false,
         order: nextOrder,
         skills: {
           create:
@@ -76,7 +78,17 @@ export async function updateProjectAction(
       return { error: validation.error.issues[0].message };
     }
 
-    const { title, description, gradient, link, github, visible, order, skills } = validation.data;
+    const {
+      title,
+      description,
+      gradient,
+      link,
+      github,
+      visible,
+      useGradientBanner,
+      order,
+      skills,
+    } = validation.data;
 
     // Atomic skill replacement
     const project = await prisma.$transaction(async (tx) => {
@@ -91,6 +103,7 @@ export async function updateProjectAction(
           link: link || null,
           github: github || null,
           visible: visible ?? true,
+          useGradientBanner: useGradientBanner ?? false,
           order: order ?? undefined,
           skills: {
             create:

@@ -3,28 +3,128 @@
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 import { smoothScrollTo } from '@/lib/utils/scroll';
-import { AnimatePresence, m } from 'framer-motion';
+import { AnimatePresence, m, type Variants } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  FaBell,
-  FaEnvelope,
-  FaFolderOpen,
-  FaHome,
-  FaLock,
-  FaUnlockAlt,
-  FaUser,
-} from 'react-icons/fa';
+import { Home, UserRound, FolderKanban, Send, Bell, Lock, LockOpen } from 'lucide-react';
 import { FiMenu, FiX } from 'react-icons/fi';
 import { getUnreadCountAction } from '@/actions/message.action';
 
+// --- Animated Icon Wrappers ---
+
+const bounceVariants: Variants = {
+  idle: { y: 0 },
+  hover: {
+    y: [0, -3, 0],
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
+
+const wiggleVariants: Variants = {
+  idle: { rotate: 0 },
+  hover: {
+    rotate: [0, -12, 12, -6, 0],
+    transition: { duration: 0.5, ease: 'easeInOut' },
+  },
+};
+
+const tiltVariants: Variants = {
+  idle: { rotate: 0, scale: 1 },
+  hover: {
+    rotate: [0, -10, 10, 0],
+    scale: [1, 1.15, 1.15, 1],
+    transition: { duration: 0.5, ease: 'easeInOut' },
+  },
+};
+
+const sendVariants: Variants = {
+  idle: { x: 0, y: 0 },
+  hover: {
+    x: [0, 3, 0],
+    y: [0, -2, 0],
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
+
+const bellVariants: Variants = {
+  idle: { rotate: 0 },
+  hover: {
+    rotate: [0, 15, -15, 10, -10, 0],
+    transition: { duration: 0.5, ease: 'easeInOut' },
+  },
+};
+
+const lockVariants: Variants = {
+  idle: { scale: 1 },
+  hover: {
+    scale: [1, 1.15, 1],
+    transition: { duration: 0.3, ease: 'easeInOut' },
+  },
+};
+
+function AnimatedHome({ size, className }: { size: number; className?: string }) {
+  return (
+    <m.span variants={bounceVariants} className={`inline-flex ${className || ''}`}>
+      <Home size={size} />
+    </m.span>
+  );
+}
+
+function AnimatedUser({ size, className }: { size: number; className?: string }) {
+  return (
+    <m.span variants={tiltVariants} className={`inline-flex ${className || ''}`}>
+      <UserRound size={size} />
+    </m.span>
+  );
+}
+
+function AnimatedProjects({ size, className }: { size: number; className?: string }) {
+  return (
+    <m.span variants={wiggleVariants} className={`inline-flex ${className || ''}`}>
+      <FolderKanban size={size} />
+    </m.span>
+  );
+}
+
+function AnimatedSend({ size, className }: { size: number; className?: string }) {
+  return (
+    <m.span variants={sendVariants} className={`inline-flex ${className || ''}`}>
+      <Send size={size} />
+    </m.span>
+  );
+}
+
+function AnimatedBell({ size, className }: { size: number; className?: string }) {
+  return (
+    <m.span variants={bellVariants} className={`inline-flex ${className || ''}`}>
+      <Bell size={size} />
+    </m.span>
+  );
+}
+
+function AnimatedLock({
+  size,
+  className,
+  open,
+}: {
+  size: number;
+  className?: string;
+  open: boolean;
+}) {
+  return (
+    <m.span variants={lockVariants} className={`inline-flex ${className || ''}`}>
+      {open ? <LockOpen size={size} /> : <Lock size={size} />}
+    </m.span>
+  );
+}
+
 const navLinks = [
-  { href: '/', icon: FaHome, label: 'Accueil', section: 'home' },
-  { href: '/#a-propos', icon: FaUser, label: 'À propos', section: 'a-propos' },
-  { href: '/#mes-projets', icon: FaFolderOpen, label: 'Projets', section: 'mes-projets' },
-  { href: '/#contact', icon: FaEnvelope, label: 'Contact & CV', section: 'contact' },
+  { href: '/', icon: AnimatedHome, label: 'Accueil', section: 'home' },
+  { href: '/#a-propos', icon: AnimatedUser, label: 'À propos', section: 'a-propos' },
+  { href: '/#mes-projets', icon: AnimatedProjects, label: 'Projets', section: 'mes-projets' },
+  { href: '/#contact', icon: AnimatedSend, label: 'Contact & CV', section: 'contact' },
 ];
 
 export default function Navbar() {
@@ -218,99 +318,94 @@ export default function Navbar() {
             const Icon = link.icon;
             const isActive = pathname === '/' && activeSection === link.section;
             return (
-              <Link
-                key={link.section}
-                href={link.href}
-                onClick={(e) => {
-                  if (pathname === '/') {
-                    e.preventDefault();
-                    smoothScrollTo(link.section, 2500);
-                  }
-                }}
-                className={`relative p-3 rounded-xl transition-all duration-300 group ${
-                  isActive
-                    ? 'text-brand-400'
-                    : 'text-neutral-500 dark:text-neutral-400 hover:text-foreground'
-                }`}
-                title={link.label}
-              >
-                <Icon
-                  size={22}
-                  className="transition-transform duration-200 group-hover:scale-110"
-                />
+              <m.div key={link.section} initial="idle" whileHover="hover" animate="idle">
+                <Link
+                  href={link.href}
+                  onClick={(e) => {
+                    if (pathname === '/') {
+                      e.preventDefault();
+                      smoothScrollTo(link.section, 2500);
+                    }
+                  }}
+                  className={`relative p-3 rounded-xl transition-all duration-300 group flex items-center ${
+                    isActive
+                      ? 'text-brand-400'
+                      : 'text-neutral-500 dark:text-neutral-400 hover:text-foreground'
+                  }`}
+                  title={link.label}
+                >
+                  <Icon size={21} />
 
-                {isActive && (
-                  <m.div
-                    layoutId="activeIndicator"
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
+                  {isActive && (
+                    <m.div
+                      layoutId="activeIndicator"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 0.8 }}
+                    />
+                  )}
 
-                <span className="absolute inset-0 rounded-xl bg-brand-400/0 group-hover:bg-brand-400/10 transition-colors duration-300" />
-              </Link>
+                  <span className="absolute inset-0 rounded-xl bg-brand-400/0 group-hover:bg-brand-400/10 transition-colors duration-300" />
+                </Link>
+              </m.div>
             );
           })}
 
           {status === 'authenticated' && (
+            <m.div initial="idle" whileHover="hover" animate="idle">
+              <Link
+                href="/admin/messages"
+                className={`relative p-3 rounded-xl transition-all duration-300 group flex items-center ${
+                  isMessagesPage
+                    ? 'text-brand-400'
+                    : 'text-neutral-500 dark:text-neutral-400 hover:text-foreground'
+                }`}
+                title="Messages"
+              >
+                <AnimatedBell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-danger-500 text-white text-[10px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center shadow-md">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+                {isMessagesPage && (
+                  <m.div
+                    layoutId="activeIndicator"
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 0.8 }}
+                  />
+                )}
+                <span className="absolute inset-0 rounded-xl bg-brand-400/0 group-hover:bg-brand-400/10 transition-colors duration-300" />
+              </Link>
+            </m.div>
+          )}
+
+          <m.div initial="idle" whileHover="hover" animate="idle">
             <Link
-              href="/admin/messages"
-              className={`relative p-3 rounded-xl transition-all duration-300 group ${
-                isMessagesPage
-                  ? 'text-brand-400'
-                  : 'text-neutral-500 dark:text-neutral-400 hover:text-foreground'
+              href={status === 'authenticated' ? '/admin/dashboard' : '/admin-login'}
+              className={`relative p-3 rounded-xl transition-all duration-300 group flex items-center ${
+                isDashboardPage || pathname === '/admin-login'
+                  ? 'text-danger-500'
+                  : 'text-danger-500 hover:text-danger-400'
               }`}
-              title="Messages"
+              title="Admin"
             >
-              <FaBell
-                size={20}
-                className="transition-transform duration-200 group-hover:scale-110"
-              />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 bg-danger-500 text-white text-[10px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center shadow-md">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-              {isMessagesPage && (
+              <AnimatedLock size={21} open={status === 'authenticated'} />
+              {(isDashboardPage || pathname === '/admin-login') && (
                 <m.div
                   layoutId="activeIndicator"
                   className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 0.8 }}
                 />
               )}
-              <span className="absolute inset-0 rounded-xl bg-brand-400/0 group-hover:bg-brand-400/10 transition-colors duration-300" />
+              <span className="absolute inset-0 rounded-xl bg-danger-500/0 group-hover:bg-danger-500/10 transition-colors duration-300" />
             </Link>
-          )}
-
-          <Link
-            href={status === 'authenticated' ? '/admin/dashboard' : '/admin-login'}
-            className={`relative p-3 rounded-xl transition-all duration-300 group ${
-              isDashboardPage || pathname === '/admin-login'
-                ? 'text-danger-500'
-                : 'text-danger-500 hover:text-danger-400'
-            }`}
-            title="Admin"
-          >
-            {status === 'authenticated' ? (
-              <FaUnlockAlt
-                size={22}
-                className="transition-transform duration-200 group-hover:scale-110"
-              />
-            ) : (
-              <FaLock
-                size={22}
-                className="transition-transform duration-200 group-hover:scale-110"
-              />
-            )}
-            {(isDashboardPage || pathname === '/admin-login') && (
-              <m.div
-                layoutId="activeIndicator"
-                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-400 rounded-full"
-                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-              />
-            )}
-            <span className="absolute inset-0 rounded-xl bg-danger-500/0 group-hover:bg-danger-500/10 transition-colors duration-300" />
-          </Link>
+          </m.div>
 
           <div className="ml-2 pl-3 border-l border-neutral-300/30 dark:border-neutral-600/30">
             <ThemeToggle />
@@ -384,6 +479,7 @@ export default function Navbar() {
                       initial={{ x: 40, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: i * 0.05 }}
+                      whileHover="hover"
                     >
                       <Link
                         href={link.href}
@@ -414,6 +510,7 @@ export default function Navbar() {
                       initial={{ x: 40, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: (navLinks.length + 1) * 0.05 }}
+                      whileHover="hover"
                     >
                       <Link
                         href="/admin/messages"
@@ -421,7 +518,7 @@ export default function Navbar() {
                         className="flex items-center gap-4 px-4 py-3 rounded-xl text-brand-500 hover:bg-brand-400/10 transition-all duration-200"
                       >
                         <div className="relative">
-                          <FaBell size={22} />
+                          <AnimatedBell size={22} />
                           {unreadCount > 0 && (
                             <span className="absolute -top-1 -right-2 bg-danger-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                               {unreadCount > 9 ? '9+' : unreadCount}
@@ -438,13 +535,14 @@ export default function Navbar() {
                   initial={{ x: 40, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: navLinks.length * 0.05 }}
+                  whileHover="hover"
                 >
                   <Link
                     href={status === 'authenticated' ? '/admin/dashboard' : '/admin-login'}
                     onClick={handleLinkClick}
                     className="flex items-center gap-4 px-4 py-3 rounded-xl text-danger-500 hover:bg-danger-500/10 transition-all duration-200"
                   >
-                    {status === 'authenticated' ? <FaUnlockAlt size={22} /> : <FaLock size={22} />}
+                    <AnimatedLock size={22} open={status === 'authenticated'} />
                     <span className="font-medium">Admin</span>
                   </Link>
                 </m.div>

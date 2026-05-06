@@ -15,6 +15,7 @@ export const createProjectSchema = z.object({
   link: z.string().url('Invalid URL').max(500).optional().or(z.literal('')),
   github: z.string().url('Invalid URL').max(500).optional().or(z.literal('')),
   visible: z.boolean().optional(),
+  useGradientBanner: z.boolean().optional(),
   skills: z.array(skillSchema).optional(),
 });
 
