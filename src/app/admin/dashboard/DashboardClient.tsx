@@ -85,6 +85,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       color: 'text-indigo-500',
       bg: 'bg-indigo-500/10',
       isLoading: loadingAnalytics,
+      href: '/admin/analytics',
     },
     {
       label: 'Pages vues',
@@ -94,6 +95,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       color: 'text-brand-500',
       bg: 'bg-brand-500/10',
       isLoading: loadingAnalytics,
+      href: '/admin/analytics',
     },
     {
       label: 'Messages',
@@ -103,6 +105,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       color: kpi.unread > 0 ? 'text-danger-500' : 'text-emerald-500',
       bg: kpi.unread > 0 ? 'bg-danger-500/10' : 'bg-emerald-500/10',
       isLoading: false,
+      href: '/admin/messages',
     },
     {
       label: 'Projets',
@@ -112,6 +115,7 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
       color: 'text-amber-500',
       bg: 'bg-amber-500/10',
       isLoading: false,
+      href: '/admin/projects',
     },
   ];
 
@@ -199,7 +203,8 @@ export default function DashboardClient({ unreadCount, projectsCount }: Dashboar
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + i * 0.08, duration: 0.4 }}
-                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow"
+                onClick={() => router.push(item.href)}
+                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-700"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className={`p-2.5 rounded-xl ${item.bg}`}>

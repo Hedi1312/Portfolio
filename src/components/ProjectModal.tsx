@@ -14,6 +14,9 @@ import {
 import { findSkillIcon } from '@/lib/skill-icons';
 import { useIsDark } from '@/hooks/useIsDark';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 
 const slideVariants = {
   enter: { opacity: 0, scale: 0.98 },
@@ -208,11 +211,9 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             <div className="h-px bg-neutral-100 dark:bg-neutral-800 my-6" />
 
             <div className="prose prose-sm dark:prose-invert text-neutral-600 dark:text-neutral-300 leading-relaxed mb-8 grow wrap-break-word">
-              {project.description.split('\\n').map((paragraph, idx) => (
-                <p key={idx} className="mb-4">
-                  {paragraph}
-                </p>
-              ))}
+              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                {project.description}
+              </ReactMarkdown>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4 mt-auto pt-6 border-t border-neutral-100 dark:border-neutral-800">
