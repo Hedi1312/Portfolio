@@ -133,7 +133,6 @@ export async function submitContact(
     const userHtml = await render(UserConfirmation({ name }));
 
     await sendEmail({
-      from: process.env.SMTP_FROM as string,
       to: destinataire,
       replyTo: email,
       subject: emailSubject,
@@ -142,7 +141,6 @@ export async function submitContact(
     });
 
     await sendEmail({
-      from: process.env.SMTP_FROM as string,
       to: email,
       subject: `${prefixe}Merci pour ton message !`,
       html: userHtml,

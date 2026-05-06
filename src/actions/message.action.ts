@@ -230,7 +230,6 @@ export async function sendReplyAction(
     });
 
     await sendEmail({
-      from: process.env.SMTP_FROM as string,
       to: contact.email,
       subject: `${prefixe}Réponse à votre message — Hëdi OKBA`,
       html,
