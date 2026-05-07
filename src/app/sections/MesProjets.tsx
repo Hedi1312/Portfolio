@@ -88,11 +88,11 @@ export default function MesProjets({ projects }: MesProjetsProps) {
         </m.div>
 
         <m.div
-          className="grid md:grid-cols-3 gap-6"
+          className="grid md:grid-cols-3 gap-10"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: false, amount: 0.5 }}
+          viewport={{ once: false, amount: 0.15 }}
         >
           {projects.map((project: Project, index: number) => (
             <m.div key={project.id} variants={cardVariants}>
