@@ -76,13 +76,9 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   icons: {
-    icon: [
-      { url: '/icon.png', type: 'image/png', sizes: '192x192' },
-    ],
+    icon: [{ url: '/icon.png', type: 'image/png', sizes: '192x192' }],
     shortcut: ['/icon.png'],
-    apple: [
-      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
-    ],
+    apple: [{ url: '/icon.png', sizes: '192x192', type: 'image/png' }],
   },
 };
 
@@ -103,7 +99,7 @@ const jsonLd = [
     name: 'Portfolio - Hëdi OKBA',
     alternateName: 'Hëdi OKBA',
     url: APP_URL,
-  }
+  },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
