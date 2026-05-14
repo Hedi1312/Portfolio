@@ -51,12 +51,13 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  applicationName: 'Portfolio - Hëdi OKBA',
   openGraph: {
     title: 'Hëdi OKBA | Développeur Full-Stack',
     description:
       "Développeur passionné par la création d'expériences web modernes, performantes et élégantes.",
     url: APP_URL,
-    siteName: 'Portfolio Hëdi OKBA',
+    siteName: 'Portfolio - Hëdi OKBA',
     locale: 'fr_FR',
     type: 'website',
     images: [
@@ -74,18 +75,32 @@ export const metadata: Metadata = {
     description: 'Découvrez mon portfolio, mes projets et mon parcours web.',
     images: ['/og-image.png'],
   },
+  icons: {
+    icon: [{ url: '/icon.png', type: 'image/png', sizes: '192x192' }],
+    shortcut: ['/icon.png'],
+    apple: [{ url: '/icon.png', sizes: '192x192', type: 'image/png' }],
+  },
 };
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: 'Hëdi OKBA',
-  jobTitle: 'Développeur Full-Stack',
-  url: APP_URL,
-  sameAs: ['https://github.com/Hedi1312', 'https://www.linkedin.com/in/hedi-okba'],
-  knowsAbout: ['React', 'Next.js', 'TypeScript', 'Node.js', 'PostgreSQL', 'Docker'],
-  image: `${APP_URL}/og-image.png`,
-};
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Hëdi OKBA',
+    jobTitle: 'Développeur Full-Stack',
+    url: APP_URL,
+    sameAs: ['https://github.com/Hedi1312', 'https://www.linkedin.com/in/hedi-okba'],
+    knowsAbout: ['React', 'Next.js', 'TypeScript', 'Node.js', 'PostgreSQL', 'Docker'],
+    image: `${APP_URL}/og-image.png`,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Portfolio - Hëdi OKBA',
+    alternateName: 'Hëdi OKBA',
+    url: APP_URL,
+  },
+];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
