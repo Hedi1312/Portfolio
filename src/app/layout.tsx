@@ -140,12 +140,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               src="/stats/script.js"
               data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
               data-host-url="/stats"
-              strategy="afterInteractive"
+              strategy="lazyOnload"
             />
           )}
           <Script
             id="scroll-reset"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             dangerouslySetInnerHTML={{
               __html:
                 "if('scrollRestoration' in history){history.scrollRestoration='manual'}if(window.location.hash){history.replaceState('',document.title,window.location.pathname+window.location.search)}window.scrollTo(0,0);",
