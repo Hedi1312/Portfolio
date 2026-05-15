@@ -209,6 +209,55 @@ body {
 }
 
 /* ═══════════════════════════════════════════════
+   HERO CSS ANIMATIONS (LCP-safe — no JS needed)
+   ═══════════════════════════════════════════════ */
+
+@keyframes hero-slide-down {
+  from {
+    transform: translateY(-20px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-slide-up {
+  from {
+    transform: translateY(15px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-letter-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.hero-title {
+  animation: hero-slide-down 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.hero-subtitle {
+  animation: hero-slide-up 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.25s both;
+}
+
+.hero-letter {
+  opacity: 0;
+  animation: hero-letter-in 0.5s ease-out both;
+  /* animation-delay is set inline per letter */
+}
+
+/* ═══════════════════════════════════════════════
    SECTION HEADING
    ═══════════════════════════════════════════════ */
 

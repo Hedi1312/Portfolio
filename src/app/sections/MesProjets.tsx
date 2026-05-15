@@ -121,7 +121,7 @@ export default function MesProjets({ projects }: MesProjetsProps) {
                           className="object-cover w-full h-full group-hover:scale-105 transition-all duration-700 pointer-events-none"
                           muted
                           playsInline
-                          preload="metadata"
+                          preload="none"
                         />
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                           <div className="bg-black/50 p-3 rounded-full text-white backdrop-blur-sm shadow-lg border border-white/20">
