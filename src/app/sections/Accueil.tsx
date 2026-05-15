@@ -7,20 +7,6 @@ import { smoothScrollTo } from '@/lib/utils/scroll';
 
 const name = 'Hëdi OKBA';
 
-const letterVariants = {
-  hidden: { opacity: 0, y: 30, filter: 'blur(8px)' },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: {
-      delay: 0.8 + i * 0.08,
-      duration: 0.5,
-      ease: 'easeOut' as const,
-    },
-  }),
-};
-
 export default function Accueil() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -50,47 +36,33 @@ export default function Accueil() {
           d&apos;opportunités
         </m.div>
 
-        <m.h1
-          className="text-5xl md:text-7xl font-extrabold mb-12 font-(family-name:--font-space-grotesk) tracking-tight"
-          initial={{ opacity: 0, y: -30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.2 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.23, 1, 0.32, 1] as const }}
-        >
+        {/* h1 is the LCP element — rendered immediately visible via CSS animation
+            instead of framer-motion initial={{ opacity: 0 }} to avoid LCP penalty */}
+        <h1 className="hero-title text-5xl md:text-7xl font-extrabold mb-12 font-(family-name:--font-space-grotesk) tracking-tight">
           Salut, moi c&apos;est{' '}
           <span className="inline-flex">
             {name.split('').map((char, i) => (
-              <m.span
+              <span
                 key={i}
-                custom={i}
-                variants={letterVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: false, amount: 0.2 }}
-                className={`${char === ' ' ? 'w-3 md:w-4' : 'inline-block gradient-text-animated'}`}
+                className={`hero-letter ${char === ' ' ? 'w-3 md:w-4' : 'inline-block gradient-text-animated'}`}
+                style={{ animationDelay: `${0.1 + i * 0.05}s` }}
               >
                 {char === ' ' ? '\u00A0' : char}
-              </m.span>
+              </span>
             ))}
           </span>
-        </m.h1>
+        </h1>
 
-        <m.p
-          className="text-lg md:text-xl text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto mb-12 leading-relaxed"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.4 }}
-          transition={{ duration: 0.8, delay: 0.6, ease: [0.23, 1, 0.32, 1] as const }}
-        >
+        {/* p is the secondary LCP candidate — also rendered immediately */}
+        <p className="hero-subtitle text-lg md:text-xl text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto mb-12 leading-relaxed">
           Développeur passionné par la création d&apos;expériences web modernes, performantes et
           élégantes.
-        </m.p>
+        </p>
 
         <m.div
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.5 }}
-          transition={{ duration: 0.8, delay: 0.8, ease: [0.23, 1, 0.32, 1] as const }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5, ease: [0.23, 1, 0.32, 1] as const }}
           className="flex flex-col items-center gap-6"
         >
           <button
