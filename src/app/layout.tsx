@@ -117,13 +117,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "try{if(localStorage.theme==='light'){document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark')}}catch(_){}",
           }}
         />
-      </head>
-      <body className="bg-background text-foreground transition-colors duration-300">
-        <Script
-          id="json-ld"
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+      </head>
+      <body className="bg-background text-foreground transition-colors duration-300">
         <RouteScrollReset>
           <FramerProvider>
             <AppSessionProvider>
