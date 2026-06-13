@@ -51,13 +51,13 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  applicationName: 'Portfolio - Hëdi OKBA',
+  applicationName: 'Hëdi OKBA',
   openGraph: {
     title: 'Hëdi OKBA | Développeur Full-Stack',
     description:
       "Développeur passionné par la création d'expériences web modernes, performantes et élégantes.",
     url: APP_URL,
-    siteName: 'Portfolio - Hëdi OKBA',
+    siteName: 'Hëdi OKBA',
     locale: 'fr_FR',
     type: 'website',
     images: [
@@ -96,8 +96,7 @@ const jsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Portfolio - Hëdi OKBA',
-    alternateName: 'Hëdi OKBA',
+    name: 'Hëdi OKBA',
     url: APP_URL,
   },
 ];
